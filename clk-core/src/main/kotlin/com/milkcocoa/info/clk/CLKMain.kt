@@ -13,7 +13,7 @@ fun main() {
         .setLogLevel(LogLevel.TRACE)
         .getLogger()
 
-    logger.trace("TRACE LEVEL LGO")
+    logger.trace("TRACE LEVEL LOG")
     logger.debug("DEBUG LEVEL LOG")
     logger.info("INFO LEVEL LOG")
     logger.warn("WARN LEVEL LOG")
