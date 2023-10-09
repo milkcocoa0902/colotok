@@ -1,6 +1,8 @@
 package com.milkcocoa.info.clk.core.provider.builtin
 
 import com.milkcocoa.info.clk.core.LogLevel
+import com.milkcocoa.info.clk.core.formatter.builtin.DetailFormatter
+import com.milkcocoa.info.clk.core.formatter.details.Formatter
 import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderColorConfig
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
@@ -20,6 +22,8 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
          * log level.
          */
         override var logLevel: LogLevel = LogLevel.DEBUG
+        override var formatter: Formatter = DetailFormatter
+        override var colorize: Boolean = true
 
         override var traceLevelColor: AnsiColor = AnsiColor.WHITE
         override var debugLevelColor: AnsiColor = AnsiColor.BLUE
@@ -29,6 +33,8 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     }
 
     private val logLevel = config.logLevel
+    private val formatter = config.formatter
+    private var colorize = config.colorize
     private val getColor: ((LogLevel) -> AnsiColor? ) = {
         config.getColorForLevel(it)
     }
@@ -37,11 +43,15 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
             return
         }
 
-
-        getColor(level)?.let {
-            println(Color.foreground(formatter.format(str, level), it))
-        } ?: run {
-            println(str)
+        if(colorize.not()){
+            println(formatter.format(str, level))
+        }else{
+            getColor(level)?.let {
+                println(Color.foreground(formatter.format(str, level), it))
+            } ?: run {
+                println(str)
+            }
         }
+
     }
 }

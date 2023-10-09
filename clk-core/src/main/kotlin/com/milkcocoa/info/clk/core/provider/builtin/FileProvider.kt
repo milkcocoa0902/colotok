@@ -1,6 +1,8 @@
 package com.milkcocoa.info.clk.core.provider.builtin
 
 import com.milkcocoa.info.clk.core.LogLevel
+import com.milkcocoa.info.clk.core.formatter.builtin.DetailFormatter
+import com.milkcocoa.info.clk.core.formatter.details.Formatter
 import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.core.provider.rotation.Rotation
@@ -36,16 +38,20 @@ class FileProvider(val filename: String, config: FileProviderConfig) : Provider 
         var rotation: Rotation? = null
 
         override var logLevel: LogLevel = LogLevel.DEBUG
+
+        override var formatter: Formatter = DetailFormatter
+
+        /**
+         * no effect
+         */
+        override var colorize: Boolean = false
     }
-
-    override val colorize: Boolean
-        get() = false
-
 
     private val enableBuffer = config.enableBuffer
     private val bufferSize = config.bufferSize
     private val rotation = config.rotation
     private val logLevel = config.logLevel
+    private val formatter = config.formatter
 
     private val sb: StringBuilder = StringBuilder()
     override fun write(name: String, str: String, level: LogLevel) {

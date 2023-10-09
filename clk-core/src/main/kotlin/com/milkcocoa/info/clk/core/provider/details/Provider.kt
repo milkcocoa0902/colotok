@@ -6,10 +6,6 @@ import com.milkcocoa.info.clk.core.formatter.details.Formatter
 import com.milkcocoa.info.clk.util.color.AnsiColor
 
 interface Provider {
-    val colorize: Boolean
-        get() = true
-
-    val formatter: Formatter get() = DetailFormatter
-
     fun write(name: String, str: String, level: LogLevel)
 }
+

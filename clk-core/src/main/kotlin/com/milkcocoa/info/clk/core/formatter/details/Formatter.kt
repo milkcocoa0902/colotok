@@ -9,7 +9,7 @@ abstract class Formatter(private val fmt: String) {
         val dt = LocalDateTime.now()
 
         return fmt.replace(Element.YEAR.toString(), String.format("%4d", dt.year))
-            .replace(Element.MONTH.toString(), String.format("%02d", (dt.monthValue + 1)))
+            .replace(Element.MONTH.toString(), String.format("%02d", dt.monthValue))
             .replace(Element.DAY.toString(), String.format("%02d", dt.dayOfMonth))
             .replace(Element.HOUR.toString(), String.format("%02d", dt.hour))
             .replace(Element.MINUTE.toString(), String.format("%02d", dt.minute))
