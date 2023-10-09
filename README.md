@@ -5,6 +5,7 @@ ClK; Cocoa LogTool for Kotlin
 - Print log with color
 - Formatter
 - Print log into Console, File
+- Log Rotation
 - Customize output location
 
 
@@ -12,8 +13,7 @@ ClK; Cocoa LogTool for Kotlin
 ``` kotlin
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider())
-    .addProvider(FileProvider("test.log"))
-    .setLogLevel(LogLevel.TRACE)
+    .addProvider(FileProvider("./test.log"))
     .getLogger()
 
 logger.trace("TRACE LEVEL LOG")
@@ -21,6 +21,41 @@ logger.debug("DEBUG LEVEL LOG")
 logger.info("INFO LEVEL LOG")
 logger.warn("WARN LEVEL LOG")
 logger.error("ERROR LEVEL LOG")
+```
+
+more config
+``` 
+val fileProvider: FileProvider
+val logger = LoggerFactory()
+    .addProvider(ConsoleProvider{
+        // show above info level in console
+        logLevel = LogLevel.INFO
+    })
+    .addProvider(FileProvider("./test.log"){
+        // write above trace level for file
+        logLevel = LogLevel.TRACE
+        
+        // memory buffering to save i/o
+        enableBuffer = true
+        
+        // memory buffer size, if buffer excced this, append to file
+        bufferSize = 2048
+        
+        // use size base rotation
+        rotation = SizeBaseRotation(size = 4096)
+    }.apply {
+        fileProvider = this
+    })
+    .getLogger()
+
+logger.trace("TRACE LEVEL LOG")
+logger.debug("DEBUG LEVEL LOG")
+logger.info("INFO LEVEL LOG")
+logger.warn("WARN LEVEL LOG")
+logger.error("ERROR LEVEL LOG")
+
+// you may need to flash, if log cache is enabled for `FileProvider`
+fileProvider.flush()
 ```
 
 
