@@ -1,6 +1,6 @@
 package com.milkcocoa.info.clk.core
 
-import com.milkcocoa.info.clk.core.details.Provider
+import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.util.color.ColorExtension.blue
 import com.milkcocoa.info.clk.util.color.ColorExtension.green
 import com.milkcocoa.info.clk.util.color.ColorExtension.red
@@ -19,55 +19,35 @@ class Logger(val name: String, val config: Logger.Config) {
     fun trace(str: String){
         if(level.toInt() > LogLevel.TRACE.toInt()) return
         providers.forEach{
-            if(it.colorize){
-                it.write(str.white())
-            }else{
-                it.write(str)
-            }
+            it.write(name, str, LogLevel.TRACE)
         }
     }
 
     fun debug(str: String){
         if(level.toInt() > LogLevel.DEBUG.toInt()) return
         providers.forEach{
-            if(it.colorize){
-                it.write(str.blue())
-            }else{
-                it.write(str)
-            }
+            it.write(name, str, LogLevel.DEBUG)
         }
     }
 
     fun info(str: String){
         if(level.toInt() > LogLevel.INFO.toInt()) return
         providers.forEach{
-            if(it.colorize){
-                it.write(str.green())
-            }else{
-                it.write(str)
-            }
+            it.write(name, str, LogLevel.INFO)
         }
     }
 
     fun warn(str: String){
         if(level.toInt() > LogLevel.WARN.toInt()) return
         providers.forEach{
-            if(it.colorize){
-                it.write(str.yellow())
-            }else{
-                it.write(str)
-            }
+            it.write(name, str, LogLevel.WARN)
         }
     }
 
     fun error(str: String){
         if(level.toInt() > LogLevel.ERROR.toInt()) return
         providers.forEach{
-            if(it.colorize){
-                it.write(str.red())
-            }else{
-                it.write(str)
-            }
+            it.write(name, str, LogLevel.ERROR)
         }
     }
 }

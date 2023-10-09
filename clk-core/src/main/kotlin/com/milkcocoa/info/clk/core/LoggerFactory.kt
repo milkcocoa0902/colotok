@@ -1,6 +1,6 @@
 package com.milkcocoa.info.clk.core
 
-import com.milkcocoa.info.clk.core.details.Provider
+import com.milkcocoa.info.clk.core.provider.details.Provider
 
 class LoggerFactory {
     private val providers: MutableList<Provider> = mutableListOf()
