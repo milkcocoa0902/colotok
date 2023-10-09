@@ -2,7 +2,9 @@ package com.milkcocoa.info.clk.core.provider.builtin
 
 import com.milkcocoa.info.clk.core.LogLevel
 import com.milkcocoa.info.clk.core.provider.details.Provider
+import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.core.provider.rotation.Rotation
+import com.milkcocoa.info.clk.util.color.AnsiColor
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -17,7 +19,7 @@ class FileProvider(val filename: String, config: FileProviderConfig) : Provider 
      * initialize provider with specified configuration
      */
     constructor(filename: String, config: FileProviderConfig.() -> Unit): this(filename, FileProviderConfig().apply(config))
-    class FileProviderConfig{
+    class FileProviderConfig() : ProviderConfig{
         /**
          * size of buffer in Byte
          */
@@ -33,10 +35,7 @@ class FileProvider(val filename: String, config: FileProviderConfig) : Provider 
          */
         var rotation: Rotation? = null
 
-        /**
-         * log level
-         */
-        var logLevel: LogLevel = LogLevel.DEBUG
+        override var logLevel: LogLevel = LogLevel.DEBUG
     }
 
     override val colorize: Boolean

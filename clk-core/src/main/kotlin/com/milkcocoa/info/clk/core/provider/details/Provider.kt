@@ -11,14 +11,5 @@ interface Provider {
 
     val formatter: Formatter get() = DetailFormatter
 
-    val colors: Map<LogLevel, AnsiColor>
-        get() = mapOf(
-            LogLevel.TRACE to AnsiColor.WHITE,
-            LogLevel.DEBUG to AnsiColor.BLUE,
-            LogLevel.INFO to AnsiColor.GREEN,
-            LogLevel.WARN to AnsiColor.YELLOW,
-            LogLevel.ERROR to AnsiColor.RED
-        )
-
     fun write(name: String, str: String, level: LogLevel)
 }
