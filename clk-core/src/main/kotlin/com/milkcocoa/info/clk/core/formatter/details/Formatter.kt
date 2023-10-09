@@ -5,7 +5,7 @@ import com.milkcocoa.info.clk.core.formatter.Element
 import java.time.LocalDateTime
 
 abstract class Formatter(private val fmt: String) {
-    fun format(msg: String, level: LogLevel): String{
+    fun format(msg: String, level: LogLevel): String {
         val dt = LocalDateTime.now()
 
         return fmt.replace(Element.YEAR.toString(), String.format("%4d", dt.year))
@@ -17,6 +17,5 @@ abstract class Formatter(private val fmt: String) {
             .replace(Element.MESSAGE.toString(), String.format("%s", msg))
             .replace(Element.LEVEL.toString(), String.format("%s", level))
             .replace(Element.THREAD.toString(), String.format("%s", Thread.currentThread().name))
-
     }
 }

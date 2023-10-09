@@ -11,8 +11,8 @@ class LoggerFactory {
 
     fun setLogLevel(level: LogLevel) = apply { logLevel = level }
 
-    fun getLogger(name: String = "Default Logger"): Logger{
-        return Logger(name = name){
+    fun getLogger(name: String = "Default Logger"): Logger {
+        return Logger(name = name) {
             this.providers = this@LoggerFactory.providers
             this.level = this@LoggerFactory.logLevel
         }

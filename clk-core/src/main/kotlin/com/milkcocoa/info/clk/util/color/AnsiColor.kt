@@ -1,6 +1,6 @@
 package com.milkcocoa.info.clk.util.color
 
-enum class AnsiColor(code: Int){
+enum class AnsiColor(code: Int) {
     BLACK(30),
     RED(31),
     GREEN(32),

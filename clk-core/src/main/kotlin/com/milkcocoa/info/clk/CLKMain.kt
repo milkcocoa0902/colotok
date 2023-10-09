@@ -6,7 +6,7 @@ import com.milkcocoa.info.clk.core.provider.builtin.ConsoleProvider
 import com.milkcocoa.info.clk.core.provider.builtin.FileProvider
 class CLKMain
 
-fun main(){
+fun main() {
     val logger = LoggerFactory()
         .addProvider(ConsoleProvider())
         .addProvider(FileProvider("test.log"))
