@@ -9,24 +9,26 @@ import com.milkcocoa.info.clk.core.provider.rotation.SizeBaseRotation
 class CLKMain
 
 fun main() {
-    val fileProvider: FileProvider
-    val logger = LoggerFactory()
-        .addProvider(ConsoleProvider())
-        .addProvider(FileProvider("./test.log"){
-            enableBuffer = true
-            bufferSize = 2048
-            rotation = SizeBaseRotation(size = 512)
-        }.apply {
-            fileProvider = this
-        })
-        .setLogLevel(LogLevel.TRACE)
-        .getLogger()
+val fileProvider: FileProvider
+val logger = LoggerFactory()
+    .addProvider(ConsoleProvider{
+        logLevel = LogLevel.INFO
+    })
+    .addProvider(FileProvider("./test.log"){
+        logLevel = LogLevel.TRACE
+        enableBuffer = true
+        bufferSize = 2048
+        rotation = SizeBaseRotation(size = 4096)
+    }.apply {
+        fileProvider = this
+    })
+    .getLogger()
 
-    logger.trace("TRACE LEVEL LOG")
-    logger.debug("DEBUG LEVEL LOG")
-    logger.info("INFO LEVEL LOG")
-    logger.warn("WARN LEVEL LOG")
-    logger.error("ERROR LEVEL LOG")
+logger.trace("TRACE LEVEL LOG")
+logger.debug("DEBUG LEVEL LOG")
+logger.info("INFO LEVEL LOG")
+logger.warn("WARN LEVEL LOG")
+logger.error("ERROR LEVEL LOG")
 
-    fileProvider.flush()
+fileProvider.flush()
 }

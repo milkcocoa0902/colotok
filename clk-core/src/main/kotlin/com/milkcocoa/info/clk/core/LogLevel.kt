@@ -13,6 +13,13 @@ enum class LogLevel(private val levelInt: Int, private val levelStr: String) {
         return levelInt
     }
 
+    public fun isEnabledTrace(): Boolean = isEnabledFor(TRACE)
+    public fun isEnabledDebug(): Boolean = isEnabledFor(DEBUG)
+    public fun isEnabledInfo(): Boolean = isEnabledFor(INFO)
+    public fun isEnabledWarn(): Boolean = isEnabledFor(WARN)
+    public fun isEnabledError(): Boolean = isEnabledFor(ERROR)
+    public fun isEnabledFor(other: LogLevel): Boolean = this.levelInt >= other.levelInt
+
     /** Returns the string representation of this Level. */
     override fun toString(): String {
         return levelStr
