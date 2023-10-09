@@ -5,9 +5,6 @@
       <module name="clk-android" target="17" />
       <module name="clk-android.main" target="17" />
       <module name="clk-android.test" target="17" />
-      <module name="clk-core" target="17" />
-      <module name="clk-core.main" target="17" />
-      <module name="clk-core.test" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

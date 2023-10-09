@@ -3,11 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CLK.iml" filepath="$PROJECT_DIR$/CLK.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clk-android.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clk-android.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clk-android.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clk-android.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/clk-core.iml" filepath="$PROJECT_DIR$/clk-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clk-core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clk-core.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clk-core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clk-core.test.iml" />
     </modules>
   </component>
 </project>
