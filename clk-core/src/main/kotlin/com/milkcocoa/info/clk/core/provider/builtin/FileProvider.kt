@@ -1,12 +1,11 @@
 package com.milkcocoa.info.clk.core.provider.builtin
 
-import com.milkcocoa.info.clk.core.LogLevel
+import com.milkcocoa.info.clk.core.logger.LogLevel
 import com.milkcocoa.info.clk.core.formatter.builtin.DetailFormatter
 import com.milkcocoa.info.clk.core.formatter.details.Formatter
 import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.core.provider.rotation.Rotation
-import com.milkcocoa.info.clk.util.color.AnsiColor
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream

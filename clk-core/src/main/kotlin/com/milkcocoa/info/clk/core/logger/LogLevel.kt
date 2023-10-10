@@ -1,4 +1,4 @@
-package com.milkcocoa.info.clk.core
+package com.milkcocoa.info.clk.core.logger
 
 enum class LogLevel(private val levelInt: Int, private val levelStr: String) {
     TRACE(Levels.TRACE_INT, "TRACE"),

@@ -1,6 +1,6 @@
 package com.milkcocoa.info.clk.core.formatter.details
 
-import com.milkcocoa.info.clk.core.LogLevel
+import com.milkcocoa.info.clk.core.logger.LogLevel
 import com.milkcocoa.info.clk.core.formatter.Element
 import java.time.LocalDateTime
 

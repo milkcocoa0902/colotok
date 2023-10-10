@@ -1,11 +1,6 @@
-package com.milkcocoa.info.clk.core
+package com.milkcocoa.info.clk.core.logger
 
-import com.milkcocoa.info.clk.core.provider.details.Provider
-
-class Logger(val name: String, val config: Logger.Config) {
-    class Config {
-        var providers = listOf<Provider>()
-    }
+class Logger(val name: String, val config: Config) {
     constructor(name: String, config: Config.() -> Unit) : this(name = name, Config().apply(config))
 
     private val providers = config.providers
@@ -37,5 +32,25 @@ class Logger(val name: String, val config: Logger.Config) {
         providers.forEach {
             it.write(name, str, LogLevel.ERROR)
         }
+    }
+
+    fun atTrace(block: LevelScopedLogger.() -> Unit){
+        block(LevelScopedLogger(name, config, LogLevel.TRACE))
+    }
+
+    fun atDebug(block: LevelScopedLogger.() -> Unit){
+        block(LevelScopedLogger(name, config, LogLevel.DEBUG))
+    }
+
+    fun atInfo(block: LevelScopedLogger.() -> Unit){
+        block(LevelScopedLogger(name, config, LogLevel.INFO))
+    }
+
+    fun atWarn(block: LevelScopedLogger.() -> Unit){
+        block(LevelScopedLogger(name, config, LogLevel.WARN))
+    }
+
+    fun atError(block: LevelScopedLogger.() -> Unit){
+        block(LevelScopedLogger(name, config, LogLevel.ERROR))
     }
 }

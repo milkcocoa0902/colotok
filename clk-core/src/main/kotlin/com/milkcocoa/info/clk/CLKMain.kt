@@ -1,8 +1,7 @@
 package com.milkcocoa.info.clk
 
-import com.milkcocoa.info.clk.core.LogLevel
-import com.milkcocoa.info.clk.core.LoggerFactory
-import com.milkcocoa.info.clk.core.formatter.builtin.PlainFormatter
+import com.milkcocoa.info.clk.core.logger.LogLevel
+import com.milkcocoa.info.clk.core.logger.LoggerFactory
 import com.milkcocoa.info.clk.core.formatter.builtin.SimpleFormatter
 import com.milkcocoa.info.clk.core.provider.builtin.ConsoleProvider
 import com.milkcocoa.info.clk.core.provider.builtin.FileProvider
@@ -27,11 +26,18 @@ val logger = LoggerFactory()
     })
     .getLogger()
 
-logger.trace("TRACE LEVEL LOG")
-logger.debug("DEBUG LEVEL LOG")
-logger.info("INFO LEVEL LOG")
-logger.warn("WARN LEVEL LOG")
-logger.error("ERROR LEVEL LOG")
+    logger.trace("TRACE LEVEL LOG")
+    logger.debug("DEBUG LEVEL LOG")
+    logger.info("INFO LEVEL LOG")
+    logger.warn("WARN LEVEL LOG")
+    logger.error("ERROR LEVEL LOG")
 
-fileProvider.flush()
+    logger.atInfo {
+        print("afadfadf")
+        print("afadfaf")
+        print("afe")
+        val a = 1
+        print("$a")
+    }
+    fileProvider.flush()
 }
