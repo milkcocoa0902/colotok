@@ -4,26 +4,27 @@ ClK; Cocoa LogTool for Kotlin
 # Feature
 - Print log with color
 - Formatter
-- Print log into Console, File
+- Print log into Console, File, or more...(Custom)
+  - builtin, Console, File
 - Log Rotation
+  - builtin, SizeBaseRotation or DateBaseRotation(; DurationBase)
 - Customize output location
 
 
 # Usage
+## Configuration
+configure CLK with code.  
+see below.
+
 ``` kotlin
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider())
     .addProvider(FileProvider("./test.log"))
     .getLogger()
 
-logger.trace("TRACE LEVEL LOG")
-logger.debug("DEBUG LEVEL LOG")
-logger.info("INFO LEVEL LOG")
-logger.warn("WARN LEVEL LOG")
-logger.error("ERROR LEVEL LOG")
 ```
 
-more config
+more details config
 ``` 
 val fileProvider: FileProvider
 val logger = LoggerFactory()
@@ -54,10 +55,26 @@ logger.info("INFO LEVEL LOG")
 logger.warn("WARN LEVEL LOG")
 logger.error("ERROR LEVEL LOG")
 
+```
+
+## Print
+now, you can print log into your space.
+
+``` kotlin
+logger.trace("TRACE LEVEL LOG")
+logger.debug("DEBUG LEVEL LOG")
+logger.info("INFO LEVEL LOG")
+logger.warn("WARN LEVEL LOG")
+logger.error("ERROR LEVEL LOG")
+
+logger.atInfo {
+    print("in this block")
+    print("all of logs are printed out with INFO level")
+}
+
 // you may need to flash, if log cache is enabled for `FileProvider`
 fileProvider.flush()
 ```
-
 
 ## Formatter
 CLK has builtin formatter.

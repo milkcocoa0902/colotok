@@ -34,11 +34,8 @@ val logger = LoggerFactory()
     logger.error("ERROR LEVEL LOG")
 
     logger.atInfo {
-        print("afadfadf")
-        print("afadfaf")
-        print("afe")
-        val a = 1
-        print("$a")
+        print("in this block")
+        print("all of logs are printed out with INFO level")
     }
     fileProvider.flush()
 }
