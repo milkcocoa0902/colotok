@@ -6,6 +6,7 @@ import com.milkcocoa.info.clk.core.formatter.builtin.SimpleFormatter
 import com.milkcocoa.info.clk.core.provider.builtin.ConsoleProvider
 import com.milkcocoa.info.clk.core.provider.builtin.FileProvider
 import com.milkcocoa.info.clk.core.provider.rotation.SizeBaseRotation
+import java.nio.file.Path
 
 class CLKMain
 
@@ -15,7 +16,7 @@ val logger = LoggerFactory()
     .addProvider(ConsoleProvider{
         formatter = SimpleFormatter
     })
-    .addProvider(FileProvider("./test.log"){
+    .addProvider(FileProvider(Path.of("./test.log")){
         logLevel = LogLevel.TRACE
         formatter = SimpleFormatter
         enableBuffer = true

@@ -8,17 +8,12 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.name
 
 class SizeBaseRotation(val size: Long = 4L.KiB()): Rotation {
-    override fun isRotateNeeded(filename: String): Boolean {
-        return Files.size(Path.of(filename)) > size
+    override fun isRotateNeeded(filePath: Path): Boolean {
+        return Files.size(filePath) > size
     }
 
-    override fun doRotate(filename: String) {
-        val path = Path.of(filename)
-        if(path.isDirectory()) return
-
-
-
-        val rotateIndex = Files.list(Path.of(filename).parent).filter { it.isDirectory().not() and it.name.startsWith(path.name) }.count()
-        Files.move(Path.of(filename), Path.of("${filename}.${rotateIndex}"), StandardCopyOption.REPLACE_EXISTING)
+    override fun doRotate(filePath: Path) {
+        val rotateIndex = Files.list(filePath.parent).filter { it.isDirectory().not() and it.name.startsWith(filePath.name) }.count()
+        Files.move(filePath, Path.of("${filePath}.${rotateIndex}"), StandardCopyOption.REPLACE_EXISTING)
     }
 }

@@ -9,17 +9,21 @@ import com.milkcocoa.info.clk.core.provider.rotation.Rotation
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
-class FileProvider(val filename: String, config: FileProviderConfig) : Provider {
+import java.nio.file.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.pathString
+
+class FileProvider(private val outputFileName: Path, config: FileProviderConfig) : Provider {
 
     /**
      * initialize provider with default configuration
      */
-    constructor(filename: String): this(filename, FileProviderConfig())
+    constructor(outputFileName: Path): this(outputFileName, FileProviderConfig())
 
     /**
      * initialize provider with specified configuration
      */
-    constructor(filename: String, config: FileProviderConfig.() -> Unit): this(filename, FileProviderConfig().apply(config))
+    constructor(outputFileName: Path, config: FileProviderConfig.() -> Unit): this(outputFileName, FileProviderConfig().apply(config))
     class FileProviderConfig() : ProviderConfig{
         /**
          * size of buffer in Byte
@@ -53,6 +57,13 @@ class FileProvider(val filename: String, config: FileProviderConfig) : Provider 
     private val formatter = config.formatter
 
     private val sb: StringBuilder = StringBuilder()
+
+    private val filePath: Path get(){
+        if(outputFileName.isDirectory()){
+            return Path.of(outputFileName.pathString, "application.log")
+        }
+        return outputFileName
+    }
     override fun write(name: String, str: String, level: LogLevel) {
         if(level.isEnabledFor(logLevel).not()){
             return
@@ -61,31 +72,31 @@ class FileProvider(val filename: String, config: FileProviderConfig) : Provider 
             if(enableBuffer){
                 sb.append(formatter.format(str.plus("\n"), level))
                 if(sb.length > bufferSize){
-                    BufferedOutputStream(FileOutputStream(File(filename), true)).use { bos ->
+                    BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
                         sb.clear()
                     }
                 }
             }else{
-                BufferedOutputStream(FileOutputStream(File(filename), true)).use { bos ->
+                BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                     bos.write(formatter.format(str.plus("\n"), level).encodeToByteArray())
                 }
             }
 
-            if(rotation?.isRotateNeeded(filename) == true){
-                rotation?.doRotate(filename)
+            if(rotation?.isRotateNeeded(outputFileName) == true){
+                rotation.doRotate(outputFileName)
             }
         }
     }
 
     fun flush(){
-        BufferedOutputStream(FileOutputStream(File(filename), true)).use { bos ->
+        BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
             bos.write(sb.toString().encodeToByteArray())
             sb.clear()
         }
 
-        if(rotation?.isRotateNeeded(filename) == true){
-            rotation?.doRotate(filename)
+        if(rotation?.isRotateNeeded(outputFileName) == true){
+            rotation.doRotate(outputFileName)
         }
     }
 }
