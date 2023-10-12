@@ -19,7 +19,7 @@ see below.
 ``` kotlin
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider())
-    .addProvider(FileProvider("./test.log"))
+    .addProvider(FileProvider(Path.of("./test.log")))
     .getLogger()
 
 ```
@@ -32,7 +32,7 @@ val logger = LoggerFactory()
         // show above info level in console
         logLevel = LogLevel.INFO
     })
-    .addProvider(FileProvider("./test.log"){
+    .addProvider(FileProvider(Path.of("./test.log")){
         // write above trace level for file
         logLevel = LogLevel.TRACE
         
