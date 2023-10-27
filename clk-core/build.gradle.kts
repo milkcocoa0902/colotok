@@ -1,10 +1,19 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.9.10"
+    id("maven-publish")
 }
 
-group = "com.milkcocoa.info"
-version = "1.0-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+group = "com.github.koron0902"
+version = "0.1.0"
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "1.8"
+    }
+}
 
 repositories {
     mavenCentral()
@@ -55,4 +64,18 @@ val ktlintFormat by tasks.creating(JavaExec::class) {
     // see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
     args = listOf("-F", "src/**/*.kt")
     jvmArgs = listOf("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            register(components.first().name, MavenPublication::class){
+                from(components.first())
+                groupId = "com.github.koron0902"
+                artifactId = "clk"
+                version = version
+            }
+        }
+    }
 }
