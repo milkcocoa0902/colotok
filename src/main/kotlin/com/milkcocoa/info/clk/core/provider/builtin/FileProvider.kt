@@ -7,7 +7,6 @@ import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.core.provider.rotation.Rotation
 import java.io.BufferedOutputStream
-import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Path
 import kotlin.io.path.isDirectory
