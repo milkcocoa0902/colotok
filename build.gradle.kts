@@ -1,12 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.8.10"
     id("maven-publish")
 }
 
-group = "com.github.koron0902"
-version = "0.1.0"
+group = "com.github.milkcocoa0902"
+version = "0.1.1"
 java.sourceCompatibility = JavaVersion.VERSION_11
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -72,7 +72,7 @@ afterEvaluate {
             // Creates a Maven publication called "release".
             register(components.first().name, MavenPublication::class){
                 from(components.first())
-                groupId = "com.github.koron0902"
+                groupId = "com.github.milkcocoa0902"
                 artifactId = "clk"
                 version = version
             }
