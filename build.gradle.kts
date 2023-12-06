@@ -35,7 +35,7 @@ afterEvaluate {
             register(components.first().name, MavenPublication::class){
                 from(components.first())
                 groupId = "com.github.milkcocoa0902"
-                artifactId = "clk"
+                artifactId = "CLK"
                 version = version
             }
         }
