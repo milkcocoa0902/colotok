@@ -1,4 +1,4 @@
-package com.milkcocoa.info.clk.core.formatter.builtin
+package com.milkcocoa.info.clk.core.formatter.builtin.structure
 
 import com.milkcocoa.info.clk.core.formatter.Element
 import com.milkcocoa.info.clk.core.formatter.details.StructuredFormatter

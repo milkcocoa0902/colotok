@@ -1,10 +1,9 @@
 package com.milkcocoa.info.clk.core.provider.builtin
 
 import com.milkcocoa.info.clk.core.logger.LogLevel
-import com.milkcocoa.info.clk.core.formatter.builtin.DetailTextFormatter
+import com.milkcocoa.info.clk.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.clk.core.formatter.details.Formatter
 import com.milkcocoa.info.clk.core.formatter.details.LogStructure
-import com.milkcocoa.info.clk.core.formatter.details.TextFormatter
 import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.core.provider.rotation.Rotation
