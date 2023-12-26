@@ -45,30 +45,33 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
             return
         }
 
-        if(colorize.not()){
-            println(formatter.format(msg, level))
-        }else{
-            getColor(level)?.let {
-                println(Color.foreground(formatter.format(msg, level), it))
-            } ?: run {
-                println(msg)
+        kotlin.runCatching {
+            if(colorize.not()){
+                println(formatter.format(msg, level))
+            }else{
+                getColor(level)?.let {
+                    println(Color.foreground(formatter.format(msg, level), it))
+                } ?: run {
+                    println(msg)
+                }
             }
         }
-
     }
 
     override fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel){
         if(level.isEnabledFor(logLevel).not()){
             return
         }
+        kotlin.runCatching {
 
-        if(colorize.not()){
-            println(formatter.format(msg, serializer, level))
-        }else{
-            getColor(level)?.let {
-                println(Color.foreground(formatter.format(msg, serializer, level), it))
-            } ?: run {
-                println(msg)
+            if(colorize.not()){
+                println(formatter.format(msg, serializer, level))
+            }else{
+                getColor(level)?.let {
+                    println(Color.foreground(formatter.format(msg, serializer, level), it))
+                } ?: run {
+                    println(msg)
+                }
             }
         }
     }
