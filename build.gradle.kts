@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.milkcocoa0902"
-version = "0.1.3"
+version = "0.1.4"
 java.sourceCompatibility = JavaVersion.VERSION_11
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -38,7 +38,7 @@ afterEvaluate {
             register(components.first().name, MavenPublication::class){
                 from(components.first())
                 groupId = "com.github.milkcocoa0902"
-                artifactId = "CLK"
+                artifactId = "colotok"
                 version = version
             }
         }
