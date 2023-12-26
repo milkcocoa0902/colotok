@@ -1,11 +1,14 @@
 package com.milkcocoa.info.clk.core.provider.builtin
 
 import com.milkcocoa.info.clk.core.logger.LogLevel
-import com.milkcocoa.info.clk.core.formatter.builtin.DetailFormatter
+import com.milkcocoa.info.clk.core.formatter.builtin.DetailTextFormatter
 import com.milkcocoa.info.clk.core.formatter.details.Formatter
+import com.milkcocoa.info.clk.core.formatter.details.LogStructure
+import com.milkcocoa.info.clk.core.formatter.details.TextFormatter
 import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.core.provider.rotation.Rotation
+import kotlinx.serialization.KSerializer
 import java.io.BufferedOutputStream
 import java.io.FileOutputStream
 import java.nio.file.Path
@@ -41,7 +44,7 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
 
         override var logLevel: LogLevel = LogLevel.DEBUG
 
-        override var formatter: Formatter = DetailFormatter
+        override var formatter: Formatter = DetailTextFormatter
 
         /**
          * no effect
@@ -63,13 +66,13 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
         }
         return outputFileName
     }
-    override fun write(name: String, str: String, level: LogLevel) {
+    override fun write(name: String, msg: String, level: LogLevel) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
         runCatching {
             if(enableBuffer){
-                sb.append(formatter.format(str.plus("\n"), level))
+                sb.appendLine(formatter.format(msg, level))
                 if(sb.length > bufferSize){
                     BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
@@ -78,7 +81,32 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
                 }
             }else{
                 BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
-                    bos.write(formatter.format(str.plus("\n"), level).encodeToByteArray())
+                    bos.write(formatter.format(msg.plus("\n"), level).encodeToByteArray())
+                }
+            }
+
+            if(rotation?.isRotateNeeded(outputFileName) == true){
+                rotation.doRotate(outputFileName)
+            }
+        }
+    }
+
+    override fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel) {
+        if(level.isEnabledFor(logLevel).not()){
+            return
+        }
+        runCatching {
+            if(enableBuffer){
+                sb.appendLine(formatter.format(msg, serializer, level))
+                if(sb.length > bufferSize){
+                    BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
+                        bos.write(sb.toString().encodeToByteArray())
+                        sb.clear()
+                    }
+                }
+            }else{
+                BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
+                    bos.write(formatter.format(msg, serializer, level).plus("\n").encodeToByteArray())
                 }
             }
 

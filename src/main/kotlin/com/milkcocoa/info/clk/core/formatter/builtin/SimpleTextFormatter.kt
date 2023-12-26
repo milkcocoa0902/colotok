@@ -1,9 +1,9 @@
 package com.milkcocoa.info.clk.core.formatter.builtin
 
 import com.milkcocoa.info.clk.core.formatter.Element
-import com.milkcocoa.info.clk.core.formatter.details.Formatter
+import com.milkcocoa.info.clk.core.formatter.details.TextFormatter
 
-object SimpleFormatter : Formatter(
+object SimpleTextFormatter : TextFormatter(
     """
         ${Element.YEAR}/${Element.MONTH}/${Element.DAY} 
         ${Element.HOUR}:${Element.MINUTE}:${Element.SECOND} 
