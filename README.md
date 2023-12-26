@@ -10,6 +10,7 @@ COLOTOK; Cocoa LogTool for Kotlin
 - Log Rotation
   - builtin, SizeBaseRotation or DateBaseRotation(; DurationBase)
 - Customize output location
+- Structure Logging
 
 
 # Usage
@@ -77,11 +78,11 @@ logger.atInfo {
 fileProvider.flush()
 ```
 
-## Formatter
-CLK has builtin formatter.
-1. PlainFormatter
-2. SimpleFormatter
-3. DetailFormatter
+## Formatter(Text)
+colotok has builtin text formatter.
+1. PlainTextFormatter
+2. SimpleTextFormatter
+3. DetailTextFormatter
 
 ### 1. PlainFormatter
 this formatter shows as below style's log
@@ -103,6 +104,34 @@ this formatter shows as below style's log
 ```
 2023/10/09 11:33:55 (thread name) [INFO] - message what happen
 ```
+
+## Formatter(Structure)
+colotok has builtin structured formatter.
+1. SimpleStructureFormatter
+2. DetailStructureFormatter
+
+if you has a class
+```kotlin
+@Serializable
+class LogDetail(val scope: String, val message: String): LogStructure
+
+@Serializable
+class Log(val name: String, val logDetail: LogDetail): LogStructure
+```
+
+### 1. SimpleStructureFormatter
+this formatter shows bellow style's log
+
+```
+{"name":"illegal state","logDetail.scope":"args","logDetail.message":"argument must be greater than zero","level":"INFO","date":"2023-12-26 23:12:56"}
+```
+### 2. DetailStructureFormatter
+this formatter shows bellow style's log
+
+```
+{"name":"illegal state","logDetail.scope":"args","logDetail.message":"argument must be greater than zero","level":"INFO","thread":"main","date":"2023-12-26 23:12:10"}
+```
+
 
 
 ## Provider
@@ -137,3 +166,6 @@ class NetworkProvider : Provider {
 4. WARN (only WARN or ERROR)
 5. ERROR (only one)
 
+## Notice 
+if you set structured formatter to provider and print text, it will ignored.  
+also you set text formatter and passed structured log will ignored

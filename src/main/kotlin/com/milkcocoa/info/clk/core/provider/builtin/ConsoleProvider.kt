@@ -1,13 +1,15 @@
 package com.milkcocoa.info.clk.core.provider.builtin
 
 import com.milkcocoa.info.clk.core.logger.LogLevel
-import com.milkcocoa.info.clk.core.formatter.builtin.DetailFormatter
+import com.milkcocoa.info.clk.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.clk.core.formatter.details.Formatter
+import com.milkcocoa.info.clk.core.formatter.details.LogStructure
 import com.milkcocoa.info.clk.core.provider.details.Provider
 import com.milkcocoa.info.clk.core.provider.details.ProviderColorConfig
 import com.milkcocoa.info.clk.core.provider.details.ProviderConfig
 import com.milkcocoa.info.clk.util.color.AnsiColor
 import com.milkcocoa.info.clk.util.color.Color
+import kotlinx.serialization.KSerializer
 
 class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     constructor(config: ConsoleProviderConfig.() -> Unit): this(ConsoleProviderConfig().apply(config))
@@ -22,7 +24,7 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
          * log level.
          */
         override var logLevel: LogLevel = LogLevel.DEBUG
-        override var formatter: Formatter = DetailFormatter
+        override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = true
 
         override var traceLevelColor: AnsiColor = AnsiColor.WHITE
@@ -38,20 +40,39 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     private val getColor: ((LogLevel) -> AnsiColor? ) = {
         config.getColorForLevel(it)
     }
-    override fun write(name: String, str: String, level: LogLevel) {
+    override fun write(name: String, msg: String, level: LogLevel) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
 
-        if(colorize.not()){
-            println(formatter.format(str, level))
-        }else{
-            getColor(level)?.let {
-                println(Color.foreground(formatter.format(str, level), it))
-            } ?: run {
-                println(str)
+        kotlin.runCatching {
+            if(colorize.not()){
+                println(formatter.format(msg, level))
+            }else{
+                getColor(level)?.let {
+                    println(Color.foreground(formatter.format(msg, level), it))
+                } ?: run {
+                    println(msg)
+                }
             }
         }
+    }
 
+    override fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel){
+        if(level.isEnabledFor(logLevel).not()){
+            return
+        }
+        kotlin.runCatching {
+
+            if(colorize.not()){
+                println(formatter.format(msg, serializer, level))
+            }else{
+                getColor(level)?.let {
+                    println(Color.foreground(formatter.format(msg, serializer, level), it))
+                } ?: run {
+                    println(msg)
+                }
+            }
+        }
     }
 }
