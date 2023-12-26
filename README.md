@@ -1,5 +1,6 @@
-# CLK
-ClK; Cocoa LogTool for Kotlin
+# COLOTOK
+COLOTOK; Cocoa LogTool for Kotlin
+
 
 # Feature
 - Print log with color
@@ -13,7 +14,7 @@ ClK; Cocoa LogTool for Kotlin
 
 # Usage
 ## Configuration
-configure CLK with code.  
+configure colotok with code.  
 see below.
 
 ``` kotlin
