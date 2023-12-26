@@ -78,6 +78,8 @@ class Logger(val name: String, val config: Config) {
     }
 
 
+
+
     fun atTrace(block: LevelScopedLogger.() -> Unit){
         block(LevelScopedLogger(name, config, LogLevel.TRACE))
     }
