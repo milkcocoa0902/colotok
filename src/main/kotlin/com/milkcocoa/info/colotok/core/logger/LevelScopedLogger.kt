@@ -7,7 +7,9 @@ final class LevelScopedLogger(val name: String, val config: Config, private val 
     private val providers = config.providers
 
     fun print(msg: String){
-        print(msg, mapOf())
+        providers.forEach {
+            it.write(name, msg, level)
+        }
     }
 
     fun print(msg: String, attr: Map<String, String>){
@@ -17,7 +19,9 @@ final class LevelScopedLogger(val name: String, val config: Config, private val 
     }
 
     fun<T: LogStructure> print(msg: T, serializer: KSerializer<T>){
-        print(msg, serializer, mapOf())
+        providers.forEach {
+            it.write(name, msg, serializer, level)
+        }
     }
     fun<T: LogStructure> print(msg: T, serializer: KSerializer<T>, attr: Map<String, String>){
         providers.forEach {

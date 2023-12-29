@@ -13,7 +13,9 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun trace(msg: String) {
-        trace(msg, mapOf())
+        providers.forEach {
+            it.write(name, msg, LogLevel.TRACE)
+        }
     }
 
     /**
@@ -21,7 +23,9 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun debug(msg: String) {
-        debug(msg, mapOf())
+        providers.forEach {
+            it.write(name, msg, LogLevel.DEBUG)
+        }
     }
 
     /**
@@ -29,7 +33,9 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun info(msg: String) {
-        info(msg, mapOf())
+        providers.forEach {
+            it.write(name, msg, LogLevel.INFO)
+        }
     }
 
     /**
@@ -37,7 +43,9 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun warn(msg: String) {
-        warn(msg, mapOf())
+        providers.forEach {
+            it.write(name, msg, LogLevel.WARN)
+        }
     }
 
     /**
@@ -45,7 +53,9 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun error(msg: String) {
-        error(msg, mapOf())
+        providers.forEach {
+            it.write(name, msg, LogLevel.ERROR)
+        }
     }
 
 
@@ -111,7 +121,9 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> trace(msg: T, serializer: KSerializer<T>) {
-        trace(msg, serializer, mapOf())
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.TRACE)
+        }
     }
 
 
@@ -121,7 +133,9 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> debug(msg: T, serializer: KSerializer<T>) {
-        debug(msg, serializer, mapOf())
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.DEBUG)
+        }
     }
 
 
@@ -131,7 +145,9 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> info(msg: T, serializer: KSerializer<T>) {
-        info(msg, serializer, mapOf())
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.INFO)
+        }
     }
 
 
@@ -141,7 +157,9 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> warn(msg: T, serializer: KSerializer<T>) {
-        warn(msg, serializer, mapOf())
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.WARN)
+        }
     }
 
 
@@ -151,7 +169,9 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> error(msg: T, serializer: KSerializer<T>) {
-        error(msg, serializer, mapOf())
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.ERROR)
+        }
     }
 
 
