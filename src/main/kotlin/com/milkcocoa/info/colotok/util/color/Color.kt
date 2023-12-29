@@ -6,5 +6,5 @@ object Color {
 
     fun foreground(str: String, ansiColor: AnsiColor) = Color.color(str, ansiColor)
 
-    private fun color(string: String, ansiColor: AnsiColor) = "${ansiColor.fg}$string$RESET"
+    private fun color(string: String, ansiColor: AnsiColor) = "${ESCAPE}[${ansiColor.code}m$string$RESET"
 }
