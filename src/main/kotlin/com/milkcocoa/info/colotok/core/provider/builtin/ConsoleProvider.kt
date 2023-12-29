@@ -41,9 +41,7 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     private val getColor: ((LogLevel) -> AnsiColor? ) = {
         config.getColorForLevel(it)
     }
-    override fun write(name: String, msg: String, level: LogLevel) {
-        write(name, msg, level, mapOf())
-    }
+
 
     override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
         if(level.isEnabledFor(logLevel).not()){
@@ -63,10 +61,6 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
         }
     }
 
-
-    override fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel){
-        write(name, msg, serializer, level, mapOf())
-    }
 
     override fun <T : LogStructure> write(
         name: String,
