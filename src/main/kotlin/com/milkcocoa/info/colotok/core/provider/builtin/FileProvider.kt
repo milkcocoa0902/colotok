@@ -65,13 +65,18 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
         }
         return outputFileName
     }
+
     override fun write(name: String, msg: String, level: LogLevel) {
+        write(name, msg, level, mapOf())
+    }
+
+    override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
         runCatching {
             if(enableBuffer){
-                sb.appendLine(formatter.format(msg, level))
+                sb.appendLine(formatter.format(msg, level, attr))
                 if(sb.length > bufferSize){
                     BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
@@ -80,7 +85,7 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
                 }
             }else{
                 BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
-                    bos.write(formatter.format(msg.plus("\n"), level).encodeToByteArray())
+                    bos.write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
                 }
             }
 
@@ -91,12 +96,22 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
     }
 
     override fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel) {
+        write(name, msg, serializer, level, mapOf())
+    }
+
+    override fun <T : LogStructure> write(
+        name: String,
+        msg: T,
+        serializer: KSerializer<T>,
+        level: LogLevel,
+        attr: Map<String, String>
+    ) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
         runCatching {
             if(enableBuffer){
-                sb.appendLine(formatter.format(msg, serializer, level))
+                sb.appendLine(formatter.format(msg, serializer, level, attr))
                 if(sb.length > bufferSize){
                     BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
@@ -105,7 +120,7 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
                 }
             }else{
                 BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
-                    bos.write(formatter.format(msg, serializer, level).plus("\n").encodeToByteArray())
+                    bos.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
                 }
             }
 

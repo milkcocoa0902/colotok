@@ -17,6 +17,10 @@ import java.time.format.DateTimeFormatter
 abstract class TextFormatter(private val fmt: String) : Formatter{
 
     override fun format(msg: String, level: LogLevel): String {
+        return format(msg, level, mapOf())
+    }
+
+    override fun format(msg: String, level: LogLevel, attrs: Map<String, String>): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
 
         return fmt
@@ -26,9 +30,6 @@ abstract class TextFormatter(private val fmt: String) : Formatter{
             .replace(Element.MESSAGE.toString(), String.format("%s", msg))
             .replace(Element.LEVEL.toString(), String.format("%s", level))
             .replace(Element.THREAD.toString(), String.format("%s", Thread.currentThread().name))
-    }
-
-    override fun <T : LogStructure> format(msg: T, serializer: KSerializer<T>, level: LogLevel): String {
-        TODO("Not yet implemented")
+            .replace(Element.ATTR.toString(), attrs.toString())
     }
 }

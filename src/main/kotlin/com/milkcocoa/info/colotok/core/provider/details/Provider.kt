@@ -5,8 +5,10 @@ import com.milkcocoa.info.colotok.core.logger.LogLevel
 import kotlinx.serialization.KSerializer
 
 interface Provider {
-    fun write(name: String, msg: String, level: LogLevel)
-    fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel)
+    fun write(name: String, msg: String, level: LogLevel){ }
+    fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>){ }
+    fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel){ }
+    fun<T: LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel, attr: Map<String, String>){ }
 
 }
 

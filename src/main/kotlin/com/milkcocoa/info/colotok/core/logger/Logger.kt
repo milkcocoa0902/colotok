@@ -13,9 +13,7 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun trace(msg: String) {
-        providers.forEach {
-            it.write(name, msg, LogLevel.TRACE)
-        }
+        trace(msg, mapOf())
     }
 
     /**
@@ -23,9 +21,7 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun debug(msg: String) {
-        providers.forEach {
-            it.write(name, msg, LogLevel.DEBUG)
-        }
+        debug(msg, mapOf())
     }
 
     /**
@@ -33,9 +29,7 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun info(msg: String) {
-        providers.forEach {
-            it.write(name, msg, LogLevel.INFO)
-        }
+        info(msg, mapOf())
     }
 
     /**
@@ -43,9 +37,7 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun warn(msg: String) {
-        providers.forEach {
-            it.write(name, msg, LogLevel.WARN)
-        }
+        warn(msg, mapOf())
     }
 
     /**
@@ -53,10 +45,63 @@ class Logger(val name: String, val config: Config) {
      * @param msg[String] message to print
      */
     fun error(msg: String) {
+        error(msg, mapOf())
+    }
+
+
+
+
+    /**
+     * print trace level log with providers
+     * @param msg[String] message to print
+     */
+    fun trace(msg: String, attr: Map<String, String>) {
         providers.forEach {
-            it.write(name, msg, LogLevel.ERROR)
+            it.write(name, msg, LogLevel.TRACE, attr)
         }
     }
+
+    /**
+     * print debug level log with providers
+     * @param msg[String] message to print
+     */
+    fun debug(msg: String, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, LogLevel.DEBUG, attr)
+        }
+    }
+
+    /**
+     * print info level log with providers
+     * @param msg[String] message to print
+     */
+    fun info(msg: String, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, LogLevel.INFO, attr)
+        }
+    }
+
+    /**
+     * print warn level log with providers
+     * @param msg[String] message to print
+     */
+    fun warn(msg: String, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, LogLevel.WARN, attr)
+        }
+    }
+
+    /**
+     * print error level log with providers
+     * @param msg[String] message to print
+     */
+    fun error(msg: String, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, LogLevel.ERROR, attr)
+        }
+    }
+
+
 
 
 
@@ -66,9 +111,7 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> trace(msg: T, serializer: KSerializer<T>) {
-        providers.forEach {
-            it.write(name, msg, serializer, LogLevel.TRACE)
-        }
+        trace(msg, serializer, mapOf())
     }
 
 
@@ -78,9 +121,7 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> debug(msg: T, serializer: KSerializer<T>) {
-        providers.forEach {
-            it.write(name, msg, serializer, LogLevel.DEBUG)
-        }
+        debug(msg, serializer, mapOf())
     }
 
 
@@ -90,9 +131,7 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> info(msg: T, serializer: KSerializer<T>) {
-        providers.forEach {
-            it.write(name, msg, serializer, LogLevel.INFO)
-        }
+        info(msg, serializer, mapOf())
     }
 
 
@@ -102,9 +141,7 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> warn(msg: T, serializer: KSerializer<T>) {
-        providers.forEach {
-            it.write(name, msg, serializer, LogLevel.WARN)
-        }
+        warn(msg, serializer, mapOf())
     }
 
 
@@ -114,8 +151,68 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> error(msg: T, serializer: KSerializer<T>) {
+        error(msg, serializer, mapOf())
+    }
+
+
+
+
+    /**
+     * print trace level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
+    fun<T: LogStructure> trace(msg: T, serializer: KSerializer<T>, attr: Map<String, String>) {
         providers.forEach {
-            it.write(name, msg, serializer, LogLevel.ERROR)
+            it.write(name, msg, serializer, LogLevel.TRACE, attr)
+        }
+    }
+
+
+    /**
+     * print debug level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
+    fun<T: LogStructure> debug(msg: T, serializer: KSerializer<T>, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.DEBUG, attr)
+        }
+    }
+
+
+    /**
+     * print info level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
+    fun<T: LogStructure> info(msg: T, serializer: KSerializer<T>, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.INFO, attr)
+        }
+    }
+
+
+    /**
+     * print warn level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
+    fun<T: LogStructure> warn(msg: T, serializer: KSerializer<T>, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.WARN, attr)
+        }
+    }
+
+
+    /**
+     * print error level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
+    fun<T: LogStructure> error(msg: T, serializer: KSerializer<T>, attr: Map<String, String>) {
+        providers.forEach {
+            it.write(name, msg, serializer, LogLevel.ERROR, attr)
         }
     }
 

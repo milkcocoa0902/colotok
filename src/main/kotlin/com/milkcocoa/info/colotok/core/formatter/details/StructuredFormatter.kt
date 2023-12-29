@@ -23,41 +23,27 @@ import java.util.Date
  */
 abstract class StructuredFormatter(private val field: List<Element>): Formatter{
     override fun format(msg: String, level: LogLevel): String {
+        return format(msg, level, mapOf())
+    }
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: LogLevel): String{
+        return format(msg, serializer, level, mapOf())
+    }
 
+
+
+    override fun format(msg: String, level: LogLevel, attrs: Map<String, String>): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return mutableMapOf<String, String>().apply {
-            var fmt = ""
             field.forEach { f ->
                 when(f){
                     Element.MESSAGE -> put("msg", msg)
                     Element.LEVEL -> put("level", level.name)
                     Element.THREAD -> put("thread", Thread.currentThread().name)
+                    Element.ATTR -> putAll(attrs)
                     else ->{}
                 }
             }
-            datetimeFormatter?.let {
-                put("date", dt.format(it))
-            }
-        }.let {
-            Json { encodeDefaults = true }
-            Json.encodeToString(it)
-        }
-    }
-    @OptIn(ExperimentalSerializationApi::class)
-    override fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: LogLevel): String{
-
-        val dt = ZonedDateTime.now(ZoneId.systemDefault())
-        return mutableMapOf<String, String>().apply {
-            var fmt = ""
-            field.forEach { f ->
-                when(f){
-                    Element.MESSAGE -> Properties.encodeToStringMap(serializer, msg).also { this.putAll(it) }
-                    Element.LEVEL -> put("level", level.name)
-                    Element.THREAD -> put("thread", Thread.currentThread().name)
-                    else ->{}
-                }
-            }
-
             datetimeFormatter?.let {
                 put("date", dt.format(it))
             }
@@ -98,6 +84,34 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
         }
 
         return@lazy null
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun <T : LogStructure> format(
+        msg: T,
+        serializer: KSerializer<T>,
+        level: LogLevel,
+        attrs: Map<String, String>
+    ): String {
+        val dt = ZonedDateTime.now(ZoneId.systemDefault())
+        return mutableMapOf<String, String>().apply {
+            field.forEach { f ->
+                when(f){
+                    Element.MESSAGE -> Properties.encodeToStringMap(serializer, msg).also { this.putAll(it) }
+                    Element.LEVEL -> put("level", level.name)
+                    Element.THREAD -> put("thread", Thread.currentThread().name)
+                    Element.ATTR -> putAll(attrs)
+                    else ->{}
+                }
+            }
+
+            datetimeFormatter?.let {
+                put("date", dt.format(it))
+            }
+        }.let {
+            Json { encodeDefaults = true }
+            Json.encodeToString(it)
+        }
     }
 }
 

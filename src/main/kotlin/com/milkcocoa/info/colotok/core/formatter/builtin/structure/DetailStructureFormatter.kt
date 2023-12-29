@@ -8,5 +8,6 @@ object DetailStructureFormatter: StructuredFormatter(
         Element.MESSAGE,
         Element.LEVEL,
         Element.DATE_TIME,
-        Element.THREAD)
+        Element.THREAD,
+        Element.ATTR)
 )
