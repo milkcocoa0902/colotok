@@ -30,8 +30,6 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
         return format(msg, serializer, level, mapOf())
     }
 
-
-
     override fun format(msg: String, level: LogLevel, attrs: Map<String, String>): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return mutableMapOf<String, String>().apply {

@@ -1,5 +1,8 @@
 package com.milkcocoa.info.colotok.util.color
 
+/**
+ * ANSI Color code
+ */
 enum class AnsiColor(code: Int) {
     BLACK(30),
     RED(31),

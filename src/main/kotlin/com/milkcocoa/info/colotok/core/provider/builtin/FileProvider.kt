@@ -7,6 +7,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.core.provider.rotation.Rotation
+import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import kotlinx.serialization.KSerializer
 import java.io.BufferedOutputStream
 import java.io.FileOutputStream
@@ -14,6 +15,9 @@ import java.nio.file.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
+/**
+ * builtin provider which used to write the log into file.
+ */
 class FileProvider(private val outputFileName: Path, config: FileProviderConfig) : Provider {
 
     /**
@@ -27,12 +31,12 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
     constructor(outputFileName: Path, config: FileProviderConfig.() -> Unit): this(outputFileName, FileProviderConfig().apply(config))
     class FileProviderConfig() : ProviderConfig{
         /**
-         * size of buffer in Byte
+         * size of buffer in Byte. which is used for save i/o.
          */
-        var bufferSize = 1024
+        var bufferSize = 4.KiB()
 
         /**
-         * use buffering. if enable this, provider does not write to file until buffered data exceed `bufferSize`
+         * use buffering. if enable this, provider does not write to file until buffered data exceed `bufferSize`. if false write data into file immediately.
          */
         var enableBuffer = true
 
@@ -59,6 +63,10 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
 
     private val sb: StringBuilder = StringBuilder()
 
+    /**
+     * get file path where to write the log.
+     * if [outputFileName] is the directory, provider creates "application.log" under [outputFileName].
+     */
     private val filePath: Path get(){
         if(outputFileName.isDirectory()){
             return Path.of(outputFileName.pathString, "application.log")
@@ -130,6 +138,9 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
         }
     }
 
+    /**
+     * flush buffered data into file.
+     */
     fun flush(){
         BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
             bos.write(sb.toString().encodeToByteArray())

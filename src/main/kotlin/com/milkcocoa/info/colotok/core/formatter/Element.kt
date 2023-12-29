@@ -44,6 +44,9 @@ enum class Element(private val typeString: String) {
      */
     NAME("%n"),
 
+    /**
+     * additional attrs
+     */
     ATTR("%a");
 
     override fun toString(): String {

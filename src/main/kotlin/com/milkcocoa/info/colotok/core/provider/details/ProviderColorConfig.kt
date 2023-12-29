@@ -3,14 +3,40 @@ package com.milkcocoa.info.colotok.core.provider.details
 import com.milkcocoa.info.colotok.core.logger.LogLevel
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 
+/**
+ * provider's color config for each level
+ */
 interface ProviderColorConfig {
-
+    /**
+     * the color which used for trace level log
+     */
     var traceLevelColor: AnsiColor
+
+    /**
+     * the color which used for debug level log
+     */
     var debugLevelColor: AnsiColor
+
+    /**
+     * the color which used for info level log
+     */
     var infoLevelColor: AnsiColor
+
+    /**
+     * the color which  used for warn level log
+     */
     var warnLevelColor: AnsiColor
+
+    /**
+     * the color which used for error level log
+     */
     var errorLevelColor: AnsiColor
 
+    /**
+     * returns the color for level.
+     * @param level[LogLevel] target log level
+     * @return [AnsiColor] color
+     */
     fun getColorForLevel(level: LogLevel): AnsiColor?{
         return when(level){
             LogLevel.TRACE -> traceLevelColor

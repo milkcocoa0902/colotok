@@ -11,6 +11,10 @@ import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.serialization.KSerializer
 
+
+/**
+ * builtin provider which used to write the log into console.
+ */
 class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     constructor(config: ConsoleProviderConfig.() -> Unit): this(ConsoleProviderConfig().apply(config))
 
@@ -20,9 +24,6 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     constructor(): this(ConsoleProviderConfig())
 
     class ConsoleProviderConfig: ProviderConfig, ProviderColorConfig{
-        /**
-         * log level.
-         */
         override var logLevel: LogLevel = LogLevel.DEBUG
         override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = true

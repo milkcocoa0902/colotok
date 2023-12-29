@@ -3,6 +3,11 @@ package com.milkcocoa.info.colotok.core.formatter.builtin.text
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.formatter.details.TextFormatter
 
+/**
+ * builtin formatter to print details log
+ *
+ * yyyy-MM-ddTHH:mm:ss.SSS+Offset (thread-name)[[LogLevel]] - message, additional = {}
+ */
 object DetailTextFormatter : TextFormatter(
     """
         ${Element.DATE_TIME} 
