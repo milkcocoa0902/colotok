@@ -5,7 +5,14 @@ import com.milkcocoa.info.colotok.core.formatter.Element
 import kotlinx.serialization.KSerializer
 import java.time.LocalDateTime
 
+/**
+ * base class for log formatter which used for text log
+ *
+ * @constructor
+ * @param fmt[String] format string
+ */
 abstract class TextFormatter(private val fmt: String) : Formatter{
+
     override fun format(msg: String, level: LogLevel): String {
         val dt = LocalDateTime.now()
 

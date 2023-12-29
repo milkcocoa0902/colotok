@@ -7,65 +7,112 @@ class Logger(val name: String, val config: Config) {
     constructor(name: String, config: Config.() -> Unit) : this(name = name, Config().apply(config))
 
     private val providers = config.providers
-    fun trace(str: String) {
+
+    /**
+     * print trace level log with providers
+     * @param msg[String] message to print
+     */
+    fun trace(msg: String) {
         providers.forEach {
-            it.write(name, str, LogLevel.TRACE)
+            it.write(name, msg, LogLevel.TRACE)
         }
     }
 
-    fun debug(str: String) {
+    /**
+     * print debug level log with providers
+     * @param msg[String] message to print
+     */
+    fun debug(msg: String) {
         providers.forEach {
-            it.write(name, str, LogLevel.DEBUG)
+            it.write(name, msg, LogLevel.DEBUG)
         }
     }
 
-    fun info(str: String) {
+    /**
+     * print info level log with providers
+     * @param msg[String] message to print
+     */
+    fun info(msg: String) {
         providers.forEach {
-            it.write(name, str, LogLevel.INFO)
+            it.write(name, msg, LogLevel.INFO)
         }
     }
 
-    fun warn(str: String) {
+    /**
+     * print warn level log with providers
+     * @param msg[String] message to print
+     */
+    fun warn(msg: String) {
         providers.forEach {
-            it.write(name, str, LogLevel.WARN)
+            it.write(name, msg, LogLevel.WARN)
         }
     }
 
-    fun error(str: String) {
+    /**
+     * print error level log with providers
+     * @param msg[String] message to print
+     */
+    fun error(msg: String) {
         providers.forEach {
-            it.write(name, str, LogLevel.ERROR)
+            it.write(name, msg, LogLevel.ERROR)
         }
     }
 
 
 
-
-
-
+    /**
+     * print trace level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
     fun<T: LogStructure> trace(msg: T, serializer: KSerializer<T>) {
         providers.forEach {
             it.write(name, msg, serializer, LogLevel.TRACE)
         }
     }
 
+
+    /**
+     * print debug level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
     fun<T: LogStructure> debug(msg: T, serializer: KSerializer<T>) {
         providers.forEach {
             it.write(name, msg, serializer, LogLevel.DEBUG)
         }
     }
 
+
+    /**
+     * print info level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
     fun<T: LogStructure> info(msg: T, serializer: KSerializer<T>) {
         providers.forEach {
             it.write(name, msg, serializer, LogLevel.INFO)
         }
     }
 
+
+    /**
+     * print warn level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
     fun<T: LogStructure> warn(msg: T, serializer: KSerializer<T>) {
         providers.forEach {
             it.write(name, msg, serializer, LogLevel.WARN)
         }
     }
 
+
+    /**
+     * print error level log with providers
+     * @param msg[LogStructure] message to print
+     * @param serializer[KSerializer] serializer which used for serialize [msg]
+     */
     fun<T: LogStructure> error(msg: T, serializer: KSerializer<T>) {
         providers.forEach {
             it.write(name, msg, serializer, LogLevel.ERROR)
@@ -75,22 +122,62 @@ class Logger(val name: String, val config: Config) {
 
 
 
+
+    /**
+     * create trace level scope.
+     * you can use [LevelScopedLogger.print] in this block.
+     * which method print with providers in trace level
+     * @param block action in scope
+     * @see LevelScopedLogger
+     */
     fun atTrace(block: LevelScopedLogger.() -> Unit){
         block(LevelScopedLogger(name, config, LogLevel.TRACE))
     }
 
+
+    /**
+     * create debug level scope.
+     * you can use [LevelScopedLogger.print] in this block.
+     * which method print with providers in trace level
+     * @param block action in scope
+     * @see LevelScopedLogger
+     */
     fun atDebug(block: LevelScopedLogger.() -> Unit){
         block(LevelScopedLogger(name, config, LogLevel.DEBUG))
     }
 
+
+    /**
+     * create info level scope.
+     * you can use [LevelScopedLogger.print] in this block.
+     * which method print with providers in trace level
+     * @param block action in scope
+     * @see LevelScopedLogger
+     */
     fun atInfo(block: LevelScopedLogger.() -> Unit){
         block(LevelScopedLogger(name, config, LogLevel.INFO))
     }
 
+
+    /**
+     * create warn level scope.
+     * you can use [LevelScopedLogger.print] in this block.
+     * which method print with providers in trace level
+     * @param block action in scope
+     * @see LevelScopedLogger
+     */
     fun atWarn(block: LevelScopedLogger.() -> Unit){
         block(LevelScopedLogger(name, config, LogLevel.WARN))
     }
 
+
+    /**
+     * create error level scope.
+     * you can use [LevelScopedLogger.print] in this block.
+     * which method print with providers in trace level
+     * @param block action in scope
+     * @see LevelScopedLogger
+     */
     fun atError(block: LevelScopedLogger.() -> Unit){
         block(LevelScopedLogger(name, config, LogLevel.ERROR))
     }

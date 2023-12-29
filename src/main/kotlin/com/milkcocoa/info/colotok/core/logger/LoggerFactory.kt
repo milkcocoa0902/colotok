@@ -2,14 +2,37 @@ package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 
+/**
+ * builder class for get logger instance
+ */
 class LoggerFactory {
     private val providers: MutableList<Provider> = mutableListOf()
+
+    /**
+     * add provider to current logger
+     * @param provider[Provider] provider to print log
+     * @return [LoggerFactory] this instance
+     */
     fun addProvider(provider: Provider) = apply {
         providers.add(provider)
     }
 
+    /**
+     * generate logger instance with default name
+     * @return [Logger] logger
+     */
+    fun getLogger(): Logger{
+        return Logger(name = "Default Logger") {
+            this.providers = this@LoggerFactory.providers
+        }
+    }
 
-    fun getLogger(name: String = "Default Logger"): Logger {
+    /**
+     * generate logger instance with specified name
+     * @param name[String] logger name
+     * @return [Logger] logger
+     */
+    fun getLogger(name: String): Logger {
         return Logger(name = name) {
             this.providers = this@LoggerFactory.providers
         }
