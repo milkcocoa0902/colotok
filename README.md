@@ -20,6 +20,40 @@ COLOTOK; Cocoa LogTool for Kotlin
 ✅ Structure Logging  
 
 
+# Integration
+basic dependency
+
+```kotlin
+repositories {
+    mavenCentral()
+    // add this line
+    maven(url =  "https://jitpack.io" )
+}
+
+dependencies {
+    // add this line
+    implementation("com.github.milkcocoa0902:colotok:0.1.8")
+}
+```
+
+if you use structure logging or create your own provider, you need to add `kotlinx-serialization`
+
+```kotlin
+
+plugins {
+    // add this.
+    // set version for your use
+    kotlin("plugin.serialization") version "1.9.21"
+}
+
+dependencies {
+    // add this line to use KSerializer<T> and @Serializable
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+}
+
+```
+
+
 # Usage
 ## Configuration
 configure colotok with code.  
