@@ -2,14 +2,18 @@ package com.milkcocoa.info.colotok.core.formatter.details
 
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.logger.LogLevel
+import com.milkcocoa.info.colotok.util.color.AnsiColor
+import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.properties.Properties
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-
+import java.util.Date
 
 /**
  * base class for log formatter which used for structure log
@@ -20,7 +24,7 @@ import java.time.format.DateTimeFormatter
 abstract class StructuredFormatter(private val field: List<Element>): Formatter{
     override fun format(msg: String, level: LogLevel): String {
 
-        val dt = LocalDateTime.now()
+        val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return mutableMapOf<String, String>().apply {
             var fmt = ""
             field.forEach { f ->
@@ -28,13 +32,11 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
                     Element.MESSAGE -> put("msg", msg)
                     Element.LEVEL -> put("level", level.name)
                     Element.THREAD -> put("thread", Thread.currentThread().name)
-                    Element.DATE -> fmt = fmt.plus("yyyy-MM-dd ")
-                    Element.TIME -> fmt = fmt.plus("HH:MM:ss ")
                     else ->{}
                 }
             }
-            if(fmt.isNotBlank()){
-                put("date", dt.format(DateTimeFormatter.ofPattern(fmt.trim())))
+            datetimeFormatter?.let {
+                put("date", dt.format(it))
             }
         }.let {
             Json { encodeDefaults = true }
@@ -44,7 +46,7 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
     @OptIn(ExperimentalSerializationApi::class)
     override fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: LogLevel): String{
 
-        val dt = LocalDateTime.now()
+        val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return mutableMapOf<String, String>().apply {
             var fmt = ""
             field.forEach { f ->
@@ -52,18 +54,50 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
                     Element.MESSAGE -> Properties.encodeToStringMap(serializer, msg).also { this.putAll(it) }
                     Element.LEVEL -> put("level", level.name)
                     Element.THREAD -> put("thread", Thread.currentThread().name)
-                    Element.DATE -> fmt = fmt.plus("yyyy-MM-dd ")
-                    Element.TIME -> fmt = fmt.plus("HH:MM:ss ")
                     else ->{}
                 }
             }
-            if(fmt.isNotBlank()){
-                put("date", dt.format(DateTimeFormatter.ofPattern(fmt.trim())))
+
+            datetimeFormatter?.let {
+                put("date", dt.format(it))
             }
         }.let {
             Json { encodeDefaults = true }
             Json.encodeToString(it)
         }
+    }
+
+    private val datetimeFormatter by lazy {
+        val d = field.find { it == Element.DATE }
+        val t = field.find { it == Element.TIME }
+
+        val dt = field.find { it == Element.DATE_TIME } ?: run {
+            if(d != null && t != null){
+                return@run Element.DATE_TIME
+            }
+            return@run null
+        }
+
+
+        dt?.let {
+            if(d != null){
+                println(Color.foreground("[StructuredFormatter]: ${Element.DATE.name} is ignored.", AnsiColor.YELLOW))
+            }
+            if(t != null){
+                println(Color.foreground("[StructuredFormatter]: ${Element.TIME.name} is ignored.", AnsiColor.YELLOW))
+            }
+
+            return@lazy DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        } ?: kotlin.run {
+            d?.let {
+                return@lazy DateTimeFormatter.ISO_LOCAL_DATE
+            }
+            t?.let {
+                return@lazy DateTimeFormatter.ISO_LOCAL_TIME
+            }
+        }
+
+        return@lazy null
     }
 }
 

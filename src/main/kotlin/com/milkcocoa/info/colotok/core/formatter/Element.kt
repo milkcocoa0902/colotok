@@ -2,42 +2,25 @@ package com.milkcocoa.info.colotok.core.formatter
 
 enum class Element(private val typeString: String) {
     /**
-     * year, ignored when StructuredFormat
+     * date time(yyyy-MM-dd'T'HH:mm:ss.SSS+offset)
      */
-    YEAR("%Y"),
+    DATE_TIME("%D"),
 
     /**
-     * month, ignored when StructuredFormat
-     */
-    MONTH("%M"),
-
-    /**
-     * day, ignored when StructuredFormat
-     */
-    DAY("%D"),
-
-    /**
-     * hour, ignored when StructuredFormat
-     */
-    HOUR("%h"),
-
-    /**
-     * minute, ignored when StructuredFormat
-     */
-    MINUTE("%m"),
-
-    /**
-     * second, ignored when StructuedFormat
-     */
-    SECOND("%s"),
-
-    /**
-     * date(yyyy-MM-dd)
+     * date(yyyy-MM-dd). <br />
+     *
+     * when structured logging ,
+     * ignored if [DATE_TIME] is also specified,
+     * and if used with [TIME], works like [DATE_TIME]
      */
     DATE("%d"),
 
     /**
      * time(HH:mm:ss)
+     *
+     * when structured logging ,
+     * ignored if [DATE_TIME] is also specified,
+     * and if used with [DATE], works like [DATE_TIME]
      */
     TIME("%T"),
 
@@ -55,6 +38,11 @@ enum class Element(private val typeString: String) {
      * logging thread
      */
     THREAD("%t"),
+
+    /**
+     * logger name
+     */
+    NAME("%n"),
 
     ATTR("%a");
 

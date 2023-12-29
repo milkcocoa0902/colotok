@@ -63,7 +63,6 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
             return
         }
         kotlin.runCatching {
-
             if(colorize.not()){
                 println(formatter.format(msg, serializer, level))
             }else{

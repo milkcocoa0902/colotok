@@ -5,8 +5,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.TextFormatter
 
 object DetailTextFormatter : TextFormatter(
     """
-        ${Element.YEAR}/${Element.MONTH}/${Element.DAY} 
-        ${Element.HOUR}:${Element.MINUTE}:${Element.SECOND} 
+        ${Element.DATE_TIME} 
         (${Element.THREAD})[${Element.LEVEL}] - ${Element.MESSAGE}
     """.trimIndent()
         .replace("\n", "")
