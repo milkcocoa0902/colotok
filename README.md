@@ -9,9 +9,10 @@ COLOTOK; Cocoa LogTool for Kotlin
 # Feature
 ✅ Print log with color  
 ✅ Formatter  
-✅ Print log into Console, File, or more...(Custom)  
+✅ Print log where you want  
 　🌟 ConsoleProvider  
 　🌟 FileProvider    
+　🌟 StreamProvider  
 ✅ Log Rotation  
 　🌟 SizeBaseRotation  
 　🌟 DateBaseRotation(; DurationBase)    
@@ -225,6 +226,7 @@ CLK has builtin provider. Provider is used for output log.
 
 1. ConsoleProvider
 2. FileProvider
+3. StreamProvider
 
 ### 1. ConsoleProvider
 this provider outputs log into console with ansi-color
@@ -232,18 +234,92 @@ this provider outputs log into console with ansi-color
 ### 2. FileProvider
 this provider output log into file without ansi-color.
 
-### 3. Customize
+### 3. StreamProvider
+this provider output log into stream where you specified.  
+
+### 4. Customize
 you can also output to remote or sql or others by create own provider.  
 example
 
+#### define custom provider
+if you want to write log into slack, you create a SlackProvider like this
+
 ```kotlin
-class NetworkProvider : Provider {
-    override fun write(name: String, str: String, level: LogLevel) {
-      // POST log message to web api 
-       api.execure(formatter.format(str, level))
+class SlackProvider(config: SlackProviderConfig): Provider {
+
+    constructor(config: SlackProviderConfig.() -> Unit): this(SlackProviderConfig().apply(config))
+
+    class SlackProviderConfig() : ProviderConfig {
+        var webhook_url: String = ""
+
+        override var logLevel: LogLevel = LogLevel.DEBUG
+
+        override var formatter: Formatter = DetailTextFormatter
+    }
+
+    private val webhookUrl = config.webhook_url
+    private val logLevel = config.logLevel
+    private val formatter = config.formatter
+
+
+    override fun write(name: String, msg: String, level: LogLevel) {
+        if(level.isEnabledFor(logLevel).not()){
+            return
+        }
+        kotlin.runCatching {
+            webhookUrl.httpPost()
+                .appendHeader("Content-Type" to "application/json")
+                .body("""
+            {"text": "${formatter.format(msg, level)}"}
+        """.trimIndent())
+                .response()
+        }.getOrElse { println(it) }
+    }
+
+    override fun <T : LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel) {
+        if(level.isEnabledFor(logLevel).not()){
+            return
+        }
+        kotlin.runCatching {
+            webhookUrl.httpPost()
+                .appendHeader("Content-Type" to "application/json")
+                .body("""
+            {"text": "${formatter.format(msg, serializer, level)}"}
+        """.trimIndent())
+                .response()
+        }.getOrElse { println(it) }
     }
 }
 ```
+
+#### use your provider
+now you can use SlackProvider to write the log into slack.
+
+```kotlin
+val logger = LoggerFactory()
+        .addProvider(ConsoleProvider{
+            formatter = DetailTextFormatter
+            logLevel = LogLevel.DEBUG
+        })
+        .addProvider(SlackProvider{
+            webhook_url = "your slack webhook url"
+            formatter = SimpleTextFormatter
+            logLevel = LogLevel.WARN
+        })
+        .getLogger()
+```
+
+#### print the log
+```kotlin
+logger.info("info level log")
+// written the log only console
+
+logger.error("error level log")
+// written the log both of console and slack
+
+```
+
+
 
 ## LogLevel
 1. TRACE (all log)
