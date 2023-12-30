@@ -22,17 +22,10 @@ class StreamProvider(config: StreamProviderConfig): Provider {
     constructor(config: StreamProviderConfig.() -> Unit): this(StreamProviderConfig().apply(config))
     constructor(): this(StreamProviderConfig())
 
-    class StreamProviderConfig: ProviderConfig, ProviderColorConfig{
+    class StreamProviderConfig: ProviderConfig{
         override var logLevel: LogLevel = LogLevel.DEBUG
         override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = false
-
-
-        override var traceLevelColor: AnsiColor = AnsiColor.WHITE
-        override var debugLevelColor: AnsiColor = AnsiColor.BLUE
-        override var infoLevelColor: AnsiColor = AnsiColor.GREEN
-        override var warnLevelColor: AnsiColor = AnsiColor.YELLOW
-        override var errorLevelColor: AnsiColor = AnsiColor.RED
 
         var outputStreamBuilder: (()->OutputStream) = { OutputStream.nullOutputStream() }
     }
@@ -42,9 +35,6 @@ class StreamProvider(config: StreamProviderConfig): Provider {
     private val colorize = config.colorize
     private val outputStream = config.outputStreamBuilder
 
-    private val getColor: ((LogLevel) -> AnsiColor? ) = {
-        config.getColorForLevel(it)
-    }
     override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
         if(level.isEnabledFor(logLevel).not()){
             return
@@ -52,15 +42,7 @@ class StreamProvider(config: StreamProviderConfig): Provider {
 
         outputStream().use { os ->
             kotlin.runCatching {
-                if(colorize.not()){
-                    os.write(formatter.format(msg, level, attr).plus("\n").encodeToByteArray())
-                }else{
-                    getColor(level)?.let {
-                        os.write(Color.foreground(formatter.format(msg, level, attr), it).plus("\n").encodeToByteArray())
-                    } ?: run {
-                        println(msg)
-                    }
-                }
+                os.write(formatter.format(msg, level, attr).plus("\n").encodeToByteArray())
                 os.flush()
             }.getOrElse { println(it.message?.red()) }
         }
@@ -79,15 +61,7 @@ class StreamProvider(config: StreamProviderConfig): Provider {
 
         outputStream().use { os ->
             kotlin.runCatching {
-                if(colorize.not()){
-                    os.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
-                }else{
-                    getColor(level)?.let {
-                        os.write(Color.foreground(formatter.format(msg, serializer, level, attr), it).plus("\n").encodeToByteArray())
-                    } ?: run {
-                        println(msg)
-                    }
-                }
+                os.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
                 os.flush()
             }.getOrElse { println(it.message?.red()) }
         }
