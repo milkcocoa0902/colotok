@@ -1,6 +1,7 @@
 package com.milkcocoa.info.colotok.core.provider.details
 
-import com.milkcocoa.info.colotok.core.logger.LogLevel
+import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 
 /**
@@ -38,12 +39,14 @@ interface ProviderColorConfig {
      */
     var errorLevelColor: AnsiColor
 
+    var customLevelColor: AnsiColor
+
     /**
      * returns the color for level.
-     * @param level[LogLevel] target log level
+     * @param level[Level] target log level
      * @return [AnsiColor] color
      */
-    fun getColorForLevel(level: LogLevel): AnsiColor?{
+    fun getColorForLevel(level: Level): AnsiColor?{
         return when(level){
             LogLevel.TRACE -> traceLevelColor
             LogLevel.DEBUG -> debugLevelColor
@@ -51,6 +54,7 @@ interface ProviderColorConfig {
             LogLevel.WARN -> warnLevelColor
             LogLevel.ERROR -> errorLevelColor
             LogLevel.OFF -> null
+            else -> customLevelColor
         }
     }
 }

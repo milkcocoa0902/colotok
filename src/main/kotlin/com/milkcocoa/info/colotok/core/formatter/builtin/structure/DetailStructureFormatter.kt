@@ -7,7 +7,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.StructuredFormatter
 /**
  * builtin formatter to print structure log for more details
  *
- * {"msg": "message", "level": "[LogLevel]", "date": "yyyy-MM-ddTHH:mm:ss.SSS+Offset", "thread": "thread-name", ....(additional attrs)}
+ * {"msg": "message", "level": "[Level]", "date": "yyyy-MM-ddTHH:mm:ss.SSS+Offset", "thread": "thread-name", ....(additional attrs)}
  */
 object DetailStructureFormatter: StructuredFormatter(
     listOf(

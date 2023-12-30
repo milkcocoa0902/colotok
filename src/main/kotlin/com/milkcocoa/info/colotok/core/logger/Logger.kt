@@ -1,6 +1,7 @@
 package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.level.LogLevel
 import kotlinx.serialization.KSerializer
 
 class Logger(val name: String, val config: Config) {

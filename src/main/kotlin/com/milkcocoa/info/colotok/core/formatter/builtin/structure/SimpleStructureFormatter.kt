@@ -6,7 +6,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.StructuredFormatter
 /**
  * builtin formatter to print simple structure log
  *
- * {"msg": "message", "level": "[LogLevel]", "date": "yyyy-MM-dd"}
+ * {"msg": "message", "level": "[Level]", "date": "yyyy-MM-dd"}
  */
 object SimpleStructureFormatter: StructuredFormatter(
     listOf(

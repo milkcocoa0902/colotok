@@ -1,7 +1,8 @@
 package com.milkcocoa.info.colotok.core.formatter.details
 
-import com.milkcocoa.info.colotok.core.logger.LogLevel
+
 import com.milkcocoa.info.colotok.core.formatter.Element
+import com.milkcocoa.info.colotok.core.level.Level
 import kotlinx.serialization.KSerializer
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -16,11 +17,11 @@ import java.time.format.DateTimeFormatter
  */
 abstract class TextFormatter(private val fmt: String) : Formatter{
 
-    override fun format(msg: String, level: LogLevel): String {
+    override fun format(msg: String, level: Level): String {
         return format(msg, level, mapOf())
     }
 
-    override fun format(msg: String, level: LogLevel, attrs: Map<String, String>): String {
+    override fun format(msg: String, level: Level, attrs: Map<String, String>): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
 
         return fmt

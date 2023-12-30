@@ -1,9 +1,10 @@
 package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.level.Level
 import kotlinx.serialization.KSerializer
 
-final class LevelScopedLogger(val name: String, val config: Config, private val level: LogLevel) {
+final class LevelScopedLogger(val name: String, val config: Config, private val level: Level) {
     private val providers = config.providers
 
     fun print(msg: String){

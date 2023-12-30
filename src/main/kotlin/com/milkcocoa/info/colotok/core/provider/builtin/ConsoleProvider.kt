@@ -1,9 +1,10 @@
 package com.milkcocoa.info.colotok.core.provider.builtin
 
-import com.milkcocoa.info.colotok.core.logger.LogLevel
+import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.details.ProviderColorConfig
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
@@ -24,7 +25,7 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     constructor(): this(ConsoleProviderConfig())
 
     class ConsoleProviderConfig: ProviderConfig, ProviderColorConfig{
-        override var logLevel: LogLevel = LogLevel.DEBUG
+        override var level: Level = LogLevel.DEBUG
         override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = true
 
@@ -33,17 +34,18 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
         override var infoLevelColor: AnsiColor = AnsiColor.GREEN
         override var warnLevelColor: AnsiColor = AnsiColor.YELLOW
         override var errorLevelColor: AnsiColor = AnsiColor.RED
+        override var customLevelColor: AnsiColor = AnsiColor.WHITE
     }
 
-    private val logLevel = config.logLevel
+    private val logLevel = config.level
     private val formatter = config.formatter
     private var colorize = config.colorize
-    private val getColor: ((LogLevel) -> AnsiColor? ) = {
+    private val getColor: ((Level) -> AnsiColor? ) = {
         config.getColorForLevel(it)
     }
 
 
-    override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
+    override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
@@ -66,7 +68,7 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
         name: String,
         msg: T,
         serializer: KSerializer<T>,
-        level: LogLevel,
+        level: Level,
         attr: Map<String, String>
     ) {
         if(level.isEnabledFor(logLevel).not()){

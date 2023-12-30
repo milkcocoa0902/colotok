@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.core.formatter.details
 
 import com.milkcocoa.info.colotok.core.formatter.Element
-import com.milkcocoa.info.colotok.core.logger.LogLevel
+import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -22,15 +22,15 @@ import java.util.Date
  * @param field[List] log fields
  */
 abstract class StructuredFormatter(private val field: List<Element>): Formatter{
-    override fun format(msg: String, level: LogLevel): String {
+    override fun format(msg: String, level: Level): String {
         return format(msg, level, mapOf())
     }
     @OptIn(ExperimentalSerializationApi::class)
-    override fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: LogLevel): String{
+    override fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: Level): String{
         return format(msg, serializer, level, mapOf())
     }
 
-    override fun format(msg: String, level: LogLevel, attrs: Map<String, String>): String {
+    override fun format(msg: String, level: Level, attrs: Map<String, String>): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return mutableMapOf<String, String>().apply {
             field.forEach { f ->
@@ -88,7 +88,7 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
     override fun <T : LogStructure> format(
         msg: T,
         serializer: KSerializer<T>,
-        level: LogLevel,
+        level: Level,
         attrs: Map<String, String>
     ): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())

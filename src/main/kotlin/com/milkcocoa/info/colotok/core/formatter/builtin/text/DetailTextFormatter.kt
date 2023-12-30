@@ -6,7 +6,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.TextFormatter
 /**
  * builtin formatter to print details log
  *
- * yyyy-MM-ddTHH:mm:ss.SSS+Offset (thread-name)[[LogLevel]] - message, additional = {}
+ * yyyy-MM-ddTHH:mm:ss.SSS+Offset (thread-name)[[Level]] - message, additional = {}
  */
 object DetailTextFormatter : TextFormatter(
     """

@@ -6,7 +6,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.TextFormatter
 /**
  * builtin formatter to print simple log.
  *
- * yyyy-MM-dd HH:mm:ss [[LogLevel]] - message
+ * yyyy-MM-dd HH:mm:ss [[Level]] - message
  */
 object SimpleTextFormatter : TextFormatter(
     """
