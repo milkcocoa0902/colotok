@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
     // add this line
-    implementation("com.github.milkcocoa0902:colotok:0.1.8")
+    implementation("com.github.milkcocoa0902:colotok:0.1.9")
 }
 ```
 
@@ -222,7 +222,7 @@ logger.info("message what happen")
 
 
 ## Provider
-CLK has builtin provider. Provider is used for output log.
+colotok has builtin provider. Provider is used for output log.
 
 1. ConsoleProvider
 2. FileProvider
@@ -246,7 +246,6 @@ if you want to write log into slack, you create a SlackProvider like this
 
 ```kotlin
 class SlackProvider(config: SlackProviderConfig): Provider {
-
     constructor(config: SlackProviderConfig.() -> Unit): this(SlackProviderConfig().apply(config))
 
     class SlackProviderConfig() : ProviderConfig {
@@ -261,8 +260,7 @@ class SlackProvider(config: SlackProviderConfig): Provider {
     private val logLevel = config.logLevel
     private val formatter = config.formatter
 
-
-    override fun write(name: String, msg: String, level: LogLevel) {
+    override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
@@ -270,13 +268,19 @@ class SlackProvider(config: SlackProviderConfig): Provider {
             webhookUrl.httpPost()
                 .appendHeader("Content-Type" to "application/json")
                 .body("""
-            {"text": "${formatter.format(msg, level)}"}
+            {"text": "${formatter.format(msg, level, attr)}"}
         """.trimIndent())
                 .response()
         }.getOrElse { println(it) }
     }
 
-    override fun <T : LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: LogLevel) {
+    override fun <T : LogStructure> write(
+        name: String,
+        msg: T,
+        serializer: KSerializer<T>,
+        level: LogLevel,
+        attr: Map<String, String>
+    ) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
@@ -284,7 +288,7 @@ class SlackProvider(config: SlackProviderConfig): Provider {
             webhookUrl.httpPost()
                 .appendHeader("Content-Type" to "application/json")
                 .body("""
-            {"text": "${formatter.format(msg, serializer, level)}"}
+            {"text": "${formatter.format(msg, serializer, level, attr)}"}
         """.trimIndent())
                 .response()
         }.getOrElse { println(it) }
@@ -316,7 +320,6 @@ logger.info("info level log")
 
 logger.error("error level log")
 // written the log both of console and slack
-
 ```
 
 
@@ -327,7 +330,3 @@ logger.error("error level log")
 3. INFO (ignore DEBUG and TRACE)
 4. WARN (only WARN or ERROR)
 5. ERROR (only one)
-
-## Notice 
-if you set structured formatter to provider and print text, it will ignored.  
-also you set text formatter and passed structured log will ignored
