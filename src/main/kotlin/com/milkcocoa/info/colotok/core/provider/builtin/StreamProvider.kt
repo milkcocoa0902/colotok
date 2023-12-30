@@ -10,6 +10,7 @@ import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import com.milkcocoa.info.colotok.util.color.ColorExtension.red
+import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import kotlinx.serialization.KSerializer
 import java.io.BufferedOutputStream
 import java.io.FileOutputStream
@@ -27,6 +28,16 @@ class StreamProvider(config: StreamProviderConfig): Provider {
         override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = false
 
+        /**
+         * size of buffer in Byte. which is used for save i/o.
+         */
+        var bufferSize = 4.KiB()
+
+        /**
+         * use buffering. if enable this, provider does not write to file until buffered data exceed `bufferSize`. if false write data into file immediately.
+         */
+        var enableBuffer = true
+
         var outputStreamBuilder: (()->OutputStream) = { OutputStream.nullOutputStream() }
     }
 
@@ -35,16 +46,30 @@ class StreamProvider(config: StreamProviderConfig): Provider {
     private val colorize = config.colorize
     private val outputStream = config.outputStreamBuilder
 
+    private val enableBuffer = config.enableBuffer
+    private val bufferSize = config.bufferSize
+
+
+    private val sb: StringBuilder = StringBuilder()
     override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
         if(level.isEnabledFor(logLevel).not()){
             return
         }
 
-        outputStream().use { os ->
-            kotlin.runCatching {
-                os.write(formatter.format(msg, level, attr).plus("\n").encodeToByteArray())
-                os.flush()
-            }.getOrElse { println(it.message?.red()) }
+        runCatching {
+            if(enableBuffer){
+                sb.appendLine(formatter.format(msg, level, attr))
+                if(sb.length > bufferSize){
+                    outputStream().buffered(64.KiB()).use { bos ->
+                        bos.write(sb.toString().encodeToByteArray())
+                        sb.clear()
+                    }
+                }
+            }else{
+                outputStream().buffered(64.KiB()).use { bos ->
+                    bos.write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
+                }
+            }
         }
     }
 
@@ -59,11 +84,30 @@ class StreamProvider(config: StreamProviderConfig): Provider {
             return
         }
 
-        outputStream().use { os ->
-            kotlin.runCatching {
-                os.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
-                os.flush()
-            }.getOrElse { println(it.message?.red()) }
+        runCatching {
+            if(enableBuffer){
+                sb.appendLine(formatter.format(msg, serializer, level, attr))
+                if(sb.length > bufferSize){
+                    outputStream().buffered(64.KiB()).use { bos ->
+                        bos.write(sb.toString().encodeToByteArray())
+                        sb.clear()
+                    }
+                }
+            }else{
+                outputStream().buffered(64.KiB()).use { bos ->
+                    bos.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
+                }
+            }
+        }
+    }
+
+    /**
+     * flush buffered data into file.
+     */
+    fun flush(){
+        outputStream().buffered(64.KiB()).use { bos ->
+            bos.write(sb.toString().encodeToByteArray())
+            sb.clear()
         }
     }
 }
