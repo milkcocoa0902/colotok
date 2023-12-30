@@ -48,11 +48,6 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
         override var logLevel: LogLevel = LogLevel.DEBUG
 
         override var formatter: Formatter = DetailTextFormatter
-
-        /**
-         * no effect
-         */
-        override var colorize: Boolean = false
     }
 
     private val enableBuffer = config.enableBuffer

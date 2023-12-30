@@ -7,6 +7,12 @@ import com.milkcocoa.info.colotok.util.color.AnsiColor
  * provider's color config for each level
  */
 interface ProviderColorConfig {
+
+    /**
+     * do colorize. if true, provider can print message with ANSI color code.
+     */
+    var colorize: Boolean
+
     /**
      * the color which used for trace level log
      */

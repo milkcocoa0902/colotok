@@ -16,9 +16,4 @@ interface ProviderConfig {
      * formatter
      */
     var formatter: Formatter
-
-    /**
-     * do colorize. if true, provider can print message with ANSI color code.
-     */
-    var colorize: Boolean
 }

@@ -26,7 +26,6 @@ class StreamProvider(config: StreamProviderConfig): Provider {
     class StreamProviderConfig: ProviderConfig{
         override var logLevel: LogLevel = LogLevel.DEBUG
         override var formatter: Formatter = DetailTextFormatter
-        override var colorize: Boolean = false
 
         /**
          * size of buffer in Byte. which is used for save i/o.
@@ -43,7 +42,6 @@ class StreamProvider(config: StreamProviderConfig): Provider {
 
     private val logLevel = config.logLevel
     private val formatter = config.formatter
-    private val colorize = config.colorize
     private val outputStream = config.outputStreamBuilder
 
     private val enableBuffer = config.enableBuffer
