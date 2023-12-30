@@ -29,12 +29,11 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
         override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = true
 
-        override var traceLevelColor: AnsiColor = AnsiColor.WHITE
-        override var debugLevelColor: AnsiColor = AnsiColor.BLUE
-        override var infoLevelColor: AnsiColor = AnsiColor.GREEN
-        override var warnLevelColor: AnsiColor = AnsiColor.YELLOW
-        override var errorLevelColor: AnsiColor = AnsiColor.RED
-        override var customLevelColor: AnsiColor = AnsiColor.WHITE
+        override var traceLevelColor: AnsiColor = LogLevel.TRACE.color
+        override var debugLevelColor: AnsiColor = LogLevel.DEBUG.color
+        override var infoLevelColor: AnsiColor = LogLevel.INFO.color
+        override var warnLevelColor: AnsiColor = LogLevel.WARN.color
+        override var errorLevelColor: AnsiColor = LogLevel.ERROR.color
     }
 
     private val logLevel = config.level
@@ -57,7 +56,7 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
                 getColor(level)?.let {
                     println(Color.foreground(formatter.format(msg, level, attr), it))
                 } ?: run {
-                    println(msg)
+                    println(formatter.format(msg, level, attr))
                 }
             }
         }
@@ -81,7 +80,7 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
                 getColor(level)?.let {
                     println(Color.foreground(formatter.format(msg, serializer, level, attr), it))
                 } ?: run {
-                    println(msg)
+                    println(formatter.format(msg, serializer, level, attr))
                 }
             }
         }

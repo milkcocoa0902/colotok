@@ -39,7 +39,6 @@ interface ProviderColorConfig {
      */
     var errorLevelColor: AnsiColor
 
-    var customLevelColor: AnsiColor
 
     /**
      * returns the color for level.
@@ -54,7 +53,7 @@ interface ProviderColorConfig {
             LogLevel.WARN -> warnLevelColor
             LogLevel.ERROR -> errorLevelColor
             LogLevel.OFF -> null
-            else -> customLevelColor
+            else -> level.color
         }
     }
 }

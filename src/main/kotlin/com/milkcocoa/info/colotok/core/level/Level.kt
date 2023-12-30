@@ -1,6 +1,8 @@
 package com.milkcocoa.info.colotok.core.level
 
-abstract class Level(val levelInt: Int, val name: String) {
+import com.milkcocoa.info.colotok.util.color.AnsiColor
+
+abstract class Level(val levelInt: Int, val name: String, val color: AnsiColor) {
     final fun toInt() = levelInt
     final override fun toString() = name
 
@@ -8,12 +10,36 @@ abstract class Level(val levelInt: Int, val name: String) {
 }
 
 object LogLevel{
-    object TRACE: Level(LevelInt.TRACE_INT, "TRACE")
-    object DEBUG: Level(LevelInt.DEBUG_INT, "DEBUG")
-    object INFO: Level(LevelInt.INFO_INT, "INFO")
-    object WARN: Level(LevelInt.WARN_INT, "WARN")
-    object ERROR: Level(LevelInt.ERROR_INT, "ERROR")
-    object OFF: Level(LevelInt.OFF_INT, "OFF")
+    object TRACE: Level(
+        LevelInt.TRACE_INT,
+        "TRACE",
+        AnsiColor.WHITE
+    )
+    object DEBUG: Level(
+        LevelInt.DEBUG_INT,
+        "DEBUG",
+        AnsiColor.BLUE
+    )
+    object INFO: Level(
+        LevelInt.INFO_INT,
+        "INFO",
+        AnsiColor.GREEN
+    )
+    object WARN: Level(
+        LevelInt.WARN_INT,
+        "WARN",
+        AnsiColor.YELLOW
+    )
+    object ERROR: Level(
+        LevelInt.ERROR_INT,
+        "ERROR",
+        AnsiColor.RED
+    )
+    object OFF: Level(
+        LevelInt.OFF_INT,
+        "OFF",
+        AnsiColor.BLACK
+    )
 }
 
 
