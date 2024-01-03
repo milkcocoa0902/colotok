@@ -329,3 +329,6 @@ logger.error("error level log")
 3. INFO (ignore DEBUG and TRACE)
 4. WARN (only WARN or ERROR)
 5. ERROR (only one)
+
+# Document
+https://milkcocoa0902.github.io/colotok/01-colotok-introduce.html

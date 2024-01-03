@@ -10,7 +10,6 @@
             topic="01-colotok-introduce.md"
     />
     <toc-element topic="02-configuration.md">
-        <toc-element topic="02-00-Basic.md"/>
         <toc-element topic="02-01-provider-configuration.md"/>
         <toc-element topic="02-02-Formatter.md"/>
     </toc-element>
