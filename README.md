@@ -74,11 +74,11 @@ val fileProvider: FileProvider
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider{
         // show above info level in console
-        logLevel = LogLevel.INFO
+        level = LogLevel.INFO
     })
     .addProvider(FileProvider(Path.of("./test.log")){
         // write above trace level for file
-        logLevel = LogLevel.TRACE
+        level = LogLevel.TRACE
         
         // memory buffering to save i/o
         enableBuffer = true
@@ -250,13 +250,13 @@ class SlackProvider(config: SlackProviderConfig): Provider {
     class SlackProviderConfig() : ProviderConfig {
         var webhook_url: String = ""
 
-        override var logLevel: LogLevel = LogLevel.DEBUG
+        override var level: level = LogLevel.DEBUG
 
         override var formatter: Formatter = DetailTextFormatter
     }
 
     private val webhookUrl = config.webhook_url
-    private val logLevel = config.logLevel
+    private val logLevel = config.level
     private val formatter = config.formatter
 
     override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
@@ -302,12 +302,12 @@ now you can use SlackProvider to write the log into slack.
 val logger = LoggerFactory()
         .addProvider(ConsoleProvider{
             formatter = DetailTextFormatter
-            logLevel = LogLevel.DEBUG
+            level = LogLevel.DEBUG
         })
         .addProvider(SlackProvider{
             webhook_url = "your slack webhook url"
             formatter = SimpleTextFormatter
-            logLevel = LogLevel.WARN
+            level = LogLevel.WARN
         })
         .getLogger()
 ```
