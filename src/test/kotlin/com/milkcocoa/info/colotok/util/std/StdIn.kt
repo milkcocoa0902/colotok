@@ -1,6 +1,5 @@
-package com.milkcocoa.info.colotok.util.color.std
+package com.milkcocoa.info.colotok.util.std
 
-import kotlinx.serialization.builtins.SetSerializer
 import java.io.InputStream
 
 class StdIn: InputStream() {

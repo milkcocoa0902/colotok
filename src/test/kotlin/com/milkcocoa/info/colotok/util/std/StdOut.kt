@@ -1,4 +1,4 @@
-package com.milkcocoa.info.colotok.util.color.std
+package com.milkcocoa.info.colotok.util.std
 
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream

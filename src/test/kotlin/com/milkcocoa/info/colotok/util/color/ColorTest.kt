@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.util.color
 
-import com.milkcocoa.info.colotok.util.color.std.StdIn
-import com.milkcocoa.info.colotok.util.color.std.StdOut
+import com.milkcocoa.info.colotok.util.std.StdIn
+import com.milkcocoa.info.colotok.util.std.StdOut
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
