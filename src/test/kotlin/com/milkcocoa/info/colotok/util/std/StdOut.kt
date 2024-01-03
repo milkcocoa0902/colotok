@@ -13,15 +13,11 @@ class StdOut: PrintStream(ByteArrayOutputStream()) {
      * 1行分の文字列を読み込む
      * @return 改行を含まない文字。終端の場合はnull
      */
-    fun readLine(): String {
+    fun readLine(): String? {
         var line = ""
-        try {
-            if ((br.readLine().also { line = it }) != null) return line
-            br = BufferedReader(StringReader(out.toString()))
-            (out as ByteArrayOutputStream).reset()
-            return br.readLine()
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        }
+        br.readLine()?.let { return it }
+        br = BufferedReader(StringReader(out.toString()))
+        (out as ByteArrayOutputStream).reset()
+        return br.readLine()
     }
 }

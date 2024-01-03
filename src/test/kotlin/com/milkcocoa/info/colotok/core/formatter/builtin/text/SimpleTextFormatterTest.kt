@@ -1,11 +1,13 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
+import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import kotlinx.serialization.Serializable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
