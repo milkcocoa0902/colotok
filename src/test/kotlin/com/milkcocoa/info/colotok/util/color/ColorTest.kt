@@ -23,6 +23,11 @@ object ColorTest {
     @Test
     fun foregroundTest(){
         Assertions.assertTrue {
+            Color.foreground("black", AnsiColor.BLACK).equals(
+                "\u001B[30mblack\u001B[0m"
+            )
+        }
+        Assertions.assertTrue {
             Color.foreground("red", AnsiColor.RED).equals(
                 "\u001B[31mred\u001B[0m"
             )
