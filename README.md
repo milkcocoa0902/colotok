@@ -98,7 +98,6 @@ logger.debug("DEBUG LEVEL LOG")
 logger.info("INFO LEVEL LOG")
 logger.warn("WARN LEVEL LOG")
 logger.error("ERROR LEVEL LOG")
-
 ```
 
 ## Print

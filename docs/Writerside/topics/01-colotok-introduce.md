@@ -1,4 +1,4 @@
-# introduction
+# Introduction
 
 COLOTOK, this is a logging library for kotlin.  
 
