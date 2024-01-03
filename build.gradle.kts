@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.serialization") version "1.8.10"
     id("maven-publish")
+    jacoco
 }
 
 group = "com.github.milkcocoa0902"
@@ -18,6 +19,7 @@ tasks.withType<KotlinCompile> {
 
 repositories {
     mavenCentral()
+    maven(url = "https://plugins.gradle.org/m2/")
 }
 
 dependencies {
@@ -29,6 +31,23 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+    reportsDirectory = layout.buildDirectory.dir("customJacocoReportDir")
 }
 
 afterEvaluate {
