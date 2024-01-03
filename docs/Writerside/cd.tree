@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE instance-profile
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+
+<instance-profile
+        id="cd"
+        name="Colotok Docs"
+        start-page="01-colotok-introduce.md">
+    <toc-element
+            topic="01-colotok-introduce.md"
+    />
+    <toc-element topic="02-configuration.md">
+        <toc-element topic="02-00-Basic.md"/>
+        <toc-element topic="02-01-provider-configuration.md"/>
+        <toc-element topic="02-02-Formatter.md"/>
+    </toc-element>
+    <toc-element topic="03-Customize.md"/>
+</instance-profile>
