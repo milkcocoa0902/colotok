@@ -41,7 +41,7 @@ object DetailTextFormatterTest {
         val formatter = DetailTextFormatter
         Assertions.assertTrue {
             formatter.format("message", LogLevel.ERROR).equals(
-                "2023-12-31T12:34:56Z (Test worker)[ERROR] - message, additional = {}"
+                "2023-12-31T12:34:56Z (${Thread.currentThread().name})[ERROR] - message, additional = {}"
             )
         }
     }
@@ -57,7 +57,7 @@ object DetailTextFormatterTest {
 
         Assertions.assertTrue {
             formatter.format("message", LogLevel.ERROR).equals(
-                "2023-12-31T12:34:56+09:00 (Test worker)[ERROR] - message, additional = {}"
+                "2023-12-31T12:34:56+09:00 (${Thread.currentThread().name})[ERROR] - message, additional = {}"
             )
         }
     }
@@ -75,7 +75,7 @@ object DetailTextFormatterTest {
                 LogLevel.ERROR,
                 mapOf("additional" to "additional param")
             ).equals(
-                "2023-12-31T12:34:56+09:00 (Test worker)[ERROR] - message, additional = {additional=additional param}"
+                "2023-12-31T12:34:56+09:00 (${Thread.currentThread().name})[ERROR] - message, additional = {additional=additional param}"
             )
         }
     }

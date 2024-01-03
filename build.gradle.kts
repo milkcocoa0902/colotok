@@ -32,15 +32,16 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // https://github.com/mockk/mockk/issues/681
+    jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
     finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
 
 }
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report
-
     reports {
-        xml.required = false
+        xml.required = true
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
     }
@@ -48,7 +49,7 @@ tasks.jacocoTestReport {
 
 jacoco {
     toolVersion = "0.8.9"
-    reportsDirectory = layout.buildDirectory.dir("customJacocoReportDir")
+    reportsDirectory = layout.buildDirectory.dir("jacocoReport")
 }
 
 afterEvaluate {
