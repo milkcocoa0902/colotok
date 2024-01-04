@@ -4,6 +4,7 @@ COLOTOK; Cocoa LogTool for Kotlin
 ![](https://img.shields.io/static/v1?label=kotlin-jvm&message=1.8.10&color=magenta)
 ![](https://img.shields.io/static/v1?label=jdk&message=11&color=magenta)
 [![](https://jitpack.io/v/milkcocoa0902/colotok.svg)](https://jitpack.io/#milkcocoa0902/colotok)
+[![codecov](https://codecov.io/gh/milkcocoa0902/colotok/graph/badge.svg?token=XGH4U42LVM)](https://codecov.io/gh/milkcocoa0902/colotok)
 
 
 # Feature
