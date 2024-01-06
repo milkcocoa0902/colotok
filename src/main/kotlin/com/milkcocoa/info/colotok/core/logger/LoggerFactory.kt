@@ -7,6 +7,11 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
  */
 class LoggerFactory {
     private val providers: MutableList<Provider> = mutableListOf()
+    private val attrs = mutableMapOf<String, String>()
+
+    fun withAttrs(attr: Map<String, String>) = apply {
+        this@LoggerFactory.attrs.putAll(attr)
+    }
 
     /**
      * add provider to current logger
@@ -23,6 +28,7 @@ class LoggerFactory {
      */
     fun getLogger(): Logger{
         return Logger(name = "Default Logger") {
+            this.defaultAttrs = this@LoggerFactory.attrs
             this.providers = this@LoggerFactory.providers
         }
     }
@@ -34,6 +40,7 @@ class LoggerFactory {
      */
     fun getLogger(name: String): Logger {
         return Logger(name = name) {
+            this.defaultAttrs = this@LoggerFactory.attrs
             this.providers = this@LoggerFactory.providers
         }
     }

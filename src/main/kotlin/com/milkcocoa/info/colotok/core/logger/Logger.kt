@@ -9,6 +9,7 @@ class Logger(val name: String, val config: Config) {
     constructor(name: String, config: Config.() -> Unit) : this(name = name, Config().apply(config))
 
     private val providers = config.providers
+    private val attrs = config.defaultAttrs
 
     /**
      * print log with providers into passed [level]
@@ -16,8 +17,14 @@ class Logger(val name: String, val config: Config) {
      * @param level[Level] log level
      */
     fun at(level: Level, msg: String){
-        providers.forEach {
-            it.write(name, msg, level)
+        if(attrs.isEmpty()){
+            providers.forEach {
+                it.write(name, msg, level)
+            }
+        }else{
+            providers.forEach {
+                it.write(name, msg, level, attrs)
+            }
         }
     }
 
@@ -29,7 +36,7 @@ class Logger(val name: String, val config: Config) {
      */
     fun at(level: Level, msg: String, attr: Map<String, String>) {
         providers.forEach {
-            it.write(name, msg, level, attr)
+            it.write(name, msg, level, attr.plus(this.attrs))
         }
     }
 
@@ -39,8 +46,14 @@ class Logger(val name: String, val config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
     fun<T: LogStructure> at(level: Level, msg: T, serializer: KSerializer<T>) {
-        providers.forEach {
-            it.write(name, msg, serializer, level)
+        if(this.attrs.isEmpty()){
+            providers.forEach {
+                it.write(name, msg, serializer, level)
+            }
+        }else{
+            providers.forEach {
+                it.write(name, msg, serializer, level, this.attrs)
+            }
         }
     }
 
@@ -52,7 +65,7 @@ class Logger(val name: String, val config: Config) {
      */
     fun<T: LogStructure> at(level: Level, msg: T, serializer: KSerializer<T>, attr: Map<String, String>) {
         providers.forEach {
-            it.write(name, msg, serializer, level, attr)
+            it.write(name, msg, serializer, level, attr.plus(this.attrs))
         }
     }
 

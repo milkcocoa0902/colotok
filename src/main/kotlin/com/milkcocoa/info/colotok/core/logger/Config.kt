@@ -10,4 +10,6 @@ class Config {
      * providers to print log
      */
     var providers = listOf<Provider>()
+
+    var defaultAttrs = mapOf<String, String>()
 }
