@@ -43,7 +43,7 @@ abstract class StructuredFormatter(private val field: List<Element>, private val
         return buildJsonObject {
             field.forEach { f ->
                 when(f){
-                    Element.MESSAGE -> put("message", msg)
+                    Element.MESSAGE -> put("message", JsonPrimitive(msg))
                     Element.LEVEL -> put("level", JsonPrimitive(level.name))
                     Element.THREAD -> put("thread", JsonPrimitive(Thread.currentThread().name))
                     Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
