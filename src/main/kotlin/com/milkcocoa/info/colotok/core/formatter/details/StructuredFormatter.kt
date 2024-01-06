@@ -8,12 +8,21 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.properties.Properties
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import javax.swing.UIManager.put
 
 /**
  * base class for log formatter which used for structure log
@@ -35,7 +44,7 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
         return mutableMapOf<String, String>().apply {
             field.forEach { f ->
                 when(f){
-                    Element.MESSAGE -> put("msg", msg)
+                    Element.MESSAGE -> put("message", msg)
                     Element.LEVEL -> put("level", level.name)
                     Element.THREAD -> put("thread", Thread.currentThread().name)
                     Element.ATTR -> putAll(attrs)
@@ -92,24 +101,21 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
         attrs: Map<String, String>
     ): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
-        return mutableMapOf<String, String>().apply {
+        return buildJsonObject {
             field.forEach { f ->
                 when(f){
-                    Element.MESSAGE -> Properties.encodeToStringMap(serializer, msg).also { this.putAll(it) }
-                    Element.LEVEL -> put("level", level.name)
-                    Element.THREAD -> put("thread", Thread.currentThread().name)
-                    Element.ATTR -> putAll(attrs)
+                    Element.MESSAGE -> put("message", Json.encodeToJsonElement(serializer, msg))
+                    Element.LEVEL -> put("level", JsonPrimitive(level.name))
+                    Element.THREAD -> put("thread", JsonPrimitive(Thread.currentThread().name))
+                    Element.ATTR -> attrs.forEach { t, u -> put(t, JsonPrimitive(u)) }
                     else ->{}
                 }
             }
 
             datetimeFormatter?.let {
-                put("date", dt.format(it))
+                put("date", JsonPrimitive(dt.format(it)))
             }
-        }.let {
-            Json { encodeDefaults = true }
-            Json.encodeToString(it)
-        }
+        }.toString()
     }
 }
 
