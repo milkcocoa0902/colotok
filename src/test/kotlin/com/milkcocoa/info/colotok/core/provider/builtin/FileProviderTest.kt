@@ -7,6 +7,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.rotation.SizeBaseRotation
+import com.milkcocoa.info.colotok.util.color.ColorExtension.magenta
 import com.milkcocoa.info.colotok.util.color.ColorExtension.red
 import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import io.mockk.every
@@ -304,7 +305,7 @@ object FileProviderTest {
         Assertions.assertEquals(
             """
                 {
-                "msg":"message",
+                "message":"message",
                 "level":"ERROR",
                 "date":"2023-12-31"
                 }
@@ -344,16 +345,20 @@ object FileProviderTest {
 
         Assertions.assertEquals(
             """
-                {
-                "name":"range error",
-                "logDetail.scope":"arg",
-                "logDetail.message":"illegal argument",
-                "level":"WARN",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attributes",
-                "date":"2023-12-31T12:34:56Z"
-                }
-            """.trimIndent().replace("\n", ""),
+                |{
+                    |"message":{
+                        |"name":"range error",
+                        |"logDetail":{
+                            |"scope":"arg",
+                            |"message":"illegal argument"
+                        |}
+                    |},
+                    |"level":"WARN",
+                    |"thread":"${Thread.currentThread().name}",
+                    |"attr":"attributes",
+                    |"date":"2023-12-31T12:34:56Z"
+                |}
+            """.trimMargin().replace("\n", ""),
             testLogFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
     }
@@ -395,16 +400,20 @@ object FileProviderTest {
         provider.flush()
         Assertions.assertEquals(
             """
-                {
-                "name":"range error",
-                "logDetail.scope":"arg",
-                "logDetail.message":"illegal argument",
-                "level":"WARN",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attributes",
-                "date":"2023-12-31T12:34:56Z"
-                }
-            """.trimIndent().replace("\n", ""),
+                |{
+                    |"message":{
+                        |"name":"range error",
+                        |"logDetail":{
+                            |"scope":"arg",
+                            |"message":"illegal argument"
+                        |}
+                    |},
+                    |"level":"WARN",
+                    |"thread":"${Thread.currentThread().name}",
+                    |"attr":"attributes",
+                    |"date":"2023-12-31T12:34:56Z"
+                |}
+            """.trimMargin().replace("\n", ""),
             testLogFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
     }
@@ -440,16 +449,20 @@ object FileProviderTest {
 
         Assertions.assertEquals(
             """
-                {
-                "name":"range error",
-                "logDetail.scope":"arg",
-                "logDetail.message":"illegal argument",
-                "level":"WARN",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attributes",
-                "date":"2023-12-31T12:34:56Z"
-                }
-            """.trimIndent().replace("\n", ""),
+                |{
+                    |"message":{
+                        |"name":"range error",
+                        |"logDetail":{
+                            |"scope":"arg",
+                            |"message":"illegal argument"
+                        |}
+                    |},
+                    |"level":"WARN",
+                    |"thread":"${Thread.currentThread().name}",
+                    |"attr":"attributes",
+                    |"date":"2023-12-31T12:34:56Z"
+                |}
+            """.trimMargin().replace("\n", ""),
             testLogFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
     }

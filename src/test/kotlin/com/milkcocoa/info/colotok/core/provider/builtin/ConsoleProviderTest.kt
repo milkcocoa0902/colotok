@@ -213,14 +213,18 @@ class ConsoleProviderTest {
         )
         Assertions.assertEquals(
             """
-                {
-                "name":"range error",
-                "logDetail.scope":"arg",
-                "logDetail.message":"illegal argument",
-                "level":"INFO",
-                "date":"2023-12-31"
-                }
-            """.trimIndent().replace("\n", ""),
+                |{
+                    |"message":{
+                        |"name":"range error",
+                        |"logDetail":{
+                            |"scope":"arg",
+                            |"message":"illegal argument"
+                        |}
+                    |},
+                    |"level":"INFO",
+                    |"date":"2023-12-31"
+                |}
+            """.trimMargin().replace("\n", ""),
             stdOut.readLine() ?: ""
         )
     }
@@ -252,16 +256,20 @@ class ConsoleProviderTest {
         )
         Assertions.assertEquals(
             """
-                {
-                "name":"range error",
-                "logDetail.scope":"arg",
-                "logDetail.message":"illegal argument",
-                "level":"INFO",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attributes",
-                "date":"2023-12-31T12:34:56+09:00"
-                }
-            """.trimIndent().replace("\n", ""),
+                |{
+                    |"message":{
+                        |"name":"range error",
+                        |"logDetail":{
+                            |"scope":"arg",
+                            |"message":"illegal argument"
+                        |}
+                    |},
+                    |"level":"INFO",
+                    |"thread":"${Thread.currentThread().name}",
+                    |"attr":"attributes",
+                    |"date":"2023-12-31T12:34:56+09:00"
+                |}
+            """.trimMargin().replace("\n", ""),
             stdOut.readLine() ?: ""
         )
     }
@@ -326,16 +334,20 @@ class ConsoleProviderTest {
         )
         Assertions.assertEquals(
             """
-                {
-                "name":"range error",
-                "logDetail.scope":"arg",
-                "logDetail.message":"illegal argument",
-                "level":"WARN",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attributes",
-                "date":"2023-12-31T12:34:56+09:00"
-                }
-            """.trimIndent().replace("\n", "").magenta(),
+                |{
+                    |"message":{
+                        |"name":"range error",
+                        |"logDetail":{
+                            |"scope":"arg",
+                            |"message":"illegal argument"
+                        |}
+                    |},
+                    |"level":"WARN",
+                    |"thread":"${Thread.currentThread().name}",
+                    |"attr":"attributes",
+                    |"date":"2023-12-31T12:34:56+09:00"
+                |}
+            """.trimMargin().replace("\n", "").magenta(),
             stdOut.readLine() ?: ""
         )
     }
@@ -363,7 +375,7 @@ class ConsoleProviderTest {
         Assertions.assertEquals(
             """
                 {
-                "msg":"message",
+                "message":"message",
                 "level":"WARN",
                 "date":"2023-12-31"
                 }
@@ -396,7 +408,7 @@ class ConsoleProviderTest {
         Assertions.assertEquals(
             """
                 {
-                "msg":"message",
+                "message":"message",
                 "level":"ERROR",
                 "date":"2023-12-31"
                 }
@@ -428,14 +440,14 @@ class ConsoleProviderTest {
         )
         Assertions.assertEquals(
             """
-                {
-                "msg":"message",
-                "level":"ERROR",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attributes",
-                "date":"2023-12-31T12:34:56+09:00"
-                }
-            """.trimIndent().replace("\n", "").red(),
+                |{
+                    |"message":"message",
+                    |"level":"ERROR",
+                    |"thread":"${Thread.currentThread().name}",
+                    |"attr":"attributes",
+                    |"date":"2023-12-31T12:34:56+09:00"
+                |}
+            """.trimMargin().replace("\n", "").red(),
             stdOut.readLine() ?: ""
         )
     }
