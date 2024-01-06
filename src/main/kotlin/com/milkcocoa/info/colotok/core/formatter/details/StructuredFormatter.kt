@@ -7,21 +7,17 @@ import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.properties.Properties
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import javax.swing.UIManager.put
 
 /**
@@ -29,8 +25,11 @@ import javax.swing.UIManager.put
  *
  * @constructor
  * @param field[List] log fields
+ * @param mask[List] field name list to mask value with '*'
  */
-abstract class StructuredFormatter(private val field: List<Element>): Formatter{
+abstract class StructuredFormatter(private val field: List<Element>, private val mask: List<String>): Formatter{
+    private val lowerMask by lazy { mask.map { it.lowercase() } }
+
     override fun format(msg: String, level: Level): String {
         return format(msg, level, mapOf())
     }
@@ -41,23 +40,21 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
 
     override fun format(msg: String, level: Level, attrs: Map<String, String>): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
-        return mutableMapOf<String, String>().apply {
+        return buildJsonObject {
             field.forEach { f ->
                 when(f){
                     Element.MESSAGE -> put("message", msg)
-                    Element.LEVEL -> put("level", level.name)
-                    Element.THREAD -> put("thread", Thread.currentThread().name)
-                    Element.ATTR -> putAll(attrs)
+                    Element.LEVEL -> put("level", JsonPrimitive(level.name))
+                    Element.THREAD -> put("thread", JsonPrimitive(Thread.currentThread().name))
+                    Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     else ->{}
                 }
             }
+
             datetimeFormatter?.let {
-                put("date", dt.format(it))
+                put("date", JsonPrimitive(dt.format(it)))
             }
-        }.let {
-            Json { encodeDefaults = true }
-            Json.encodeToString(it)
-        }
+        }.toString()
     }
 
     private val datetimeFormatter by lazy {
@@ -100,14 +97,36 @@ abstract class StructuredFormatter(private val field: List<Element>): Formatter{
         level: Level,
         attrs: Map<String, String>
     ): String {
+        val s = object: JsonTransformingSerializer<T>(serializer){
+            override fun transformSerialize(element: JsonElement): JsonElement =
+                JsonObject(element.jsonObject.mapValues {
+                    if(this@StructuredFormatter.lowerMask.contains(it.key.lowercase())){
+                        JsonPrimitive("*".repeat(it.value.toString().length.coerceAtMost(32)))
+                    }else{
+                        when (it.value) {
+                            is JsonArray -> {
+                                JsonArray(it.value.jsonArray.map { transformSerialize(it) })
+                            }
+                            is JsonObject -> {
+                                transformSerialize(it.value)
+                            }
+                            else -> {
+                                it.value
+                            }
+                        }
+                    }
+                })
+        }
+
+
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return buildJsonObject {
             field.forEach { f ->
                 when(f){
-                    Element.MESSAGE -> put("message", Json.encodeToJsonElement(serializer, msg))
+                    Element.MESSAGE -> put("message", Json.encodeToJsonElement(s, msg))
                     Element.LEVEL -> put("level", JsonPrimitive(level.name))
                     Element.THREAD -> put("thread", JsonPrimitive(Thread.currentThread().name))
-                    Element.ATTR -> attrs.forEach { t, u -> put(t, JsonPrimitive(u)) }
+                    Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     else ->{}
                 }
             }

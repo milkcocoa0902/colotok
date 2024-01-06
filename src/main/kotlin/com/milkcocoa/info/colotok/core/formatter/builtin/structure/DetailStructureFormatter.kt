@@ -15,5 +15,9 @@ object DetailStructureFormatter: StructuredFormatter(
         Element.LEVEL,
         Element.DATE_TIME,
         Element.THREAD,
-        Element.ATTR)
+        Element.ATTR),
+    listOf(
+        "password",
+        "secret"
+    )
 )

@@ -12,5 +12,9 @@ object SimpleStructureFormatter: StructuredFormatter(
     listOf(
         Element.MESSAGE,
         Element.LEVEL,
-        Element.DATE)
+        Element.DATE),
+    listOf(
+        "password",
+        "secret"
+    )
 )
