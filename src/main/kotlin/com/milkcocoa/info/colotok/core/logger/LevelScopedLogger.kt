@@ -8,36 +8,47 @@ final class LevelScopedLogger(val name: String, val config: Config, private val 
     private val providers = config.providers
     private val attrs = config.defaultAttrs
 
-    fun print(msg: String){
-        if(this.attrs.isEmpty()){
+    fun print(msg: String) {
+        if (this.attrs.isEmpty()) {
             providers.forEach {
                 it.write(name, msg, level)
             }
-        }else{
+        } else {
             providers.forEach {
                 it.write(name, msg, level, this.attrs)
             }
         }
     }
 
-    fun print(msg: String, attr: Map<String, String>){
+    fun print(
+        msg: String,
+        attr: Map<String, String>
+    ) {
         providers.forEach {
             it.write(name, msg, level, attr.plus(this.attrs))
         }
     }
 
-    fun<T: LogStructure> print(msg: T, serializer: KSerializer<T>){
-        if(this.attrs.isEmpty()){
+    fun <T : LogStructure> print(
+        msg: T,
+        serializer: KSerializer<T>
+    ) {
+        if (this.attrs.isEmpty()) {
             providers.forEach {
                 it.write(name, msg, serializer, level)
             }
-        }else{
+        } else {
             providers.forEach {
                 it.write(name, msg, serializer, level, this.attrs)
             }
         }
     }
-    fun<T: LogStructure> print(msg: T, serializer: KSerializer<T>, attr: Map<String, String>){
+
+    fun <T : LogStructure> print(
+        msg: T,
+        serializer: KSerializer<T>,
+        attr: Map<String, String>
+    ) {
         providers.forEach {
             it.write(name, msg, serializer, level, attr.plus(this.attrs))
         }

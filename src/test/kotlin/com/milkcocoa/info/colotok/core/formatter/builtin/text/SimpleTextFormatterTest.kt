@@ -1,32 +1,30 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import kotlinx.serialization.Serializable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
 object SimpleTextFormatterTest {
     private val stdIn = StdIn()
     private val stdOut = StdOut()
+
     @BeforeEach
-    public fun before(){
+    public fun before() {
         System.setIn(stdIn)
         System.setOut(stdOut)
     }
 
     @AfterEach
-    public fun after(){
+    public fun after() {
         System.setIn(null)
         System.setOut(null)
 
@@ -34,7 +32,7 @@ object SimpleTextFormatterTest {
     }
 
     @Test
-    fun simpleTextFormatterTest01(){
+    fun simpleTextFormatterTest01() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
@@ -46,9 +44,8 @@ object SimpleTextFormatterTest {
         }
     }
 
-
     @Test
-    fun simpleTextFormatterTest02(){
+    fun simpleTextFormatterTest02() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
@@ -62,7 +59,7 @@ object SimpleTextFormatterTest {
     }
 
     @Test
-    fun simpleTextFormatterTest03(){
+    fun simpleTextFormatterTest03() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 

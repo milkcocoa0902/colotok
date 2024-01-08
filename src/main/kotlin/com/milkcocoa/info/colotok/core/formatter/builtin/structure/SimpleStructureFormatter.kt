@@ -8,11 +8,12 @@ import com.milkcocoa.info.colotok.core.formatter.details.StructuredFormatter
  *
  * {"msg": "message", "level": "[Level]", "date": "yyyy-MM-dd"}
  */
-object SimpleStructureFormatter: StructuredFormatter(
+object SimpleStructureFormatter : StructuredFormatter(
     listOf(
         Element.MESSAGE,
         Element.LEVEL,
-        Element.DATE),
+        Element.DATE
+    ),
     listOf(
         "password",
         "secret"

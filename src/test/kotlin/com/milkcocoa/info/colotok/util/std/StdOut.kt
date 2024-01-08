@@ -2,11 +2,10 @@ package com.milkcocoa.info.colotok.util.std
 
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.io.PrintStream
 import java.io.StringReader
 
-class StdOut: PrintStream(ByteArrayOutputStream()) {
+class StdOut : PrintStream(ByteArrayOutputStream()) {
     private var br = BufferedReader(StringReader(""))
 
     /**

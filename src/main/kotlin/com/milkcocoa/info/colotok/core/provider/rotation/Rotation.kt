@@ -6,7 +6,6 @@ import java.nio.file.Path
  * log rotation interface
  */
 interface Rotation {
-
     /**
      * check for the log-rotation is needed.
      *

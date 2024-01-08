@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 
 object ColorExtensionTest {
     @Test
-    fun colorExtensionTest(){
+    fun colorExtensionTest() {
         Assertions.assertTrue {
             "black".black().equals(
                 "\u001B[30mblack\u001B[0m"

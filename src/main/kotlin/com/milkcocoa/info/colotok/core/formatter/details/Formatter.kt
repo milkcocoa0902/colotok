@@ -10,7 +10,10 @@ interface Formatter {
      * @param level[Level] log level
      * @return [String] formatted message
      */
-    fun format(msg: String, level: Level): String{
+    fun format(
+        msg: String,
+        level: Level
+    ): String {
         TODO("Not Implemented")
     }
 
@@ -21,7 +24,11 @@ interface Formatter {
      * @param level[Level] log level
      * @return [String] formatted message
      */
-    fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: Level): String{
+    fun <T : LogStructure> format(
+        msg: T,
+        serializer: KSerializer<T>,
+        level: Level
+    ): String {
         TODO("Not Implemented")
     }
 
@@ -32,10 +39,14 @@ interface Formatter {
      * @param level[Level] log level
      * @return [String] formatted message
      */
-    fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: Level, attrs: Map<String, String>): String{
+    fun <T : LogStructure> format(
+        msg: T,
+        serializer: KSerializer<T>,
+        level: Level,
+        attrs: Map<String, String>
+    ): String {
         TODO("Not Implemented")
     }
-
 
     /**
      * used for formatting message which structured
@@ -45,7 +56,11 @@ interface Formatter {
      * @param attrs[Map] additional attributes
      * @return [String] formatted message
      */
-    fun format(msg: String, level: Level, attrs: Map<String, String>): String{
+    fun format(
+        msg: String,
+        level: Level,
+        attrs: Map<String, String>
+    ): String {
         TODO("Not Implemented")
     }
 }

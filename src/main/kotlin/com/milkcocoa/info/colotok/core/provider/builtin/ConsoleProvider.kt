@@ -1,9 +1,9 @@
 package com.milkcocoa.info.colotok.core.provider.builtin
 
-import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.details.ProviderColorConfig
@@ -12,19 +12,18 @@ import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.serialization.KSerializer
 
-
 /**
  * builtin provider which used to write the log into console.
  */
 class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
-    constructor(config: ConsoleProviderConfig.() -> Unit): this(ConsoleProviderConfig().apply(config))
+    constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**
      * initialize provider with default configuration
      */
-    constructor(): this(ConsoleProviderConfig())
+    constructor() : this(ConsoleProviderConfig())
 
-    class ConsoleProviderConfig: ProviderConfig, ProviderColorConfig{
+    class ConsoleProviderConfig : ProviderConfig, ProviderColorConfig {
         override var level: Level = LogLevel.DEBUG
         override var formatter: Formatter = DetailTextFormatter
         override var colorize: Boolean = true
@@ -39,20 +38,24 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     private val logLevel = config.level
     private val formatter = config.formatter
     private var colorize = config.colorize
-    private val getColor: ((Level) -> AnsiColor? ) = {
+    private val getColor: ((Level) -> AnsiColor?) = {
         config.getColorForLevel(it)
     }
 
-
-    override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
-        if(level.isEnabledFor(logLevel).not()){
+    override fun write(
+        name: String,
+        msg: String,
+        level: Level,
+        attr: Map<String, String>
+    ) {
+        if (level.isEnabledFor(logLevel).not()) {
             return
         }
 
         kotlin.runCatching {
-            if(colorize.not()){
+            if (colorize.not()) {
                 println(formatter.format(msg, level, attr))
-            }else{
+            } else {
                 getColor(level)?.let {
                     println(Color.foreground(formatter.format(msg, level, attr), it))
                 } ?: run {
@@ -62,7 +65,6 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
         }
     }
 
-
     override fun <T : LogStructure> write(
         name: String,
         msg: T,
@@ -70,13 +72,13 @@ class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
         level: Level,
         attr: Map<String, String>
     ) {
-        if(level.isEnabledFor(logLevel).not()){
+        if (level.isEnabledFor(logLevel).not()) {
             return
         }
         kotlin.runCatching {
-            if(colorize.not()){
+            if (colorize.not()) {
                 println(formatter.format(msg, serializer, level, attr))
-            }else{
+            } else {
                 getColor(level)?.let {
                     println(Color.foreground(formatter.format(msg, serializer, level, attr), it))
                 } ?: run {

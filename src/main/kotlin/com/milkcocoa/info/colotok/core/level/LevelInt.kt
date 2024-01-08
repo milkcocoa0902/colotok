@@ -1,7 +1,6 @@
 package com.milkcocoa.info.colotok.core.level
 
 object LevelInt {
-
     const val TRACE_INT: Int = 0
     const val DEBUG_INT: Int = 10
     const val INFO_INT: Int = 20

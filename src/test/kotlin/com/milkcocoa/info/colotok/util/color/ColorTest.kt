@@ -9,19 +9,19 @@ import org.junit.jupiter.api.Test
 
 object ColorTest {
     @BeforeEach
-    public fun before(){
+    public fun before() {
         System.setIn(StdIn())
         System.setOut(StdOut())
     }
 
     @AfterEach
-    public fun after(){
+    public fun after() {
         System.setIn(null)
         System.setOut(null)
     }
 
     @Test
-    fun foregroundTest(){
+    fun foregroundTest() {
         Assertions.assertTrue {
             Color.foreground("black", AnsiColor.BLACK).equals(
                 "\u001B[30mblack\u001B[0m"

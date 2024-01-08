@@ -1,9 +1,9 @@
 package com.milkcocoa.info.colotok.core.provider.builtin
 
-import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
@@ -20,17 +20,20 @@ import kotlin.io.path.pathString
  * builtin provider which used to write the log into file.
  */
 class FileProvider(private val outputFileName: Path, config: FileProviderConfig) : Provider {
-
     /**
      * initialize provider with default configuration
      */
-    constructor(outputFileName: Path): this(outputFileName, FileProviderConfig())
+    constructor(outputFileName: Path) : this(outputFileName, FileProviderConfig())
 
     /**
      * initialize provider with specified configuration
      */
-    constructor(outputFileName: Path, config: FileProviderConfig.() -> Unit): this(outputFileName, FileProviderConfig().apply(config))
-    class FileProviderConfig() : ProviderConfig{
+    constructor(
+        outputFileName: Path,
+        config: FileProviderConfig.() -> Unit
+    ) : this(outputFileName, FileProviderConfig().apply(config))
+
+    class FileProviderConfig() : ProviderConfig {
         /**
          * size of buffer in Byte. which is used for save i/o.
          */
@@ -63,39 +66,42 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
      * get file path where to write the log.
      * if [outputFileName] is the directory, provider creates "application.log" under [outputFileName].
      */
-    private val filePath: Path get(){
-        if(outputFileName.isDirectory()){
+    private val filePath: Path get() {
+        if (outputFileName.isDirectory()) {
             return Path.of(outputFileName.pathString, "application.log")
         }
         return outputFileName
     }
 
-
-    override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
-        if(level.isEnabledFor(logLevel).not()){
+    override fun write(
+        name: String,
+        msg: String,
+        level: Level,
+        attr: Map<String, String>
+    ) {
+        if (level.isEnabledFor(logLevel).not()) {
             return
         }
         runCatching {
-            if(enableBuffer){
+            if (enableBuffer) {
                 sb.appendLine(formatter.format(msg, level, attr))
-                if(sb.length > bufferSize){
+                if (sb.length > bufferSize) {
                     BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
                         sb.clear()
                     }
                 }
-            }else{
+            } else {
                 BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                     bos.write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
                 }
             }
 
-            if(rotation?.isRotateNeeded(outputFileName) == true){
+            if (rotation?.isRotateNeeded(outputFileName) == true) {
                 rotation.doRotate(outputFileName)
             }
         }
     }
-
 
     override fun <T : LogStructure> write(
         name: String,
@@ -104,25 +110,25 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
         level: Level,
         attr: Map<String, String>
     ) {
-        if(level.isEnabledFor(logLevel).not()){
+        if (level.isEnabledFor(logLevel).not()) {
             return
         }
         runCatching {
-            if(enableBuffer){
+            if (enableBuffer) {
                 sb.appendLine(formatter.format(msg, serializer, level, attr))
-                if(sb.length > bufferSize){
+                if (sb.length > bufferSize) {
                     BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
                         sb.clear()
                     }
                 }
-            }else{
+            } else {
                 BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
                     bos.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
                 }
             }
 
-            if(rotation?.isRotateNeeded(outputFileName) == true){
+            if (rotation?.isRotateNeeded(outputFileName) == true) {
                 rotation.doRotate(outputFileName)
             }
         }
@@ -131,13 +137,13 @@ class FileProvider(private val outputFileName: Path, config: FileProviderConfig)
     /**
      * flush buffered data into file.
      */
-    fun flush(){
+    fun flush() {
         BufferedOutputStream(FileOutputStream(filePath.toFile(), true)).use { bos ->
             bos.write(sb.toString().encodeToByteArray())
             sb.clear()
         }
 
-        if(rotation?.isRotateNeeded(outputFileName) == true){
+        if (rotation?.isRotateNeeded(outputFileName) == true) {
             rotation.doRotate(outputFileName)
         }
     }

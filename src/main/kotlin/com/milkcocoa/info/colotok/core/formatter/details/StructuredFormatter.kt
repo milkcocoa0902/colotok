@@ -27,27 +27,39 @@ import javax.swing.UIManager.put
  * @param field[List] log fields
  * @param mask[List] field name list to mask value with '*'
  */
-abstract class StructuredFormatter(private val field: List<Element>, private val mask: List<String>): Formatter{
+abstract class StructuredFormatter(private val field: List<Element>, private val mask: List<String>) : Formatter {
     private val lowerMask by lazy { mask.map { it.lowercase() } }
 
-    override fun format(msg: String, level: Level): String {
+    override fun format(
+        msg: String,
+        level: Level
+    ): String {
         return format(msg, level, mapOf())
     }
+
     @OptIn(ExperimentalSerializationApi::class)
-    override fun<T: LogStructure> format(msg: T, serializer: KSerializer<T>, level: Level): String{
+    override fun <T : LogStructure> format(
+        msg: T,
+        serializer: KSerializer<T>,
+        level: Level
+    ): String {
         return format(msg, serializer, level, mapOf())
     }
 
-    override fun format(msg: String, level: Level, attrs: Map<String, String>): String {
+    override fun format(
+        msg: String,
+        level: Level,
+        attrs: Map<String, String>
+    ): String {
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return buildJsonObject {
             field.forEach { f ->
-                when(f){
+                when (f) {
                     Element.MESSAGE -> put("message", JsonPrimitive(msg))
                     Element.LEVEL -> put("level", JsonPrimitive(level.name))
                     Element.THREAD -> put("thread", JsonPrimitive(Thread.currentThread().name))
                     Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
-                    else ->{}
+                    else -> {}
                 }
             }
 
@@ -61,19 +73,19 @@ abstract class StructuredFormatter(private val field: List<Element>, private val
         val d = field.find { it == Element.DATE }
         val t = field.find { it == Element.TIME }
 
-        val dt = field.find { it == Element.DATE_TIME } ?: run {
-            if(d != null && t != null){
-                return@run Element.DATE_TIME
+        val dt =
+            field.find { it == Element.DATE_TIME } ?: run {
+                if (d != null && t != null) {
+                    return@run Element.DATE_TIME
+                }
+                return@run null
             }
-            return@run null
-        }
-
 
         dt?.let {
-            if(d != null){
+            if (d != null) {
                 println(Color.foreground("[StructuredFormatter]: ${Element.DATE.name} is ignored.", AnsiColor.YELLOW))
             }
-            if(t != null){
+            if (t != null) {
                 println(Color.foreground("[StructuredFormatter]: ${Element.TIME.name} is ignored.", AnsiColor.YELLOW))
             }
 
@@ -97,30 +109,34 @@ abstract class StructuredFormatter(private val field: List<Element>, private val
         level: Level,
         attrs: Map<String, String>
     ): String {
-        val s = object: JsonTransformingSerializer<T>(serializer){
-            override fun transformSerialize(element: JsonElement): JsonElement =
-                JsonObject(element.jsonObject.mapValues {
-                    if(this@StructuredFormatter.lowerMask.contains(it.key.lowercase())){
-                        return@mapValues JsonPrimitive("*".repeat(it.value.toString().length.coerceAtMost(32)))
-                    }
-                    return@mapValues when (it.value) {
-                        is JsonArray -> JsonArray(it.value.jsonArray.map { transformSerialize(it) })
-                        is JsonObject -> transformSerialize(it.value)
-                        else -> it.value
-                    }
-                })
-        }
-
+        val s =
+            object : JsonTransformingSerializer<T>(serializer) {
+                override fun transformSerialize(element: JsonElement): JsonElement =
+                    JsonObject(
+                        element.jsonObject.mapValues {
+                            if (this@StructuredFormatter.lowerMask.contains(it.key.lowercase())) {
+                                return@mapValues JsonPrimitive(
+                                    "*".repeat(it.value.toString().length.coerceAtMost(32))
+                                )
+                            }
+                            return@mapValues when (it.value) {
+                                is JsonArray -> JsonArray(it.value.jsonArray.map { transformSerialize(it) })
+                                is JsonObject -> transformSerialize(it.value)
+                                else -> it.value
+                            }
+                        }
+                    )
+            }
 
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         return buildJsonObject {
             field.forEach { f ->
-                when(f){
+                when (f) {
                     Element.MESSAGE -> put("message", Json.encodeToJsonElement(s, msg))
                     Element.LEVEL -> put("level", JsonPrimitive(level.name))
                     Element.THREAD -> put("thread", JsonPrimitive(Thread.currentThread().name))
                     Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
-                    else ->{}
+                    else -> {}
                 }
             }
 

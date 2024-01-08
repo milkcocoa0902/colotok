@@ -2,14 +2,12 @@ package com.milkcocoa.info.colotok.core.provider.builtin
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.DetailStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
-import com.milkcocoa.info.colotok.core.formatter.builtin.structure.StructureFormatterTest
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
-import com.milkcocoa.info.colotok.util.color.ColorExtension.blue
 import com.milkcocoa.info.colotok.util.color.ColorExtension.magenta
 import com.milkcocoa.info.colotok.util.color.ColorExtension.red
 import com.milkcocoa.info.colotok.util.std.StdIn
@@ -30,30 +28,30 @@ class ConsoleProviderTest {
     private val stdOut = StdOut()
 
     @BeforeEach
-    public fun before(){
+    public fun before() {
         System.setIn(stdIn)
         System.setOut(stdOut)
     }
 
     @AfterEach
-    public fun after(){
+    public fun after() {
         System.setIn(null)
         System.setOut(null)
 
         unmockkAll()
     }
 
-
     @Test
-    fun consoleProviderTest01(){
+    fun consoleProviderTest01() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = SimpleTextFormatter
-            colorize = false
-            level = LogLevel.DEBUG
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = SimpleTextFormatter
+                colorize = false
+                level = LogLevel.DEBUG
+            }
 
         provider.write(
             name = "default logger",
@@ -66,17 +64,17 @@ class ConsoleProviderTest {
         )
     }
 
-
     @Test
-    fun consoleProviderTest02(){
+    fun consoleProviderTest02() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = SimpleTextFormatter
-            colorize = false
-            level = LogLevel.DEBUG
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = SimpleTextFormatter
+                colorize = false
+                level = LogLevel.DEBUG
+            }
 
         provider.write(
             name = "default logger",
@@ -89,18 +87,18 @@ class ConsoleProviderTest {
         )
     }
 
-
     @Test
-    fun consoleProviderTest03(){
+    fun consoleProviderTest03() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = SimpleTextFormatter
-            colorize = true
-            level = LogLevel.DEBUG
-            infoLevelColor = AnsiColor.BLUE
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = SimpleTextFormatter
+                colorize = true
+                level = LogLevel.DEBUG
+                infoLevelColor = AnsiColor.BLUE
+            }
 
         provider.write(
             name = "default logger",
@@ -114,16 +112,17 @@ class ConsoleProviderTest {
     }
 
     @Test
-    fun consoleProviderTest04(){
+    fun consoleProviderTest04() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailTextFormatter
-            colorize = true
-            level = LogLevel.DEBUG
-            infoLevelColor = AnsiColor.BLUE
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = DetailTextFormatter
+                colorize = true
+                level = LogLevel.DEBUG
+                infoLevelColor = AnsiColor.BLUE
+            }
 
         provider.write(
             name = "default logger",
@@ -132,21 +131,27 @@ class ConsoleProviderTest {
             attr = mapOf("additional" to "additional param")
         )
         Assertions.assertEquals(
-            Color.foreground("2023-12-31T12:34:56+09:00 (${Thread.currentThread().name})[INFO] - message, additional = {additional=additional param}", AnsiColor.BLUE),
+            @Suppress("ktlint:standard:max-line-length")
+            Color.foreground(
+                "2023-12-31T12:34:56+09:00 (${Thread.currentThread().name})[INFO] - message, additional = {additional=additional param}",
+                AnsiColor.BLUE
+            ),
             stdOut.readLine() ?: ""
         )
     }
+
     @Test
-    fun consoleProviderTest05(){
+    fun consoleProviderTest05() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailTextFormatter
-            colorize = true
-            level = LogLevel.DEBUG
-            infoLevelColor = AnsiColor.BLUE
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = DetailTextFormatter
+                colorize = true
+                level = LogLevel.DEBUG
+                infoLevelColor = AnsiColor.BLUE
+            }
 
         provider.write(
             name = "default logger",
@@ -159,16 +164,18 @@ class ConsoleProviderTest {
             stdOut.readLine() ?: ""
         )
     }
+
     @Test
-    fun consoleProviderTest06(){
+    fun consoleProviderTest06() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailTextFormatter
-            colorize = false
-            level = LogLevel.DEBUG
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = DetailTextFormatter
+                colorize = false
+                level = LogLevel.DEBUG
+            }
 
         provider.write(
             name = "default logger",
@@ -176,38 +183,42 @@ class ConsoleProviderTest {
             level = LogLevel.INFO,
             attr = mapOf("additional" to "additional param")
         )
+        @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
             "2023-12-31T12:34:56+09:00 (${Thread.currentThread().name})[INFO] - message, additional = {additional=additional param}",
             stdOut.readLine() ?: ""
         )
     }
 
+    @Serializable
+    class LogDetail(val scope: String, val message: String) : LogStructure
 
     @Serializable
-    class LogDetail(val scope: String, val message: String): LogStructure
-    @Serializable
-    class Log(val name: String, val logDetail: LogDetail): LogStructure
+    class Log(val name: String, val logDetail: LogDetail) : LogStructure
 
     @Test
-    fun consoleProviderTest07(){
+    fun consoleProviderTest07() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = SimpleStructureFormatter
-            colorize = false
-            level = LogLevel.DEBUG
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = SimpleStructureFormatter
+                colorize = false
+                level = LogLevel.DEBUG
+            }
 
         provider.write(
             name = "default logger",
-            msg = Log(
-                name = "range error",
-                logDetail = LogDetail(
-                    scope = "arg",
-                    message = "illegal argument"
-                )
-            ),
+            msg =
+                Log(
+                    name = "range error",
+                    logDetail =
+                        LogDetail(
+                            scope = "arg",
+                            message = "illegal argument"
+                        )
+                ),
             serializer = Log.serializer(),
             level = LogLevel.INFO
         )
@@ -229,27 +240,29 @@ class ConsoleProviderTest {
         )
     }
 
-
     @Test
-    fun consoleProviderTest08(){
+    fun consoleProviderTest08() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailStructureFormatter
-            colorize = false
-            level = LogLevel.DEBUG
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = DetailStructureFormatter
+                colorize = false
+                level = LogLevel.DEBUG
+            }
 
         provider.write(
             name = "default logger",
-            msg = Log(
-                name = "range error",
-                logDetail = LogDetail(
-                    scope = "arg",
-                    message = "illegal argument"
-                )
-            ),
+            msg =
+                Log(
+                    name = "range error",
+                    logDetail =
+                        LogDetail(
+                            scope = "arg",
+                            message = "illegal argument"
+                        )
+                ),
             serializer = Log.serializer(),
             level = LogLevel.INFO,
             attr = mapOf("attr" to "attributes")
@@ -274,27 +287,29 @@ class ConsoleProviderTest {
         )
     }
 
-
     @Test
-    fun consoleProviderTest09(){
+    fun consoleProviderTest09() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailStructureFormatter
-            colorize = false
-            level = LogLevel.OFF
-        }
+        val provider =
+            ConsoleProvider {
+                formatter = DetailStructureFormatter
+                colorize = false
+                level = LogLevel.OFF
+            }
 
         provider.write(
             name = "default logger",
-            msg = Log(
-                name = "range error",
-                logDetail = LogDetail(
-                    scope = "arg",
-                    message = "illegal argument"
-                )
-            ),
+            msg =
+                Log(
+                    name = "range error",
+                    logDetail =
+                        LogDetail(
+                            scope = "arg",
+                            message = "illegal argument"
+                        )
+                ),
             serializer = Log.serializer(),
             level = LogLevel.INFO,
             attr = mapOf("attr" to "attributes")
@@ -305,29 +320,31 @@ class ConsoleProviderTest {
         )
     }
 
-
     @Test
-    fun consoleProviderTest10(){
+    fun consoleProviderTest10() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailStructureFormatter
-            colorize = true
-            level = LogLevel.DEBUG
+        val provider =
+            ConsoleProvider {
+                formatter = DetailStructureFormatter
+                colorize = true
+                level = LogLevel.DEBUG
 
-            warnLevelColor = AnsiColor.MAGENTA
-        }
+                warnLevelColor = AnsiColor.MAGENTA
+            }
 
         provider.write(
             name = "default logger",
-            msg = Log(
-                name = "range error",
-                logDetail = LogDetail(
-                    scope = "arg",
-                    message = "illegal argument"
-                )
-            ),
+            msg =
+                Log(
+                    name = "range error",
+                    logDetail =
+                        LogDetail(
+                            scope = "arg",
+                            message = "illegal argument"
+                        )
+                ),
             serializer = Log.serializer(),
             level = LogLevel.WARN,
             attr = mapOf("attr" to "attributes")
@@ -352,20 +369,19 @@ class ConsoleProviderTest {
         )
     }
 
-
-
     @Test
-    fun consoleProviderTest11(){
+    fun consoleProviderTest11() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = SimpleStructureFormatter
-            colorize = true
-            level = LogLevel.DEBUG
+        val provider =
+            ConsoleProvider {
+                formatter = SimpleStructureFormatter
+                colorize = true
+                level = LogLevel.DEBUG
 
-            warnLevelColor = AnsiColor.MAGENTA
-        }
+                warnLevelColor = AnsiColor.MAGENTA
+            }
 
         provider.write(
             name = "default logger",
@@ -374,30 +390,29 @@ class ConsoleProviderTest {
         )
         Assertions.assertEquals(
             """
-                {
-                "message":"message",
-                "level":"WARN",
-                "date":"2023-12-31"
-                }
+            {
+            "message":"message",
+            "level":"WARN",
+            "date":"2023-12-31"
+            }
             """.trimIndent().replace("\n", "").magenta(),
             stdOut.readLine() ?: ""
         )
     }
 
-
-
     @Test
-    fun consoleProviderTest12(){
+    fun consoleProviderTest12() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = SimpleStructureFormatter
-            colorize = true
-            level = LogLevel.DEBUG
+        val provider =
+            ConsoleProvider {
+                formatter = SimpleStructureFormatter
+                colorize = true
+                level = LogLevel.DEBUG
 
-            errorLevelColor = AnsiColor.RED
-        }
+                errorLevelColor = AnsiColor.RED
+            }
 
         provider.write(
             name = "default logger",
@@ -407,30 +422,29 @@ class ConsoleProviderTest {
         )
         Assertions.assertEquals(
             """
-                {
-                "message":"message",
-                "level":"ERROR",
-                "date":"2023-12-31"
-                }
+            {
+            "message":"message",
+            "level":"ERROR",
+            "date":"2023-12-31"
+            }
             """.trimIndent().replace("\n", "").red(),
             stdOut.readLine() ?: ""
         )
     }
 
-
-
     @Test
-    fun consoleProviderTest13(){
+    fun consoleProviderTest13() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56+09:00")
 
-        val provider = ConsoleProvider{
-            formatter = DetailStructureFormatter
-            colorize = true
-            level = LogLevel.DEBUG
+        val provider =
+            ConsoleProvider {
+                formatter = DetailStructureFormatter
+                colorize = true
+                level = LogLevel.DEBUG
 
-            errorLevelColor = AnsiColor.RED
-        }
+                errorLevelColor = AnsiColor.RED
+            }
 
         provider.write(
             name = "default logger",

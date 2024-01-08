@@ -16,13 +16,16 @@ import kotlin.io.path.name
  * @constructor
  * @param size[Long] max log file size in Byte
  */
-class SizeBaseRotation(val size: Long = 4L.KiB()): Rotation {
+class SizeBaseRotation(val size: Long = 4L.KiB()) : Rotation {
     override fun isRotateNeeded(filePath: Path): Boolean {
         return Files.size(filePath) > size
     }
 
     override fun doRotate(filePath: Path) {
-        val rotateIndex = Files.list(filePath.parent).filter { it.isDirectory().not() and it.name.startsWith(filePath.name) }.count()
-        Files.move(filePath, Path.of("${filePath}.${rotateIndex}"), StandardCopyOption.REPLACE_EXISTING)
+        val rotateIndex =
+            Files.list(filePath.parent).filter {
+                it.isDirectory().not() and it.name.startsWith(filePath.name)
+            }.count()
+        Files.move(filePath, Path.of("$filePath.$rotateIndex"), StandardCopyOption.REPLACE_EXISTING)
     }
 }

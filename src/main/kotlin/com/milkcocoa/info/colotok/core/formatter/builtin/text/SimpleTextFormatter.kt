@@ -10,8 +10,8 @@ import com.milkcocoa.info.colotok.core.formatter.details.TextFormatter
  */
 object SimpleTextFormatter : TextFormatter(
     """
-        ${Element.DATE} ${Element.TIME}  
-        [${Element.LEVEL}] - ${Element.MESSAGE}
+    ${Element.DATE} ${Element.TIME}  
+    [${Element.LEVEL}] - ${Element.MESSAGE}
     """.trimIndent()
         .replace("\n", "")
 )

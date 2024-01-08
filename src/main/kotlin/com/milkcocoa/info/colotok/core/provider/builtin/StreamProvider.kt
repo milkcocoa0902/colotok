@@ -11,12 +11,11 @@ import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import kotlinx.serialization.KSerializer
 import java.io.OutputStream
 
-class StreamProvider(config: StreamProviderConfig): Provider {
+class StreamProvider(config: StreamProviderConfig) : Provider {
+    constructor(config: StreamProviderConfig.() -> Unit) : this(StreamProviderConfig().apply(config))
+    constructor() : this(StreamProviderConfig())
 
-    constructor(config: StreamProviderConfig.() -> Unit): this(StreamProviderConfig().apply(config))
-    constructor(): this(StreamProviderConfig())
-
-    class StreamProviderConfig: ProviderConfig{
+    class StreamProviderConfig : ProviderConfig {
         override var level: Level = LogLevel.DEBUG
         override var formatter: Formatter = DetailTextFormatter
 
@@ -30,7 +29,7 @@ class StreamProvider(config: StreamProviderConfig): Provider {
          */
         var enableBuffer = true
 
-        var outputStreamBuilder: (()->OutputStream) = { OutputStream.nullOutputStream() }
+        var outputStreamBuilder: (() -> OutputStream) = { OutputStream.nullOutputStream() }
     }
 
     private val logLevel = config.level
@@ -40,23 +39,28 @@ class StreamProvider(config: StreamProviderConfig): Provider {
     private val enableBuffer = config.enableBuffer
     private val bufferSize = config.bufferSize
 
-
     private val sb: StringBuilder = StringBuilder()
-    override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
-        if(level.isEnabledFor(logLevel).not()){
+
+    override fun write(
+        name: String,
+        msg: String,
+        level: Level,
+        attr: Map<String, String>
+    ) {
+        if (level.isEnabledFor(logLevel).not()) {
             return
         }
 
         runCatching {
-            if(enableBuffer){
+            if (enableBuffer) {
                 sb.appendLine(formatter.format(msg, level, attr))
-                if(sb.length > bufferSize){
+                if (sb.length > bufferSize) {
                     outputStream().buffered(64.KiB()).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
                         sb.clear()
                     }
                 }
-            }else{
+            } else {
                 outputStream().buffered(64.KiB()).use { bos ->
                     bos.write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
                 }
@@ -71,20 +75,20 @@ class StreamProvider(config: StreamProviderConfig): Provider {
         level: Level,
         attr: Map<String, String>
     ) {
-        if(level.isEnabledFor(logLevel).not()){
+        if (level.isEnabledFor(logLevel).not()) {
             return
         }
 
         runCatching {
-            if(enableBuffer){
+            if (enableBuffer) {
                 sb.appendLine(formatter.format(msg, serializer, level, attr))
-                if(sb.length > bufferSize){
+                if (sb.length > bufferSize) {
                     outputStream().buffered(64.KiB()).use { bos ->
                         bos.write(sb.toString().encodeToByteArray())
                         sb.clear()
                     }
                 }
-            }else{
+            } else {
                 outputStream().buffered(64.KiB()).use { bos ->
                     bos.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
                 }
@@ -95,7 +99,7 @@ class StreamProvider(config: StreamProviderConfig): Provider {
     /**
      * flush buffered data into file.
      */
-    fun flush(){
+    fun flush() {
         outputStream().buffered(64.KiB()).use { bos ->
             bos.write(sb.toString().encodeToByteArray())
             sb.clear()

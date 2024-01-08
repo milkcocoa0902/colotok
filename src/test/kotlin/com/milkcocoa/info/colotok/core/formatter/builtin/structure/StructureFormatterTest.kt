@@ -1,6 +1,5 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.structure
 
-import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.std.StdIn
@@ -21,13 +20,13 @@ object StructureFormatterTest {
     private val stdOut = StdOut()
 
     @BeforeEach
-    public fun before(){
+    public fun before() {
         System.setIn(stdIn)
         System.setOut(stdOut)
     }
 
     @AfterEach
-    public fun after(){
+    public fun after() {
         System.setIn(null)
         System.setOut(null)
 
@@ -35,90 +34,88 @@ object StructureFormatterTest {
     }
 
     @Test
-    fun structureFormatterTest01(){
+    fun structureFormatterTest01() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
         val formatter = SimpleStructureFormatter
         Assertions.assertEquals(
             """
-                {
-                "message":"message",
-                "level":"INFO",
-                "date":"2023-12-31"
-                }
+            {
+            "message":"message",
+            "level":"INFO",
+            "date":"2023-12-31"
+            }
             """.trimIndent().replace("\n", ""),
             formatter.format(msg = "message", level = LogLevel.INFO)
         )
     }
 
-
     @Test
-    fun structureFormatterTest02(){
+    fun structureFormatterTest02() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
         val formatter = SimpleStructureFormatter
         Assertions.assertEquals(
             """
-                {
-                "message":"message",
-                "level":"WARN",
-                "date":"2023-12-31"
-                }
+            {
+            "message":"message",
+            "level":"WARN",
+            "date":"2023-12-31"
+            }
             """.trimIndent().replace("\n", ""),
             formatter.format(msg = "message", level = LogLevel.WARN, attrs = mapOf())
         )
     }
 
-
     @Test
-    fun structureFormatterTest03(){
+    fun structureFormatterTest03() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
         val formatter = DetailStructureFormatter
         Assertions.assertEquals(
             """
-                {
-                "message":"message",
-                "level":"ERROR",
-                "thread":"${Thread.currentThread().name}",
-                "date":"2023-12-31T12:34:56Z"
-                }
+            {
+            "message":"message",
+            "level":"ERROR",
+            "thread":"${Thread.currentThread().name}",
+            "date":"2023-12-31T12:34:56Z"
+            }
             """.trimIndent().replace("\n", ""),
             formatter.format(msg = "message", level = LogLevel.ERROR)
         )
     }
 
     @Test
-    fun structureFormatterTest04(){
+    fun structureFormatterTest04() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
         val formatter = DetailStructureFormatter
         Assertions.assertEquals(
             """
-                {
-                "message":"message",
-                "level":"ERROR",
-                "thread":"${Thread.currentThread().name}",
-                "attr":"attribute",
-                "date":"2023-12-31T12:34:56Z"
-                }
+            {
+            "message":"message",
+            "level":"ERROR",
+            "thread":"${Thread.currentThread().name}",
+            "attr":"attribute",
+            "date":"2023-12-31T12:34:56Z"
+            }
             """.trimIndent().replace("\n", ""),
             formatter.format(msg = "message", level = LogLevel.ERROR, attrs = mapOf("attr" to "attribute"))
         )
     }
 
+    @Serializable
+    class LogDetail(val scope: String, val message: String) : LogStructure
 
     @Serializable
-    class LogDetail(val scope: String, val message: String): LogStructure
-    @Serializable
-    class Log(val name: String, val logDetail: LogDetail): LogStructure
+    class Log(val name: String, val logDetail: LogDetail) : LogStructure
 
     @Test
-    fun structureFormatterTest05(){
+    fun structureFormatterTest05() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
@@ -138,13 +135,15 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg = Log(
-                    name = "range error",
-                    logDetail = LogDetail(
-                        scope = "arg",
-                        message = "illegal argument"
-                    )
-                ),
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
                 serializer = Log.serializer(),
                 level = LogLevel.ERROR
             )
@@ -152,7 +151,7 @@ object StructureFormatterTest {
     }
 
     @Test
-    fun structureFormatterTest06(){
+    fun structureFormatterTest06() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
@@ -172,13 +171,15 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg = Log(
-                    name = "range error",
-                    logDetail = LogDetail(
-                        scope = "arg",
-                        message = "illegal argument"
-                    )
-                ),
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
                 serializer = Log.serializer(),
                 level = LogLevel.ERROR,
                 attrs = mapOf("attr" to "attribute")
@@ -187,7 +188,7 @@ object StructureFormatterTest {
     }
 
     @Test
-    fun structureFormatterTest07(){
+    fun structureFormatterTest07() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
@@ -208,13 +209,15 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg = Log(
-                    name = "range error",
-                    logDetail = LogDetail(
-                        scope = "arg",
-                        message = "illegal argument"
-                    )
-                ),
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
                 serializer = Log.serializer(),
                 level = LogLevel.ERROR
             )
@@ -222,7 +225,7 @@ object StructureFormatterTest {
     }
 
     @Test
-    fun structureFormatterTest08(){
+    fun structureFormatterTest08() {
         mockkStatic(ZonedDateTime::class)
         every { ZonedDateTime.now(ZoneId.systemDefault()) } returns ZonedDateTime.parse("2023-12-31T12:34:56Z")
 
@@ -244,13 +247,15 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg = Log(
-                    name = "range error",
-                    logDetail = LogDetail(
-                        scope = "arg",
-                        message = "illegal argument"
-                    )
-                ),
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
                 serializer = Log.serializer(),
                 level = LogLevel.INFO,
                 attrs = mapOf("attr" to "attribute")

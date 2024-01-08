@@ -11,5 +11,5 @@ enum class AnsiColor(val code: Int) {
     BLUE(34),
     MAGENTA(35),
     CYAN(36),
-    WHITE(37);
+    WHITE(37)
 }

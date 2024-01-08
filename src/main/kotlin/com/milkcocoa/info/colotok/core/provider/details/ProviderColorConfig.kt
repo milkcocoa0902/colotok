@@ -8,7 +8,6 @@ import com.milkcocoa.info.colotok.util.color.AnsiColor
  * provider's color config for each level
  */
 interface ProviderColorConfig {
-
     /**
      * do colorize. if true, provider can print message with ANSI color code.
      */
@@ -39,14 +38,13 @@ interface ProviderColorConfig {
      */
     var errorLevelColor: AnsiColor
 
-
     /**
      * returns the color for level.
      * @param level[Level] target log level
      * @return [AnsiColor] color
      */
-    fun getColorForLevel(level: Level): AnsiColor?{
-        return when(level){
+    fun getColorForLevel(level: Level): AnsiColor? {
+        return when (level) {
             LogLevel.TRACE -> traceLevelColor
             LogLevel.DEBUG -> debugLevelColor
             LogLevel.INFO -> infoLevelColor
