@@ -22,12 +22,19 @@ repositories {
     maven(url = "https://plugins.gradle.org/m2/")
 }
 
+val ktlint by configurations.creating
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-properties:1.6.0")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("io.mockk:mockk:1.13.7")
+
+    ktlint("com.pinterest.ktlint:ktlint-cli:1.1.0") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+        }
+    }
 }
 
 tasks.test {
@@ -35,7 +42,6 @@ tasks.test {
     // https://github.com/mockk/mockk/issues/681
     jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
     finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-
 }
 
 tasks.jacocoTestReport {
@@ -56,7 +62,7 @@ afterEvaluate {
     publishing {
         publications {
             // Creates a Maven publication called "release".
-            register(components.first().name, MavenPublication::class){
+            register(components.first().name, MavenPublication::class) {
                 from(components.first())
                 groupId = "com.github.milkcocoa0902"
                 artifactId = "colotok"
@@ -64,4 +70,37 @@ afterEvaluate {
             }
         }
     }
+}
+
+val ktlintCheck by tasks.registering(JavaExec::class) {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Check Kotlin code style"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
+    // see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
+    args(
+        "**/src/**/*.kt",
+        "**.kts",
+        "!**/build/**"
+    )
+}
+
+tasks.check {
+    dependsOn(ktlintCheck)
+}
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Check Kotlin code style and format"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
+    // see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
+    args(
+        "-F",
+        "**/src/**/*.kt",
+        "**.kts",
+        "!**/build/**"
+    )
 }
