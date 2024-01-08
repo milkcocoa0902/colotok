@@ -101,19 +101,12 @@ abstract class StructuredFormatter(private val field: List<Element>, private val
             override fun transformSerialize(element: JsonElement): JsonElement =
                 JsonObject(element.jsonObject.mapValues {
                     if(this@StructuredFormatter.lowerMask.contains(it.key.lowercase())){
-                        JsonPrimitive("*".repeat(it.value.toString().length.coerceAtMost(32)))
-                    }else{
-                        when (it.value) {
-                            is JsonArray -> {
-                                JsonArray(it.value.jsonArray.map { transformSerialize(it) })
-                            }
-                            is JsonObject -> {
-                                transformSerialize(it.value)
-                            }
-                            else -> {
-                                it.value
-                            }
-                        }
+                        return@mapValues JsonPrimitive("*".repeat(it.value.toString().length.coerceAtMost(32)))
+                    }
+                    return@mapValues when (it.value) {
+                        is JsonArray -> JsonArray(it.value.jsonArray.map { transformSerialize(it) })
+                        is JsonObject -> transformSerialize(it.value)
+                        else -> it.value
                     }
                 })
         }
