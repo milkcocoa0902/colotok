@@ -187,7 +187,7 @@ logger.info(
     Log.serializer()
 )
 
-// {"name":"illegal state","logDetail.scope":"args","logDetail.message":"argument must be greater than zero","level":"INFO","date":"2023-12-29"}
+// // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29"}
 
 
 logger.info("message what happen")
@@ -208,15 +208,15 @@ logger.info(
     ),
     Log.serializer(),
     // you can pass additional attrs
-    mapOf("a" to "afeafseaf")
+    mapOf("additional" to "additional param")
 )
 
-// {"name":"illegal state","logDetail.scope":"args","logDetail.message":"argument must be greater than zero","level":"INFO","thread":"main","a":"afeafseaf","date":"2023-12-29T12:27:22.559733+09:00"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","additional":"additional param","date":"2023-12-29T12:34:56+09:00"}
 
 
 logger.info("message what happen")
 
-// {"msg":"message what happen","level":"INFO","thread":"main","a":"BBBBB","date":"2023-12-29T12:27:22.5908+09:00"}
+// {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908+09:00"}
 ```
 
 

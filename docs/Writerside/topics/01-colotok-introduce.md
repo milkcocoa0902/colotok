@@ -56,11 +56,11 @@ val fileProvider: FileProvider
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider{
         // show above info level in console
-        logLevel = LogLevel.INFO
+        level = LogLevel.INFO
     })
     .addProvider(FileProvider(Path.of("./test.log")){
         // write above trace level for file
-        logLevel = LogLevel.TRACE
+        level = LogLevel.TRACE
         
         // memory buffering to save i/o
         enableBuffer = true

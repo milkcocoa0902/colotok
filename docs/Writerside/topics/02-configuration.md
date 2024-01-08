@@ -15,7 +15,7 @@ you can get the logger instance by `LoggerFactory.getLogger()`
 `ConsoleProvider` is a builtin provider which used for print the log into console
 
 > if none of `addProvider()` is called, the logger will not print the log anywhere
-{style="note"}
+> {style="note"}
 
 ## Print log
 
@@ -48,8 +48,8 @@ logger.atInfo {
 // 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - in this block, additional = {}
 // 2023-12-29T12:21:13.356133+09:00 (main)[INFO] - all of logs are printed out with INFO level, additional = {}
 ```
-> if no formatter is passed to `ConsoleProvider()`, builtin `DetailTextFormatter` is used 
-{style="note"}
+> if no formatter is passed to `ConsoleProvider()`, builtin `DetailTextFormatter` is used
+> {style="note"}
 
 
 
@@ -57,7 +57,7 @@ logger.atInfo {
 Colotok also can print structured log using `kotlinx-serialization`.
 
 > need for dependencies to kotlinx-serializations on your app
-{style="note"}
+> {style="note"}
 
 implement the log structure
 
@@ -92,5 +92,5 @@ logger.info(
     Log.serializer()
 )
 
-// {"name":"illegal state","logDetail.scope":"args","logDetail.message":"argument must be greater than zero","level":"INFO","date":"2023-12-29"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29T12:34:56Z"}
 ```
