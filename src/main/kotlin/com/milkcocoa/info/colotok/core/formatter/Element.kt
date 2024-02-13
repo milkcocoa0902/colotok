@@ -47,7 +47,9 @@ enum class Element(private val typeString: String) {
     /**
      * additional attrs
      */
-    ATTR("%a");
+    ATTR("%a"),
+
+    CALLER("%C");
 
     override fun toString(): String {
         return typeString
