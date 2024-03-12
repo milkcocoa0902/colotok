@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.github.milkcocoa0902"
-version = "0.2.0"
+version = "0.2.3"
 java.sourceCompatibility = JavaVersion.VERSION_11
 tasks.withType<KotlinCompile> {
     kotlinOptions {

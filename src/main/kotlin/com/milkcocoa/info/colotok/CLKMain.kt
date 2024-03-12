@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.logger.Logger
 import com.milkcocoa.info.colotok.core.logger.LoggerFactory
 import com.milkcocoa.info.colotok.core.provider.builtin.ConsoleProvider
 import com.milkcocoa.info.colotok.core.provider.builtin.FileProvider
@@ -24,6 +25,11 @@ class Credential(
 ) : LogStructure
 
 fun main() {
+
+    val defaultLogger = Logger.getDefault()
+    defaultLogger.info("default logger")
+
+
     val fileProvider: FileProvider
     val streamProvider: StreamProvider
     val logger =

@@ -1,15 +1,17 @@
 package com.milkcocoa.info.colotok.core.logger
 
+import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.provider.builtin.ConsoleProvider
 import kotlinx.serialization.KSerializer
 
-class Logger(val name: String, val config: Config) {
+class Logger(val name: String, config: Config) {
     constructor(name: String, config: Config.() -> Unit) : this(name = name, Config().apply(config))
 
-    private val providers = config.providers
-    private val attrs = config.defaultAttrs
+    val providers = config.providers
+    val attrs = config.defaultAttrs
 
     /**
      * print log with providers into passed [level]
@@ -381,6 +383,34 @@ class Logger(val name: String, val config: Config) {
         level: Level,
         block: LevelScopedLogger.() -> Unit
     ) {
-        block(LevelScopedLogger(name, config, level))
+        LevelScopedLogger(
+            name = name,
+            config = Config().apply{
+                this.providers = this@Logger.providers
+                this.defaultAttrs = this@Logger.attrs
+            },
+            level = level
+        ).block()
+    }
+
+    companion object{
+        private var defaultLogger: Logger = Logger(
+            name = "default logger",
+        ){
+            providers = listOf(
+                ConsoleProvider{
+                    colorize = true
+                    level = LogLevel.DEBUG
+                    formatter = DetailTextFormatter
+                }
+            )
+        }
+        fun getDefault(): Logger{
+            return defaultLogger
+        }
+
+        fun setDefault(logger: Logger){
+            defaultLogger = logger
+        }
     }
 }
