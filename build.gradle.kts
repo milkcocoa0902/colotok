@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.21"
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
     id("maven-publish")
     jacoco
 }
@@ -30,6 +30,8 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockk)
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     ktlint("com.pinterest.ktlint:ktlint-cli:1.1.0") {
         attributes {

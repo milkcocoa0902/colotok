@@ -5,7 +5,9 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.ConsoleProvider
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.serializer
 
 class Logger(val name: String, config: Config) {
     constructor(name: String, config: Config.() -> Unit) : this(name = name, Config().apply(config))
@@ -54,18 +56,18 @@ class Logger(val name: String, config: Config) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    fun <T : LogStructure> at(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> at(
         level: Level,
         msg: T,
-        serializer: KSerializer<T>
     ) {
         if (this.attrs.isEmpty()) {
             providers.forEach {
-                it.write(name, msg, serializer, level)
+                it.write(name, msg, T::class.serializer(), level)
             }
         } else {
             providers.forEach {
-                it.write(name, msg, serializer, level, this.attrs)
+                it.write(name, msg, T::class.serializer(), level, this.attrs)
             }
         }
     }
@@ -76,14 +78,14 @@ class Logger(val name: String, config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attributes
      */
-    fun <T : LogStructure> at(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> at(
         level: Level,
         msg: T,
-        serializer: KSerializer<T>,
         attr: Map<String, String>
     ) {
         providers.forEach {
-            it.write(name, msg, serializer, level, attr.plus(this.attrs))
+            it.write(name, msg, T::class.serializer(), level, attr.plus(this.attrs))
         }
     }
 
@@ -192,11 +194,11 @@ class Logger(val name: String, config: Config) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    fun <T : LogStructure> trace(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> trace(
         msg: T,
-        serializer: KSerializer<T>
     ) {
-        at(LogLevel.TRACE, msg, serializer)
+        at(LogLevel.TRACE, msg)
     }
 
     /**
@@ -204,11 +206,11 @@ class Logger(val name: String, config: Config) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    fun <T : LogStructure> debug(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> debug(
         msg: T,
-        serializer: KSerializer<T>
     ) {
-        at(LogLevel.DEBUG, msg, serializer)
+        at(LogLevel.DEBUG, msg)
     }
 
     /**
@@ -216,11 +218,11 @@ class Logger(val name: String, config: Config) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    fun <T : LogStructure> info(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> info(
         msg: T,
-        serializer: KSerializer<T>
     ) {
-        at(LogLevel.INFO, msg, serializer)
+        at(LogLevel.INFO, msg)
     }
 
     /**
@@ -228,11 +230,11 @@ class Logger(val name: String, config: Config) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    fun <T : LogStructure> warn(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> warn(
         msg: T,
-        serializer: KSerializer<T>
     ) {
-        at(LogLevel.WARN, msg, serializer)
+        at(LogLevel.WARN, msg)
     }
 
     /**
@@ -240,11 +242,11 @@ class Logger(val name: String, config: Config) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    fun <T : LogStructure> error(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> error(
         msg: T,
-        serializer: KSerializer<T>
     ) {
-        at(LogLevel.ERROR, msg, serializer)
+        at(LogLevel.ERROR, msg)
     }
 
     /**
@@ -253,12 +255,12 @@ class Logger(val name: String, config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attributes
      */
-    fun <T : LogStructure> trace(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> trace(
         msg: T,
-        serializer: KSerializer<T>,
         attr: Map<String, String>
     ) {
-        at(LogLevel.TRACE, msg, serializer, attr)
+        at(LogLevel.TRACE, msg, attr)
     }
 
     /**
@@ -267,12 +269,12 @@ class Logger(val name: String, config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    fun <T : LogStructure> debug(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> debug(
         msg: T,
-        serializer: KSerializer<T>,
         attr: Map<String, String>
     ) {
-        at(LogLevel.DEBUG, msg, serializer, attr)
+        at(LogLevel.DEBUG, msg, attr)
     }
 
     /**
@@ -281,12 +283,12 @@ class Logger(val name: String, config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    fun <T : LogStructure> info(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> info(
         msg: T,
-        serializer: KSerializer<T>,
         attr: Map<String, String>
     ) {
-        at(LogLevel.INFO, msg, serializer, attr)
+        at(LogLevel.INFO, msg, attr)
     }
 
     /**
@@ -295,12 +297,12 @@ class Logger(val name: String, config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    fun <T : LogStructure> warn(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure> warn(
         msg: T,
-        serializer: KSerializer<T>,
         attr: Map<String, String>
     ) {
-        at(LogLevel.WARN, msg, serializer, attr)
+        at(LogLevel.WARN, msg, attr)
     }
 
     /**
@@ -309,12 +311,12 @@ class Logger(val name: String, config: Config) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    fun <T : LogStructure> error(
+    @OptIn(InternalSerializationApi::class)
+    inline fun <reified T : LogStructure>error(
         msg: T,
-        serializer: KSerializer<T>,
         attr: Map<String, String>
     ) {
-        at(LogLevel.ERROR, msg, serializer, attr)
+        at(LogLevel.ERROR, msg, attr)
     }
 
     /**

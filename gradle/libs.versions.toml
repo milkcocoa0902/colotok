@@ -1,6 +1,6 @@
 [versions]
-kotlin = "1.9.21"
-kotlin-serialization = "1.6.0"
+kotlin = "2.1.10"
+kotlin-serialization = "1.8.0"
 mockk = "1.13.7"
 junit-bom = "5.9.1"
 
