@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LevelScopedLogger
 import com.milkcocoa.info.colotok.core.logger.Logger
+import com.milkcocoa.info.colotok.core.logger.MDC
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -27,6 +28,8 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         level: Level,
         attrs: Map<String, String>
     ): String {
+        val mdc = MDC.getThreadLocalContext().data
+
         val dt = ZonedDateTime.now(ZoneId.systemDefault())
         val thread = Thread.currentThread()
 
@@ -55,5 +58,8 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
             .replace(Element.THREAD.toString(), String.format("%s", thread.name))
             .replace(Element.ATTR.toString(), attrs.toString())
             .replace(Element.CALLER.toString(), caller)
+            .let {
+                mdc.keys.fold(it) { acc, k -> acc.replace("%{${k}}", mdc.get(k).toString()) }
+            }
     }
 }
