@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Colotok-jvm-0.2.3">
+    <output-path>$PROJECT_DIR$/build/libs</output-path>
+    <root id="archive" name="Colotok-jvm-0.2.3.jar">
+      <element id="module-output" name="Colotok.jvmMain" />
+    </root>
+  </artifact>
+</component>

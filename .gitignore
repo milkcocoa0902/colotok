@@ -29,3 +29,7 @@ replay_pid*
 
 build
 .gradle
+/.kotlin
+
+*.log.*
+local.properties
