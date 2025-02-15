@@ -3,6 +3,7 @@
 COLOTOK, this is a logging library for kotlin.  
 
 ## Feature
+✅ Kotlin Multiplatform Support    
 ✅ Print log with color  
 ✅ Formatter  
 ✅ Print log where you want  
@@ -16,37 +17,63 @@ COLOTOK, this is a logging library for kotlin.
 　🌟 example   
 ✅ Structure Logging  
 
-## Install 
-edit your build.gradle.kts like below.
+# Integration
+basic dependency
 
 ```kotlin
-repositories {
-    mavenCentral()
-    // add this line
-    maven(url =  "https://jitpack.io" )
-}
-
 dependencies {
     // add this line
-    implementation("com.github.milkcocoa0902:colotok:0.1.9")
+    implementation("io.github.milkcocoa0902:colotok:0.3.0")
 }
 ```
 
-if you use structure logging or create your own provider, you need to add `kotlinx-serialization`
+or when you use kotlin multiplatform(;KMP)
+
+```kotlin
+commonMain.dependncies{
+    implementation("io.github.milkcocoa0902:colotok:0.3.0")
+}
+
+jvmMain.dependencies{
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.0")
+}
+
+androidMain.dependencies{
+    implementation("io.github.milkcocoa0902:colotok-android:0.3.0")
+}
+
+jsMain.dependencies{
+    implementation("io.github.milkcocoa0902:colotok-js:0.3.0")
+}
+```
+
+# Dependencies
+
+if you will use the provider which File or Stream, your application needs to be depended on `Okio`
+```kotlin
+dependencies {
+  implementation("com.squareup.okio:okio:3.10.2")
+}
+```
+
+if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  
+when colotok formats into text from your structure, using `kotlinx.serialization` internally.
 
 ```kotlin
 
 plugins {
     // add this.
     // set version for your use
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("plugin.serialization") version "2.1.10"
 }
 
 dependencies {
-    // add this line to use KSerializer<T> and @Serializable
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+    // add this line to use @Serializable
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
 }
 ```
+
+
 
 ## Usage
 ### create logger instance
@@ -58,7 +85,7 @@ val logger = LoggerFactory()
         // show above info level in console
         level = LogLevel.INFO
     })
-    .addProvider(FileProvider(Path.of("./test.log")){
+    .addProvider(File("test.log").toOkioPath()){
         // write above trace level for file
         level = LogLevel.TRACE
         
@@ -83,5 +110,4 @@ logger.debug("DEBUG LEVEL LOG")
 logger.info("INFO LEVEL LOG")
 logger.warn("WARN LEVEL LOG")
 logger.error("ERROR LEVEL LOG")
-
 ```

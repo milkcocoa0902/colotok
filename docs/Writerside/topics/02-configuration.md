@@ -30,11 +30,11 @@ logger.warn("message what happen")
 logger.error("message what happen")
 
 
-// 2023-12-29T12:21:13.354328+09:00 (main)[TRACE] - message what happen, additional = {}
-// 2023-12-29T12:21:13.354328+09:00 (main)[DEBUG] - message what happen, additional = {}
-// 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - message what happen, additional = {}
-// 2023-12-29T12:21:13.354328+09:00 (main)[WARN] - message what happen, additional = {}
-// 2023-12-29T12:21:13.354328+09:00 (main)[ERROR] - message what happen, additional = {}
+// 2023-12-29T12:21:13.354328 (main)[TRACE] - message what happen, additional = {}
+// 2023-12-29T12:21:13.354328 (main)[DEBUG] - message what happen, additional = {}
+// 2023-12-29T12:21:13.354328 (main)[INFO] - message what happen, additional = {}
+// 2023-12-29T12:21:13.354328 (main)[WARN] - message what happen, additional = {}
+// 2023-12-29T12:21:13.354328 (main)[ERROR] - message what happen, additional = {}
 ```
 
 or
@@ -45,8 +45,8 @@ logger.atInfo {
     print("all of logs are printed out with INFO level")
 }
 
-// 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - in this block, additional = {}
-// 2023-12-29T12:21:13.356133+09:00 (main)[INFO] - all of logs are printed out with INFO level, additional = {}
+// 2023-12-29T12:21:13.354328 (main)[INFO] - in this block, additional = {}
+// 2023-12-29T12:21:13.356133 (main)[INFO] - all of logs are printed out with INFO level, additional = {}
 ```
 > if no formatter is passed to `ConsoleProvider()`, builtin `DetailTextFormatter` is used
 > {style="note"}
@@ -92,5 +92,5 @@ logger.info(
     Log.serializer()
 )
 
-// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29T12:34:56Z"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29T12:34:56"}
 ```

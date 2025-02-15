@@ -27,6 +27,8 @@ ConsoleProvider can colorize with ANSI-Color
 ## FileProvider
 FileProvider write the log into file.  
 
+> FileProvider depends on Okio, so you need additional dependency to use it.
+
 If `enableBuffer` is true, FileProvider will buffering until buffer is full,  
 when buffer becomes full, write content into file and cleared the buffer.  
 
@@ -35,7 +37,7 @@ when buffer becomes full, write content into file and cleared the buffer.
 val fileProvider: FileProvider
 
 ....
-.addProvider(FileProvider(Path.of("./test.log")){
+.addProvider(FileProvider(File("./test.log").toOkioPath()){
     level = LogLevel.TRACE
     formatter = DetailTextFormatter
     enableBuffer = true
@@ -68,6 +70,8 @@ rotation = DateBaseRotation(period = 7.days)
 ## StreamProvider
 StreamProvider write the log into stream
 
+> StreamProvider depends on Okio, so you need additional dependency to use it.
+> 
 ```Kotlin
 val streamProvider: StreamProvider
 
@@ -76,9 +80,7 @@ val streamProvider: StreamProvider
     enableBuffer = true
     bufferSize = 64.KiB()
     formatter = SimpleStructureFormatter
-    outputStreamBuilder = {
-        FileOutputStream("./stream-log", true)
-    }
+    outputStreamBuilder = { blackholeSink() }
 }.apply { streamProvider = this })
 ```
 

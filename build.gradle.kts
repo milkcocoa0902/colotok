@@ -1,21 +1,22 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10" apply false
+    kotlin("multiplatform") version "2.1.10" apply false
+    id("com.android.library") version "8.7.0" apply false
+//    id("org.jetbrains.kotlin.android") version "2.1.10"
+    id("cl.franciscosolis.sonatype-central-upload") version "1.0.3" apply false
     id("maven-publish")
     jacoco
 }
 
 group = "com.github.milkcocoa0902"
 version = "0.2.3"
-java.sourceCompatibility = JavaVersion.VERSION_11
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
-    }
-}
+
+// tasks.withType<KotlinCompile> {
+//    kotlinOptions {
+//        freeCompilerArgs = listOf("-Xjsr305=strict")
+//        jvmTarget = "11"
+//    }
+// }
 
 repositories {
     mavenCentral()
@@ -23,54 +24,11 @@ repositories {
 }
 
 val ktlint by configurations.creating
+
 dependencies {
-    api(libs.kotlin.serialization.core)
-    implementation(libs.kotlin.serialization.json)
-    implementation(libs.kotlin.serialization.properties)
-    testImplementation(platform(libs.junit.bom))
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockk)
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-
     ktlint("com.pinterest.ktlint:ktlint-cli:1.1.0") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-        }
-    }
-}
-
-tasks.test {
-    useJUnitPlatform()
-    // https://github.com/mockk/mockk/issues/681
-    jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test) // tests are required to run before generating the report
-    reports {
-        xml.required = true
-        csv.required = false
-        html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
-    }
-}
-
-jacoco {
-    toolVersion = "0.8.9"
-    reportsDirectory = layout.buildDirectory.dir("jacocoReport")
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            register(components.first().name, MavenPublication::class) {
-                from(components.first())
-                groupId = "com.github.milkcocoa0902"
-                artifactId = "colotok"
-                version = version
-            }
         }
     }
 }
@@ -89,9 +47,9 @@ val ktlintCheck by tasks.registering(JavaExec::class) {
     )
 }
 
-tasks.check {
-    dependsOn(ktlintCheck)
-}
+// tasks.check {
+//    dependsOn(ktlintCheck)
+// }
 
 tasks.register<JavaExec>("ktlintFormat") {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
