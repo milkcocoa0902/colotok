@@ -21,7 +21,7 @@ plugins {
 }
 
 group = "io.github.milkcocoa0902"
-version = "0.3.0"
+version = "0.3.1"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 java {
