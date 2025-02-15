@@ -265,8 +265,8 @@ publishing {
                 url = uri("https://nexus.milkcocoa.info/repository/Colotok/")
 
                 credentials {
-                    username = properties["nexus.user"] as String
-                    password = properties["nexus.password"] as String
+                    username = properties["nexus.user"] as String?
+                    password = properties["nexus.password"] as String?
                 }
             }
         }
