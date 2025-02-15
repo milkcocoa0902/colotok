@@ -26,34 +26,58 @@ COLOTOK; Cocoa LogTool for Kotlin
 basic dependency
 
 ```kotlin
-repositories {
-    mavenCentral()
-    // add this line
-    maven(url =  "https://jitpack.io" )
-}
-
 dependencies {
     // add this line
-    implementation("com.github.milkcocoa0902:colotok:0.1.9")
+    implementation("io.github.milkcocoa0902:colotok:0.3.0")
 }
 ```
 
-if you use structure logging or create your own provider, you need to add `kotlinx-serialization`
+or when you use kotlin multiplatform(;KMP)
+
+```kotlin
+commonMain.dependncies{
+    implementation("io.github.milkcocoa0902:colotok:0.3.0")
+}
+
+jvmMain.dependencies{
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.0")
+}
+
+androidMain.dependencies{
+    implementation("io.github.milkcocoa0902:colotok-android:0.3.0")
+}
+
+jsMain.dependencies{
+    implementation("io.github.milkcocoa0902:colotok-js:0.3.0")
+}
+```
+
+# Dependencies
+
+if you will use the provider which File or Stream, your application needs to be depend on `Okio`
+```kotlin: buind.gradle.kts
+dependencies {
+  implementation("com.squareup.okio:okio:3.10.2")
+}
+```
+
+if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  
+when colotok formats into text from your structure, using `kotlinx.serialization` internally.
 
 ```kotlin
 
 plugins {
     // add this.
     // set version for your use
-    kotlin("plugin.serialization") version "1.9.21"
+    kotlin("plugin.serialization") version "2.1.10"
 }
 
 dependencies {
-    // add this line to use KSerializer<T> and @Serializable
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
+    // add this line to use @Serializable
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
 }
-
 ```
+
 
 
 # Usage
@@ -64,34 +88,18 @@ see below.
 ```kotlin
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider())
-    .addProvider(FileProvider(Path.of("./test.log")))
     .getLogger()
 
 ```
 
 more details config
 ```Kotlin
-val fileProvider: FileProvider
 val logger = LoggerFactory()
     .addProvider(ConsoleProvider{
         // show above info level in console
         level = LogLevel.INFO
     })
-    .addProvider(FileProvider(Path.of("./test.log")){
-        // write above trace level for file
-        level = LogLevel.TRACE
-        
-        // memory buffering to save i/o
-        enableBuffer = true
-        
-        // memory buffer size, if buffer excced this, append to file
-        bufferSize = 2048
-        
-        // use size base rotation
-        rotation = SizeBaseRotation(size = 4096)
-    }.apply {
-        fileProvider = this
-    })
+    .addProvider(fileProvider)
     .getLogger()
 
 logger.trace("TRACE LEVEL LOG")
@@ -118,11 +126,6 @@ logger.atInfo {
 
 // or you can add additional parameters
 logger.info("INFO LEVEL LOG", mapOf("param1" to "a custom attr"))
-
-
-// you may need to flash, if log cache is enabled for `FileProvider`
-fileProvider.flush()
-
 ```
 
 ## Formatter(Text)
@@ -183,8 +186,7 @@ logger.info(
             "args",
             "argument must be greater than zero"
         )
-    ),
-    Log.serializer()
+    )
 )
 
 // // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29"}
@@ -206,17 +208,16 @@ logger.info(
             "argument must be greater than zero"
         )
     ),
-    Log.serializer(),
     // you can pass additional attrs
     mapOf("additional" to "additional param")
 )
 
-// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","additional":"additional param","date":"2023-12-29T12:34:56+09:00"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","additional":"additional param","date":"2023-12-29T12:34:56"}
 
 
 logger.info("message what happen")
 
-// {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908+09:00"}
+// {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908"}
 ```
 
 
@@ -245,6 +246,11 @@ example
 if you want to write log into slack, you create a SlackProvider like this
 
 ```kotlin
+@Serializable
+data class SlackWebhookPayload(
+    val text: String,
+)
+
 class SlackProvider(config: SlackProviderConfig): Provider {
     constructor(config: SlackProviderConfig.() -> Unit): this(SlackProviderConfig().apply(config))
 
@@ -267,9 +273,7 @@ class SlackProvider(config: SlackProviderConfig): Provider {
         kotlin.runCatching {
             webhookUrl.httpPost()
                 .appendHeader("Content-Type" to "application/json")
-                .body("""
-            {"text": "${formatter.format(msg, level, attr)}"}
-        """.trimIndent())
+                .body(Json.encodeToString(text = formatter.format(msg, level, attr)))
                 .response()
         }.getOrElse { println(it) }
     }
@@ -287,9 +291,7 @@ class SlackProvider(config: SlackProviderConfig): Provider {
         kotlin.runCatching {
             webhookUrl.httpPost()
                 .appendHeader("Content-Type" to "application/json")
-                .body("""
-            {"text": "${formatter.format(msg, serializer, level, attr)}"}
-        """.trimIndent())
+                .body(Json.encodeToString(text = formatter.format(msg, serializer, level, attr)))
                 .response()
         }.getOrElse { println(it) }
     }
@@ -329,7 +331,8 @@ logger.error("error level log")
 2. DEBUG (ignore TRACE)
 3. INFO (ignore DEBUG and TRACE)
 4. WARN (only WARN or ERROR)
-5. ERROR (only one)
+5. ERROR (only this)
+6. OFF (no log will present)
 
 # Document
 https://milkcocoa0902.github.io/colotok/01-colotok-introduce.html

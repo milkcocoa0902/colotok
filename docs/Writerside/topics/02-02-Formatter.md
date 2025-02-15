@@ -27,7 +27,7 @@ logger.info("message what happen")
 ```Kotlin
 logger.ingo("message what happen", mapOf("param1" to "a custom attribute"))
 
-// 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - message what happen, additional = {param1=a custom attribute}
+// 2023-12-29T12:21:13.354328 (main)[INFO] - message what happen, additional = {param1=a custom attribute}
 ```
 
 ## StructuredFormatter
@@ -84,12 +84,12 @@ logger.info(
     mapOf("additional" to "additional param")
 )
 
-// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","additional":"additional param","date":"2023-12-29T12:34:56+09:00"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","additional":"additional param","date":"2023-12-29T12:34:56"}
 
 
 logger.info("message what happen")
 
-// {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908+09:00"}
+// {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908"}
 ```
 
 ### Mask Field
