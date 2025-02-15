@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.serialization.KSerializer
+import okio.buffer
 import okio.use
 
 class StreamProvider(config: StreamProviderConfig) : Provider {
@@ -33,14 +34,16 @@ class StreamProvider(config: StreamProviderConfig) : Provider {
             if (enableBuffer) {
                 sb.appendLine(formatter.format(msg, level, attr))
                 if (sb.length > bufferSize) {
-                    outputStream.invoke().use { sink ->
+                    outputStream.invoke().buffer().use { sink ->
                         sink.write(sb.toString().encodeToByteArray())
+                        sink.flush()
                     }
                     sb.clear()
                 }
             } else {
-                outputStream.invoke().use { sink ->
+                outputStream.invoke().buffer().use { sink ->
                     sink.write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
+                    sink.flush()
                 }
             }
         }
@@ -61,14 +64,16 @@ class StreamProvider(config: StreamProviderConfig) : Provider {
             if (enableBuffer) {
                 sb.appendLine(formatter.format(msg, serializer, level, attr))
                 if (sb.length > bufferSize) {
-                    outputStream.invoke().use { sink ->
+                    outputStream.invoke().buffer().use { sink ->
                         sink.write(sb.toString().encodeToByteArray())
+                        sink.flush()
                     }
                     sb.clear()
                 }
             } else {
-                outputStream.invoke().use { sink ->
+                outputStream.invoke().buffer().use { sink ->
                     sink.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
+                    sink.flush()
                 }
             }
         }
@@ -78,8 +83,9 @@ class StreamProvider(config: StreamProviderConfig) : Provider {
      * flush buffered data into file.
      */
     fun flush() {
-        outputStream.invoke().use { sink ->
+        outputStream.invoke().buffer().use { sink ->
             sink.write(sb.toString().encodeToByteArray())
+            sink.flush()
         }
         sb.clear()
     }

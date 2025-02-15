@@ -8,6 +8,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.file.FileProvider
 import com.milkcocoa.info.colotok.core.provider.rotation.SizeBaseRotation
+import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import io.mockk.every
 import io.mockk.mockkObject
@@ -186,7 +187,7 @@ object FileProviderTest {
         provider.flush()
         @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
-            "2023-12-31T12:34:56 (${Thread.currentThread().name})[ERROR] - message, additional = {additional=additional param}",
+            "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {additional=additional param}",
             testLogFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
     }
@@ -223,7 +224,7 @@ object FileProviderTest {
 
         @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
-            "2023-12-31T12:34:56 (${Thread.currentThread().name})[ERROR] - message, additional = {additional=additional param}",
+            "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {additional=additional param}",
             rotatedFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
     }
@@ -253,7 +254,7 @@ object FileProviderTest {
             ).let { java.nio.file.Path.of(logFilesDir.pathString, it) }
         @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
-            "2023-12-31T12:34:56 (${Thread.currentThread().name})[ERROR] - message, additional = {additional=additional param}",
+            "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {additional=additional param}",
             rotatedFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
     }
@@ -336,7 +337,7 @@ object FileProviderTest {
                         |}
                     |},
                     |"level":"WARN",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attributes",
                     |"date":"2023-12-31T12:34:56"
                 |}
@@ -388,7 +389,7 @@ object FileProviderTest {
                         |}
                     |},
                     |"level":"WARN",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attributes",
                     |"date":"2023-12-31T12:34:56"
                 |}
@@ -434,7 +435,7 @@ object FileProviderTest {
                         |}
                     |},
                     |"level":"WARN",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attributes",
                     |"date":"2023-12-31T12:34:56"
                 |}

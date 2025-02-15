@@ -7,6 +7,7 @@ import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import okio.BufferedSink
+import okio.Sink
 import okio.blackholeSink
 import okio.buffer
 
@@ -24,5 +25,5 @@ class StreamProviderConfig : ProviderConfig {
      */
     var enableBuffer = true
 
-    var outputStreamBuilder: (() -> BufferedSink) = { blackholeSink().buffer() }
+    var outputStreamBuilder: (() -> Sink) = { blackholeSink().buffer() }
 }

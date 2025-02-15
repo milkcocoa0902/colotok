@@ -1,6 +1,7 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
@@ -39,7 +40,7 @@ object DetailTextFormatterTest {
         val formatter = DetailTextFormatter
         Assertions.assertTrue {
             formatter.format("message", LogLevel.ERROR).equals(
-                "2023-12-31T12:34:56 (${Thread.currentThread().name})[ERROR] - message, additional = {}"
+                "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {}"
             )
         }
     }
@@ -52,7 +53,7 @@ object DetailTextFormatterTest {
             formatter.format("message", LogLevel.ERROR).also {
                 println(it)
             }.equals(
-                "2023-12-31T12:34:56 (${Thread.currentThread().name})[ERROR] - message, additional = {}"
+                "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {}"
             )
         }
     }
@@ -68,7 +69,7 @@ object DetailTextFormatterTest {
                 mapOf("additional" to "additional param")
             ).equals(
                 @Suppress("ktlint:standard:max-line-length")
-                "2023-12-31T12:34:56 (${Thread.currentThread().name})[ERROR] - message, additional = {additional=additional param}"
+                "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {additional=additional param}"
             )
         }
     }

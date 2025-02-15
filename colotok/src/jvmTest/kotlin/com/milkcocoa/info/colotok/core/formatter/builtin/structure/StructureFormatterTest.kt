@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.core.formatter.builtin.structure
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
@@ -76,7 +77,7 @@ object StructureFormatterTest {
             {
             "message":"message",
             "level":"ERROR",
-            "thread":"${Thread.currentThread().name}",
+            "thread":"${ThreadWrapper.getCurrentThreadName()}",
             "date":"2023-12-31T12:34:56"
             }
             """.trimIndent().replace("\n", ""),
@@ -92,7 +93,7 @@ object StructureFormatterTest {
             {
             "message":"message",
             "level":"ERROR",
-            "thread":"${Thread.currentThread().name}",
+            "thread":"${ThreadWrapper.getCurrentThreadName()}",
             "attr":"attribute",
             "date":"2023-12-31T12:34:56"
             }
@@ -136,7 +137,9 @@ object StructureFormatterTest {
                     ),
                 serializer = Log::class.serializer(),
                 level = LogLevel.ERROR
-            )
+            ).also {
+                println(it)
+            }
         )
     }
 
@@ -188,7 +191,7 @@ object StructureFormatterTest {
                         |}
                     |},
                     |"level":"ERROR",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"date":"2023-12-31T12:34:56"
                 |}
             """.trimMargin().replace("\n", ""),
@@ -222,7 +225,7 @@ object StructureFormatterTest {
                         |}
                     |},
                     |"level":"INFO",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attribute",
                     |"date":"2023-12-31T12:34:56"
                 |}

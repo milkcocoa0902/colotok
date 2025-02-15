@@ -7,6 +7,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
+import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import com.milkcocoa.info.colotok.util.color.ColorExtension.magenta
@@ -128,7 +129,7 @@ class ConsoleProviderTest {
         Assertions.assertEquals(
             @Suppress("ktlint:standard:max-line-length")
             Color.foreground(
-                "2023-12-31T12:34:56 (${Thread.currentThread().name})[INFO] - message, additional = {additional=additional param}",
+                "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[INFO] - message, additional = {additional=additional param}",
                 AnsiColor.BLUE
             ),
             stdOut.readLine() ?: ""
@@ -174,7 +175,7 @@ class ConsoleProviderTest {
         )
         @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
-            "2023-12-31T12:34:56 (${Thread.currentThread().name})[INFO] - message, additional = {additional=additional param}",
+            "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[INFO] - message, additional = {additional=additional param}",
             stdOut.readLine() ?: ""
         )
     }
@@ -261,7 +262,7 @@ class ConsoleProviderTest {
                         |}
                     |},
                     |"level":"INFO",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attributes",
                     |"date":"2023-12-31T12:34:56"
                 |}
@@ -337,7 +338,7 @@ class ConsoleProviderTest {
                         |}
                     |},
                     |"level":"WARN",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attributes",
                     |"date":"2023-12-31T12:34:56"
                 |}
@@ -425,7 +426,7 @@ class ConsoleProviderTest {
                 |{
                     |"message":"message",
                     |"level":"ERROR",
-                    |"thread":"${Thread.currentThread().name}",
+                    |"thread":"${ThreadWrapper.getCurrentThreadName()}",
                     |"attr":"attributes",
                     |"date":"2023-12-31T12:34:56"
                 |}
