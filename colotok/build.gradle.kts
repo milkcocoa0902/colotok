@@ -1,27 +1,34 @@
+@file:OptIn(ExperimentalEncodingApi::class)
+
+import cl.franciscosolis.sonatypecentralupload.SonatypeCentralUploadTask
+import com.vanniktech.maven.publish.SonatypeHost
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.named
+import org.jetbrains.kotlin.daemon.common.isDaemonEnabled
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
     kotlin("plugin.serialization")
-//    id("org.jetbrains.kotlin.android") version "2.1.10"
-//    id("maven-publish")
-//    jacoco
+    id("org.jetbrains.kotlinx.kover") version "0.9.1"
+    id("maven-publish")
+    id("signing")
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "com.github.milkcocoa0902"
-version = "0.2.3"
+group = "io.github.milkcocoa0902"
+version = "0.3.0"
+
 java.sourceCompatibility = JavaVersion.VERSION_11
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "11"
     }
-}
-
-repositories {
-    mavenCentral()
-    maven(url = "https://plugins.gradle.org/m2/")
 }
 
 val ktlint by configurations.creating
@@ -41,6 +48,11 @@ kotlin {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
         }
+
+        publishLibraryVariants(
+            "release",
+//            "debug"
+        )
     }
 
     iosX64()
@@ -103,87 +115,151 @@ android {
     }
 }
 
-dependencies {
-//    api(libs.kotlin.serialization.core)
-//    implementation(libs.kotlin.serialization.json)
-//    implementation(libs.kotlin.serialization.properties)
-//    testImplementation(platform(libs.junit.bom))
-//    testImplementation(libs.junit.jupiter)
-//    testImplementation(libs.mockk)
+dependencies { }
+
+
+
+kover {
+    reports {
+        filters {
+            includes {
+                classes("com.milkcocoa.info.colotok.*")
+            }
+            excludes {
+                classes(
+                    // Android
+                    "*BuildConfig*",
+                    // Dagger/Hilt
+                    "*_*Factory*",
+                    "*_ComponentTreeDeps*",
+                    "*Hilt_**",
+                    "*HiltWrapper_*",
+                    "*_Factory*",
+                    "*_GeneratedInjector*",
+                    "*_HiltComponents*",
+                    "*_HiltModules*",
+                    "*_HiltModules_BindsModule*",
+                    "*_HiltModules_KeyModule*",
+                    "*_MembersInjector*",
+                    "*_ProvideFactory*",
+                    "*_SingletonC*",
+                    "*_TestComponentDataSupplier*",
+                )
+            }
+        }
+    }
+}
 //
-//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-//
-//    ktlint("com.pinterest.ktlint:ktlint-cli:1.1.0") {
-//        attributes {
-//            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+//koverReport {
+//    filters {
+//        excludes{
+//            classes("")
 //        }
 //    }
+//}
+
+val CORE_LIBRARY_DESCRIPTION: String by project
+val PROJECT_URL: String by project
+val LICENSE_TYPE: String by project
+val LICENSE_URL: String by project
+val LICENSE_DISTRIBUTION: String by project
+val DEVELOPER_ID: String by project
+val DEVELOPER_NAME: String by project
+val DEVELOPER_EMAIL: String by project
+val REPOSITORY_URL: String by project
+
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+    coordinates(
+        groupId = group.toString(),
+        artifactId = "colotok",
+        version = version.toString()
+    )
+
+    pom {
+        name.set("Colotok")
+        description.set(CORE_LIBRARY_DESCRIPTION)
+        url.set(PROJECT_URL)
+
+        licenses {
+            license {
+                name.set(LICENSE_TYPE)
+                url.set(LICENSE_URL)
+                distribution.set(LICENSE_DISTRIBUTION)
+            }
+        }
+
+        developers {
+            developer {
+                id.set(DEVELOPER_ID)
+                name.set(DEVELOPER_NAME)
+                email.set(DEVELOPER_EMAIL)
+            }
+        }
+
+        scm {
+            url.set(REPOSITORY_URL)
+        }
+    }
 }
 
-// tasks.test {
-//    useJUnitPlatform()
-//    // https://github.com/mockk/mockk/issues/681
-//    jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
-//    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-// }
-//
-// tasks.jacocoTestReport {
-//    dependsOn(tasks.test) // tests are required to run before generating the report
-//    reports {
-//        xml.required = true
-//        csv.required = false
-//        html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
-//    }
-// }
-//
-// jacoco {
-//    toolVersion = "0.8.9"
-//    reportsDirectory = layout.buildDirectory.dir("jacocoReport")
-// }
-//
-// afterEvaluate {
-//    publishing {
-//        publications {
-//            // Creates a Maven publication called "release".
-//            register(components.first().name, MavenPublication::class) {
-//                from(components.first())
-//                groupId = "com.github.milkcocoa0902"
-//                artifactId = "colotok"
-//                version = version
-//            }
-//        }
-//    }
-// }
-//
-// val ktlintCheck by tasks.registering(JavaExec::class) {
-//    group = LifecycleBasePlugin.VERIFICATION_GROUP
-//    description = "Check Kotlin code style"
-//    classpath = ktlint
-//    mainClass.set("com.pinterest.ktlint.Main")
-//    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
-//    // see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
-//    args(
-//        "**/src/**/*.kt",
-//        "**.kts",
-//        "!**/build/**"
-//    )
-// }
-//
-// tasks.check {
-//    dependsOn(ktlintCheck)
-// }
-//
-// tasks.register<JavaExec>("ktlintFormat") {
-//    group = LifecycleBasePlugin.VERIFICATION_GROUP
-//    description = "Check Kotlin code style and format"
-//    classpath = ktlint
-//    mainClass.set("com.pinterest.ktlint.Main")
-//    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
-//    // see https://pinterest.github.io/ktlint/install/cli/#command-line-usage for more information
-//    args(
-//        "-F",
-//        "**/src/**/*.kt",
-//        "**.kts",
-//        "!**/build/**"
-//    )
-// }
+
+// ローカルのSonatype Nexusにアップロードする設定
+publishing {
+    val properties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = "colotok"
+            from(components["kotlin"])
+
+            pom {
+                name.set("Colotok")
+                description.set(CORE_LIBRARY_DESCRIPTION)
+                url.set(PROJECT_URL)
+
+                licenses {
+                    license {
+                        name.set(LICENSE_TYPE)
+                        url.set(LICENSE_URL)
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set(DEVELOPER_ID)
+                        name.set(DEVELOPER_NAME)
+                        email.set(DEVELOPER_EMAIL)
+                    }
+                }
+
+                scm {
+                    url.set(REPOSITORY_URL)
+                }
+            }
+        }
+    }
+
+    repositories {
+        val publishTarget = findProperty("PUBLISH_TARGET") as String? ?: "nexus"  // デフォルト Nexus
+
+        if (publishTarget == "nexus") {
+            maven {
+                name = "nexus"
+                isAllowInsecureProtocol = true
+                url = uri("https://nexus.milkcocoa.info/repository/Colotok/")
+
+                credentials {
+                    username = properties["nexus.user"] as String
+                    password = properties["nexus.password"] as String
+                }
+            }
+        }
+    }
+}

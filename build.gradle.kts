@@ -3,6 +3,7 @@ plugins {
     kotlin("multiplatform") version "2.1.10" apply false
     id("com.android.library") version "8.7.0" apply false
 //    id("org.jetbrains.kotlin.android") version "2.1.10"
+    id("cl.franciscosolis.sonatype-central-upload") version "1.0.3" apply false
     id("maven-publish")
     jacoco
 }
@@ -32,41 +33,6 @@ dependencies {
     }
 }
 
-// tasks.test {
-//    useJUnitPlatform()
-//    // https://github.com/mockk/mockk/issues/681
-//    jvmArgs("--add-opens", "java.base/java.time=ALL-UNNAMED")
-//    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-// }
-//
-// tasks.jacocoTestReport {
-//    dependsOn(tasks.test) // tests are required to run before generating the report
-//    reports {
-//        xml.required = true
-//        csv.required = false
-//        html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
-//    }
-// }
-//
-// jacoco {
-//    toolVersion = "0.8.9"
-//    reportsDirectory = layout.buildDirectory.dir("jacocoReport")
-// }
-//
-// afterEvaluate {
-//    publishing {
-//        publications {
-//            // Creates a Maven publication called "release".
-//            register(components.first().name, MavenPublication::class) {
-//                from(components.first())
-//                groupId = "com.github.milkcocoa0902"
-//                artifactId = "colotok"
-//                version = version
-//            }
-//        }
-//    }
-// }
-//
 val ktlintCheck by tasks.registering(JavaExec::class) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Check Kotlin code style"
