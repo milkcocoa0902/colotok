@@ -24,14 +24,23 @@ group = "io.github.milkcocoa0902"
 version = "0.3.0"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17)) // 🔹 Java 17 でビルド
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のソースコード
+    targetCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のバイトコードを出力
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "11"
     }
 }
-
-val ktlint by configurations.creating
 
 kotlin {
     jvm {
