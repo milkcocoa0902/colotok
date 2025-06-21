@@ -25,9 +25,9 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
 
     private val logLevel = config.level
     private val formatter = config.formatter
-    private val cloudwatchLogGroup = config.logGroup
-    private val cloudwatchLogStream = config.logStream
-    private val credential = config.credential
+    private val cloudwatchLogGroup = config.logGroup ?: error("Cloudwatch log group is null")
+    private val cloudwatchLogStream = config.logStream ?: error("Cloudwatch log stream is null")
+    private val credential = config.credential ?:  error("Credential is null")
 
     private var sequenceToken: String? = null
 

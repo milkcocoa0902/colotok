@@ -33,8 +33,8 @@ class CloudwatchProviderConfig: ProviderConfig {
     override var level: Level = LogLevel.DEBUG
     override var formatter: Formatter = SimpleStructureFormatter
 
-    var logGroup: String = error("")
-    var logStream: String = error("")
-    var credential: CloudwatchCredential = error("")
+    var logGroup: String? = null
+    var logStream: String? = null
+    var credential: CloudwatchCredential? = null
     var logBufferSize:  Int = 50
 }
