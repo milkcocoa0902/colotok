@@ -5,7 +5,7 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 /**
  * logger configuration object
  */
-class Config {
+class ColotokConfig {
     /**
      * providers to print log
      */

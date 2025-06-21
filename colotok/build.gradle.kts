@@ -1,13 +1,8 @@
 @file:OptIn(ExperimentalEncodingApi::class)
 
-import cl.franciscosolis.sonatypecentralupload.SonatypeCentralUploadTask
 import com.vanniktech.maven.publish.SonatypeHost
-import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.named
-import org.jetbrains.kotlin.daemon.common.isDaemonEnabled
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
-import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 plugins {

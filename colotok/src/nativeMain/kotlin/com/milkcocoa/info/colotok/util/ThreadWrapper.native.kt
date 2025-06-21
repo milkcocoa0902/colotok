@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.util
 
-import com.milkcocoa.info.colotok.core.logger.LevelScopedLogger
-import com.milkcocoa.info.colotok.core.logger.Logger
+import com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger
+import com.milkcocoa.info.colotok.core.logger.ColotokLogger
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.concurrent.ObsoleteWorkersApi
 import kotlin.native.concurrent.Worker
@@ -14,12 +14,12 @@ actual object ThreadWrapper {
     actual fun traceCallPoint() =
         Throwable().getStackTrace().asSequence()
             .dropWhile {
-                it.startsWith(Logger::class.simpleName ?: "").not() &&
-                    it.startsWith(LevelScopedLogger::class.simpleName ?: "").not()
+                it.startsWith(ColotokLogger::class.simpleName ?: "").not() &&
+                    it.startsWith(LevelScopedColotokLogger::class.simpleName ?: "").not()
             }
             .dropWhile {
-                it.startsWith(Logger::class.simpleName ?: "") ||
-                    it.startsWith(LevelScopedLogger::class.simpleName ?: "")
+                it.startsWith(ColotokLogger::class.simpleName ?: "") ||
+                    it.startsWith(LevelScopedColotokLogger::class.simpleName ?: "")
             }
             .firstOrNull() ?: ""
 }

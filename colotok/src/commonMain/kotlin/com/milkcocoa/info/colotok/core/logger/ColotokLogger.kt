@@ -10,8 +10,8 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
-class Logger(val name: String, config: Config) {
-    constructor(name: String, config: Config.() -> Unit) : this(name = name, Config().apply(config))
+class ColotokLogger(val name: String, config: ColotokConfig) {
+    constructor(name: String, config: ColotokConfig.() -> Unit) : this(name = name, ColotokConfig().apply(config))
 
     val providers = config.providers
     val attrs = config.defaultAttrs
@@ -312,84 +312,84 @@ class Logger(val name: String, config: Config) {
 
     /**
      * create trace level scope.
-     * you can use [LevelScopedLogger.print] in this block.
+     * you can use [LevelScopedColotokLogger.print] in this block.
      * which method print with providers in trace level
      * @param block action in scope
-     * @see LevelScopedLogger
+     * @see LevelScopedColotokLogger
      */
-    inline fun atTrace(block: LevelScopedLogger.() -> Unit) {
+    inline fun atTrace(block: LevelScopedColotokLogger.() -> Unit) {
         at(LogLevel.TRACE, block)
     }
 
     /**
      * create debug level scope.
-     * you can use [LevelScopedLogger.print] in this block.
+     * you can use [LevelScopedColotokLogger.print] in this block.
      * which method print with providers in trace level
      * @param block action in scope
-     * @see LevelScopedLogger
+     * @see LevelScopedColotokLogger
      */
-    inline fun atDebug(block: LevelScopedLogger.() -> Unit) {
+    inline fun atDebug(block: LevelScopedColotokLogger.() -> Unit) {
         at(LogLevel.DEBUG, block)
     }
 
     /**
      * create info level scope.
-     * you can use [LevelScopedLogger.print] in this block.
+     * you can use [LevelScopedColotokLogger.print] in this block.
      * which method print with providers in trace level
      * @param block action in scope
-     * @see LevelScopedLogger
+     * @see LevelScopedColotokLogger
      */
-    inline fun atInfo(block: LevelScopedLogger.() -> Unit) {
+    inline fun atInfo(block: LevelScopedColotokLogger.() -> Unit) {
         at(LogLevel.INFO, block)
     }
 
     /**
      * create warn level scope.
-     * you can use [LevelScopedLogger.print] in this block.
+     * you can use [LevelScopedColotokLogger.print] in this block.
      * which method print with providers in trace level
      * @param block action in scope
-     * @see LevelScopedLogger
+     * @see LevelScopedColotokLogger
      */
-    inline fun atWarn(block: LevelScopedLogger.() -> Unit) {
+    inline fun atWarn(block: LevelScopedColotokLogger.() -> Unit) {
         at(LogLevel.WARN, block)
     }
 
     /**
      * create error level scope.
-     * you can use [LevelScopedLogger.print] in this block.
+     * you can use [LevelScopedColotokLogger.print] in this block.
      * which method print with providers in trace level
      * @param block action in scope
-     * @see LevelScopedLogger
+     * @see LevelScopedColotokLogger
      */
-    inline fun atError(block: LevelScopedLogger.() -> Unit) {
+    inline fun atError(block: LevelScopedColotokLogger.() -> Unit) {
         at(LogLevel.ERROR, block)
     }
 
     /**
      * create specified level scope.
-     * you can use [LevelScopedLogger.print] in this block.
+     * you can use [LevelScopedColotokLogger.print] in this block.
      * which method print with providers in trace level
      * @param block action in scope
-     * @see LevelScopedLogger
+     * @see LevelScopedColotokLogger
      */
     inline fun at(
         level: Level,
-        block: LevelScopedLogger.() -> Unit
+        block: LevelScopedColotokLogger.() -> Unit
     ) {
-        LevelScopedLogger(
+        LevelScopedColotokLogger(
             name = name,
             config =
-                Config().apply {
-                    this.providers = this@Logger.providers
-                    this.defaultAttrs = this@Logger.attrs
+                ColotokConfig().apply {
+                    this.providers = this@ColotokLogger.providers
+                    this.defaultAttrs = this@ColotokLogger.attrs
                 },
             level = level
         ).block()
     }
 
     companion object {
-        private var defaultLogger: Logger =
-            Logger(
+        private var defaultLogger: ColotokLogger =
+            ColotokLogger(
                 name = "default logger"
             ) {
                 providers =
@@ -403,11 +403,11 @@ class Logger(val name: String, config: Config) {
                     )
             }
 
-        fun getDefault(): Logger {
+        fun getDefault(): ColotokLogger {
             return defaultLogger
         }
 
-        fun setDefault(logger: Logger) {
+        fun setDefault(logger: ColotokLogger) {
             defaultLogger = logger
         }
     }

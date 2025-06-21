@@ -4,8 +4,8 @@ import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.formatter.details.StructuredFormatter
-import com.milkcocoa.info.colotok.core.logger.Logger
-import com.milkcocoa.info.colotok.core.logger.LoggerFactory
+import com.milkcocoa.info.colotok.core.logger.ColotokLogger
+import com.milkcocoa.info.colotok.core.logger.ColotokLoggerFactory
 import com.milkcocoa.info.colotok.core.logger.MDC
 import com.milkcocoa.info.colotok.core.logger.withMdcScope
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
@@ -37,7 +37,7 @@ class Credential(
 suspend fun main() {
     MDC.put("TEST", "test")
 
-    val defaultLogger = Logger.getDefault()
+    val defaultLogger = ColotokLogger.getDefault()
     defaultLogger.info("default logger")
 
     val fileProvider: FileProvider =
@@ -48,7 +48,7 @@ suspend fun main() {
         }
     val streamProvider: StreamProvider
     val logger =
-        LoggerFactory()
+        ColotokLoggerFactory()
             .addProvider(
                 ConsoleProvider {
                     colorize = false

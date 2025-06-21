@@ -5,9 +5,9 @@ import com.milkcocoa.info.colotok.core.level.Level
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 
-final class LevelScopedLogger(
+final class LevelScopedColotokLogger(
     val name: String,
-    private val config: Config,
+    private val config: ColotokConfig,
     val level: Level
 ) {
     val providers get() = config.providers

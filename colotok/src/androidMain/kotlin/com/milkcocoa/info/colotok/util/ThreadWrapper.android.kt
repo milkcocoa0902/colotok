@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.util
 
-import com.milkcocoa.info.colotok.core.logger.LevelScopedLogger
-import com.milkcocoa.info.colotok.core.logger.Logger
+import com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger
+import com.milkcocoa.info.colotok.core.logger.ColotokLogger
 
 actual object ThreadWrapper {
     actual fun getCurrentThreadName() = Thread.currentThread().name
@@ -10,12 +10,12 @@ actual object ThreadWrapper {
         Thread.currentThread().stackTrace
             .asSequence()
             .dropWhile {
-                it.className.startsWith(Logger::class.java.name).not() &&
-                    it.className.startsWith(LevelScopedLogger::class.java.name).not()
+                it.className.startsWith(ColotokLogger::class.java.name).not() &&
+                    it.className.startsWith(LevelScopedColotokLogger::class.java.name).not()
             }
             .dropWhile {
-                it.className.startsWith(Logger::class.java.name) ||
-                    it.className.startsWith(LevelScopedLogger::class.java.name)
+                it.className.startsWith(ColotokLogger::class.java.name) ||
+                    it.className.startsWith(LevelScopedColotokLogger::class.java.name)
             }
             .firstOrNull()
             ?.let {
