@@ -110,8 +110,6 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
             mutex.withLock {
                 if (buf.isEmpty()) return@withLock
 
-                createGroupIfNotExists()
-                createStreamIfNotExists()
                 val response = client().putLogEvents putLogEvents@{
                     this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
                     this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
@@ -167,5 +165,12 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
      */
     suspend fun flush() {
         sendLogsToCloudWatch()
+    }
+
+    init {
+        runBlocking {
+            createGroupIfNotExists()
+            createStreamIfNotExists()
+        }
     }
 }
