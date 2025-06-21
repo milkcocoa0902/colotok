@@ -61,7 +61,7 @@ suspend fun <T : LogStructure> Provider.writeAsync(
     attr: Map<String, String>
 ){
     if(this is AsyncProvider) {
-        this.writeAsync(name, msg, serializer, level)
+        this.writeAsync(name, msg, serializer, level, attr)
         return
     }
     withContext(Dispatchers.Default){
