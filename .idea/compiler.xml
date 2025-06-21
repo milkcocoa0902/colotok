@@ -2,6 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
+      <module name="Colotok.colotok-slf4j" target="1.8" />
+      <module name="Colotok.colotok-slf4j.main" target="1.8" />
+      <module name="Colotok.colotok-slf4j.test" target="1.8" />
       <module name="Colotok.colotok.test" target="17" />
     </bytecodeTargetLevel>
   </component>

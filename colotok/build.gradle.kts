@@ -15,8 +15,6 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "io.github.milkcocoa0902"
-version = "0.3.1"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 java {
@@ -177,9 +175,7 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     coordinates(
-        groupId = group.toString(),
         artifactId = "colotok",
-        version = version.toString()
     )
 
     pom {

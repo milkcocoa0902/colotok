@@ -6,18 +6,16 @@ plugins {
 //    id("org.jetbrains.kotlin.android") version "2.1.10"
     id("cl.franciscosolis.sonatype-central-upload") version "1.0.3" apply false
     id("maven-publish")
+    id("signing")
+    id("com.vanniktech.maven.publish") version "0.30.0" apply false
+    id("org.jetbrains.kotlinx.kover") version "0.9.1" apply false
     jacoco
 }
-
-group = "com.github.milkcocoa0902"
-version = "0.2.3"
-
-// tasks.withType<KotlinCompile> {
-//    kotlinOptions {
-//        freeCompilerArgs = listOf("-Xjsr305=strict")
-//        jvmTarget = "11"
-//    }
-// }
+// ルート build.gradle.kts
+subprojects {
+    group = "io.github.milkcocoa0902"
+    version = "0.3.1"
+}
 
 repositories {
     mavenCentral()
