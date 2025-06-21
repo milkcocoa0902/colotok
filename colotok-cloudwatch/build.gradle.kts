@@ -8,10 +8,6 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":colotok"))
     api(project(":colotok-coroutines"))

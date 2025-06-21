@@ -8,10 +8,6 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-repositories {
-    mavenCentral()
-}
-
 java.sourceCompatibility = JavaVersion.VERSION_11
 java {
     toolchain {
