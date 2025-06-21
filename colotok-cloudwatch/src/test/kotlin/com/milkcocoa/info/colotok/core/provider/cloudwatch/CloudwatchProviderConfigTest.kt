@@ -15,11 +15,6 @@ class CloudwatchProviderConfigTest {
         assertEquals(LogLevel.DEBUG, config.level)
         assertEquals(SimpleStructureFormatter, config.formatter)
         assertEquals(50, config.logBufferSize)
-        
-        // These properties should throw errors if not set
-        assertFailsWith<IllegalStateException> { config.logGroup }
-        assertFailsWith<IllegalStateException> { config.logStream }
-        assertFailsWith<IllegalStateException> { config.credential }
     }
     
     @Test

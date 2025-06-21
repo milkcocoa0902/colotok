@@ -3,21 +3,19 @@ import com.vanniktech.maven.publish.SonatypeHost
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    kotlin("plugin.serialization")
     id("maven-publish")
     id("signing")
     id("com.vanniktech.maven.publish")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_11
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17)) // 🔹 Java 17 でビルド
-    }
-}
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
-tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のソースコード
-    targetCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のバイトコードを出力
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11)) // 実際のビルド環境
+    }
 }
 
 kotlin {
@@ -59,6 +57,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
