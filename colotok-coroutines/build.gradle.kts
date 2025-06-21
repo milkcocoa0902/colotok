@@ -4,6 +4,7 @@ import java.util.Properties
 import kotlin.io.encoding.ExperimentalEncodingApi
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization")
     id("com.android.library")
 }
 
@@ -68,6 +69,11 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.okio)
             implementation(project(":colotok"))
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
         }
     }
     compilerOptions {
