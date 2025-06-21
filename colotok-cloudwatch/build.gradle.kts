@@ -1,4 +1,5 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import org.gradle.api.JavaVersion
 
 plugins {
     kotlin("jvm")
@@ -23,6 +24,20 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+java.sourceCompatibility = JavaVersion.VERSION_11
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17)) // 🔹 Java 17 でビルド
+        }
+    }
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のソースコード
+    targetCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のバイトコードを出力
+}
+
+
 kotlin {
     jvmToolchain(11)
 }
