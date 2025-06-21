@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import okio.Path.Companion.toOkioPath
+import org.slf4j.LoggerFactory
 import java.io.File
 
 class CLKMain
@@ -35,58 +36,47 @@ class Credential(
 ) : LogStructure
 
 suspend fun main() {
-    MDC.put("TEST", "test")
+//    MDC.put("TEST", "test")
 
-    val defaultLogger = ColotokLogger.getDefault()
-    defaultLogger.info("default logger")
+//    val fileProvider: FileProvider =
+//        FileProvider(File("test.log").toOkioPath()) {
+//            this.formatter = SimpleTextFormatter
+//            this.enableBuffer = false
+//            this.rotation = SizeBaseRotation(4L.KiB())
+//        }
+//    val streamProvider: StreamProvider
+//        ColotokLoggerFactory()
+//            .addProvider(
+//                ConsoleProvider {
+//                    colorize = false
+//                    formatter =
+//                        object : StructuredFormatter(
+//                            listOf(
+//                                Element.MESSAGE,
+//                                Element.LEVEL,
+//                                Element.DATETIME,
+//                                Element.THREAD,
+//                                Element.ATTR,
+//                                Element.CUSTOM("TEST"),
+//                                Element.CUSTOM("jjj")
+//                            ),
+//                            listOf(
+//                                "password",
+//                                "secret"
+//                            )
+//                        ) {}
+//                }
+//            ).addProvider(fileProvider)
+//            .withAttrs(
+//                mapOf(
+//                    "def attr" to "attributes"
+//                )
+//            )
+//            .getLogger().let {
+//                ColotokLogger.setDefault(it)
+//            }
 
-    val fileProvider: FileProvider =
-        FileProvider(File("test.log").toOkioPath()) {
-            this.formatter = SimpleTextFormatter
-            this.enableBuffer = false
-            this.rotation = SizeBaseRotation(4L.KiB())
-        }
-    val streamProvider: StreamProvider
-    val logger =
-        ColotokLoggerFactory()
-            .addProvider(
-                ConsoleProvider {
-                    colorize = false
-                    formatter =
-                        object : StructuredFormatter(
-                            listOf(
-                                Element.MESSAGE,
-                                Element.LEVEL,
-                                Element.DATETIME,
-                                Element.THREAD,
-                                Element.ATTR,
-                                Element.CUSTOM("TEST"),
-                                Element.CUSTOM("jjj")
-                            ),
-                            listOf(
-                                "password",
-                                "secret"
-                            )
-                        ) {}
-                }
-            ).addProvider(fileProvider)
-            .withAttrs(
-                mapOf(
-                    "def attr" to "attributes"
-                )
-            )
-            .getLogger()
-
-    logger.info(
-        Log(
-            name = "illegal state",
-            LogDetail(
-                "args",
-                "argument must be greater than zero"
-            )
-        ),
-        mapOf("a" to "afeafseaf")
-    )
+    val logger = LoggerFactory.getLogger("test")
 
     logger.trace("TRACE LEVEL LOG")
     logger.debug("DEBUG LEVEL LOG")
@@ -109,28 +99,6 @@ suspend fun main() {
     logger.warn("WARN LEVEL LOG")
     logger.error("ERROR LEVEL LOG")
 
-    logger.atInfo {
-        print("in this block")
-        print("all of logs are printed out with INFO level")
-
-        print(
-            Log(
-                name = "illegal state",
-                LogDetail(
-                    "args",
-                    "argument must be greater than zero"
-                )
-            )
-        )
-    }
-
-    logger.error(
-        Credential(
-            username = "user_name",
-            password = "this field is masked",
-            raw_password = "this field is not masked"
-        )
-    )
 
     withMdcScope(Dispatchers.Default) {
         logger.info("INFO LEVEL LOG???????")
@@ -141,6 +109,6 @@ suspend fun main() {
     }
     logger.error("ERROR LEVEL LOG")
 
-    MDC.clear()
-    fileProvider.flush()
+//    MDC.clear()
+//    fileProvider.flush()
 }
