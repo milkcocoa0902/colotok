@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation(project(":colotok"))
+    implementation(project(":colotok-coroutines"))
     implementation(platform(awssdk.bom))
     implementation(awssdk.services.cloudwatchlogs)
     testImplementation(kotlin("test"))

@@ -36,4 +36,5 @@ class CloudwatchProviderConfig: ProviderConfig {
     var logGroup: String = error("")
     var logStream: String = error("")
     var credential: CloudwatchCredential = error("")
+    var logBufferSize:  Int = 50
 }
