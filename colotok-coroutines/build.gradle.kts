@@ -59,6 +59,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":colotok"))
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlin.serialization.core)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
