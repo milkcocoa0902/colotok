@@ -32,4 +32,11 @@ dependencyResolutionManagement {
         }
         mavenCentral()
     }
+
+    versionCatalogs {
+        create("awssdk") {
+            from("aws.sdk.kotlin:version-catalog:1.4.109")
+        }
+    }
 }
+include("colotok-cloudwatch")

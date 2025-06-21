@@ -1,6 +1,7 @@
 plugins {
-    kotlin("plugin.serialization") version "2.1.10" apply false
-    kotlin("multiplatform") version "2.1.10" apply false
+    kotlin("plugin.serialization") version "2.1.21" apply false
+    kotlin("multiplatform") version "2.1.21" apply false
+    kotlin("jvm") version "2.1.21" apply false
     id("com.android.library") version "8.7.0" apply false
 //    id("org.jetbrains.kotlin.android") version "2.1.10"
     id("cl.franciscosolis.sonatype-central-upload") version "1.0.3" apply false
