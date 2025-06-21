@@ -35,7 +35,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 val CORE_LIBRARY_DESCRIPTION: String by project

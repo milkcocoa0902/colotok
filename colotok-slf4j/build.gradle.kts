@@ -17,7 +17,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_11
