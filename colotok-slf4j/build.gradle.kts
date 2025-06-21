@@ -7,10 +7,6 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":colotok"))
     implementation("org.slf4j:slf4j-api:1.7.36")
@@ -21,7 +17,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(11)
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_11
