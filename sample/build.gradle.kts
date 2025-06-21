@@ -15,9 +15,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.okio)
     implementation(project(":colotok"))
-//    implementation(project(":colotok-slf4j"))
+    implementation(project(":colotok-cloudwatch"))
     testImplementation(kotlin("test"))
-    implementation("org.slf4j:slf4j-api:1.7.36")
 }
 
 tasks.test {
