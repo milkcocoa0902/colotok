@@ -334,5 +334,18 @@ logger.error("error level log")
 5. ERROR (only this)
 6. OFF (no log will present)
 
+
+# Use as SLF4J backend
+If you want to use Colotok as SLF4J backend, you can!  
+
+```kotlin
+dependencies {
+    implementation("io.githib.milkcocoa0902:colotok-slf4j:0.3.2")
+}
+```
+
+colotok-slf4j uses a default logger which been set ColotokLogger.default
+
+
 # Document
 https://milkcocoa0902.github.io/colotok/01-colotok-introduce.html
