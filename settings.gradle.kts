@@ -33,3 +33,4 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+include("colotok-slf4j")
