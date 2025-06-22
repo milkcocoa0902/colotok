@@ -21,20 +21,16 @@ tasks.test {
     useJUnitPlatform()
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_11
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17)) // 🔹 Java 17 でビルド
-        }
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
-tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のソースコード
-    targetCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のバイトコードを出力
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11)) // 実際のビルド環境
+    }
 }
 
-
-kotlin {
+kotlin{
     jvmToolchain(11)
 }
 

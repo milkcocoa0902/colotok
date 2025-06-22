@@ -16,26 +16,18 @@ plugins {
 }
 
 
-java.sourceCompatibility = JavaVersion.VERSION_11
 java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17)) // 🔹 Java 17 でビルド
+        languageVersion.set(JavaLanguageVersion.of(11)) // 実際のビルド環境
     }
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のソースコード
-    targetCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のバイトコードを出力
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
-    }
-}
 
 kotlin {
+    jvmToolchain(11)
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
