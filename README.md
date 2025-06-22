@@ -4,6 +4,7 @@ COLOTOK; Cocoa LogTool for Kotlin
 ![](https://img.shields.io/static/v1?label=kotlin-jvm&message=1.8.10&color=magenta)
 ![](https://img.shields.io/static/v1?label=jdk&message=11&color=magenta)
 [![](https://jitpack.io/v/milkcocoa0902/colotok.svg)](https://jitpack.io/#milkcocoa0902/colotok)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.milkcocoa0902/colotok.svg)](https://search.maven.org/artifact/io.github.milkcocoa0902/colotok)
 [![codecov](https://codecov.io/gh/milkcocoa0902/colotok/graph/badge.svg?token=XGH4U42LVM)](https://codecov.io/gh/milkcocoa0902/colotok)
 
 
@@ -20,6 +21,7 @@ COLOTOK; Cocoa LogTool for Kotlin
 ✅ Customize output location  
 　🌟 example [print log into slack](https://github.com/milkcocoa0902/colotok_slack_integration_sample)  
 ✅ Structure Logging  
+✅ MDC (Mapped Diagnostic Context)  
 
 
 # Integration
@@ -28,7 +30,7 @@ basic dependency
 ```kotlin
 dependencies {
     // add this line
-    implementation("io.github.milkcocoa0902:colotok:0.3.0")
+    implementation("io.github.milkcocoa0902:colotok:0.3.2")
 }
 ```
 
@@ -36,21 +38,58 @@ or when you use kotlin multiplatform(;KMP)
 
 ```kotlin
 commonMain.dependncies{
-    implementation("io.github.milkcocoa0902:colotok:0.3.0")
+    implementation("io.github.milkcocoa0902:colotok:0.3.2")
 }
 
 jvmMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.0")
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.2")
 }
 
 androidMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-android:0.3.0")
+    implementation("io.github.milkcocoa0902:colotok-android:0.3.2")
 }
 
 jsMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-js:0.3.0")
+    implementation("io.github.milkcocoa0902:colotok-js:0.3.2")
 }
 ```
+
+# Plugins
+
+Colotok provides several plugins to extend its functionality:
+
+## colotok-coroutines
+This plugin allows you to handle logging operations with coroutines, making logging more efficient when file operations or network I/O are involved.
+
+```kotlin
+dependencies {
+    implementation("io.github.milkcocoa0902:colotok-coroutines:0.3.2")
+}
+```
+
+**Platform compatibility**: Multiplatform (KMP)
+
+## colotok-slf4j
+This plugin allows you to use Colotok as an SLF4J backend.
+
+```kotlin
+dependencies {
+    implementation("io.github.milkcocoa0902:colotok-slf4j:0.3.2")
+}
+```
+
+**Platform compatibility**: JVM only
+
+## colotok-cloudwatch
+This plugin enables logging to Amazon CloudWatch.
+
+```kotlin
+dependencies {
+    implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.3.2")
+}
+```
+
+**Platform compatibility**: JVM only
 
 # Dependencies
 
@@ -335,17 +374,53 @@ logger.error("error level log")
 6. OFF (no log will present)
 
 
-# Use as SLF4J backend
-If you want to use Colotok as SLF4J backend, you can!  
+## MDC (Mapped Diagnostic Context)
+Colotok supports MDC functionality since version 0.3.0, which allows you to add contextual information to your logs. MDC is designed to be coroutine-friendly.  
+MDC replace the `Element.CUSTOM` when formatting.
+
 
 ```kotlin
-dependencies {
-    implementation("io.githib.milkcocoa0902:colotok-slf4j:0.3.2")
+// Set MDC values
+MDC.put("requestId", "12345")
+MDC.put("userId", "user-abc")
+
+// Log with MDC context
+logger.info("Processing request") // MDC values will be included automatically
+
+// Clear specific MDC value
+MDC.remove("userId")
+
+// Clear all MDC values
+MDC.clear()
+
+// Using MDC with coroutines
+// On JVM platform
+suspend fun processRequest() {
+    withMdcScope(Dispatchers.IO) {
+        MDC.put("requestId", "12345")
+        // MDC context is preserved across coroutine boundaries
+        someAsyncOperation()
+    }
+}
+
+// On JS platform
+fun processRequest() {
+    MDC.withContext {
+        MDC.put("requestId", "12345")
+        // MDC context is preserved within this block
+        someOperation()
+    }
+}
+
+// Alternative syntax on JS
+fun processRequest() {
+    withMdcScope {
+        MDC.put("requestId", "12345")
+        // MDC context is preserved within this block
+        someOperation()
+    }
 }
 ```
-
-colotok-slf4j uses a default logger which been set ColotokLogger.default
-
 
 # Document
 https://milkcocoa0902.github.io/colotok/01-colotok-introduce.html
