@@ -66,7 +66,7 @@ kotlin {
             implementation(libs.kotlin.serialization.properties)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
-            implementation(libs.okio)
+            api(libs.okio)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

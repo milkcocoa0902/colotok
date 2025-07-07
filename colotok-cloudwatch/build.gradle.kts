@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":colotok"))
+    api(project(":colotok"))
     api(project(":colotok-coroutines"))
     implementation(platform(awssdk.bom))
     implementation(awssdk.services.cloudwatchlogs)
