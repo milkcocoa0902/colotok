@@ -14,7 +14,7 @@ plugins {
 // ルート build.gradle.kts
 subprojects {
     group = "io.github.milkcocoa0902"
-    version = "0.3.2"
+    version = "0.3.3"
 }
 
 repositories {

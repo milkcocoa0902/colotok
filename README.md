@@ -30,7 +30,7 @@ basic dependency
 ```kotlin
 dependencies {
     // add this line
-    implementation("io.github.milkcocoa0902:colotok:0.3.2")
+    implementation("io.github.milkcocoa0902:colotok:0.3.3")
 }
 ```
 
@@ -38,19 +38,19 @@ or when you use kotlin multiplatform(;KMP)
 
 ```kotlin
 commonMain.dependncies{
-    implementation("io.github.milkcocoa0902:colotok:0.3.2")
+    implementation("io.github.milkcocoa0902:colotok:0.3.3")
 }
 
 jvmMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.2")
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.3")
 }
 
 androidMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-android:0.3.2")
+    implementation("io.github.milkcocoa0902:colotok-android:0.3.3")
 }
 
 jsMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-js:0.3.2")
+    implementation("io.github.milkcocoa0902:colotok-js:0.3.3")
 }
 ```
 
@@ -60,10 +60,10 @@ Colotok provides several plugins to extend its functionality:
 
 |       plugin       |                      artifact                      |           feature           |    Platform    |
 |:------------------:|:--------------------------------------------------:|:---------------------------:|:--------------:|
-| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.2` |      coroutine support      | Multi Platform |
-|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.2`    | as SLF4J backend (JVM only) |      JVM       |
-| colotok-cloudwath  | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.2` | send logs to AWS CloudWatch |      JVM       |
-|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.2`    |  send logs to Grafana Loki  | Multi Platform |
+| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.3` |      coroutine support      | Multi Platform |
+|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.3`    | as SLF4J backend (JVM only) |      JVM       |
+| colotok-cloudwath  | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.3` | send logs to AWS CloudWatch |      JVM       |
+|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.3`    |  send logs to Grafana Loki  | Multi Platform |
 
 # Dependencies
 if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  
