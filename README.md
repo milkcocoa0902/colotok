@@ -1,7 +1,7 @@
 # COLOTOK
 COLOTOK; Cocoa LogTool for Kotlin  
 
-![](https://img.shields.io/static/v1?label=kotlin-jvm&message=1.8.10&color=magenta)
+![](https://img.shields.io/static/v1?label=kotlin&message=2.1.20&color=magenta)
 ![](https://img.shields.io/static/v1?label=jdk&message=11&color=magenta)
 [![](https://jitpack.io/v/milkcocoa0902/colotok.svg)](https://jitpack.io/#milkcocoa0902/colotok)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.milkcocoa0902/colotok.svg)](https://search.maven.org/artifact/io.github.milkcocoa0902/colotok)
@@ -58,48 +58,14 @@ jsMain.dependencies{
 
 Colotok provides several plugins to extend its functionality:
 
-## colotok-coroutines
-This plugin allows you to handle logging operations with coroutines, making logging more efficient when file operations or network I/O are involved.
-
-```kotlin
-dependencies {
-    implementation("io.github.milkcocoa0902:colotok-coroutines:0.3.2")
-}
-```
-
-**Platform compatibility**: Multiplatform (KMP)
-
-## colotok-slf4j
-This plugin allows you to use Colotok as an SLF4J backend.
-
-```kotlin
-dependencies {
-    implementation("io.github.milkcocoa0902:colotok-slf4j:0.3.2")
-}
-```
-
-**Platform compatibility**: JVM only
-
-## colotok-cloudwatch
-This plugin enables logging to Amazon CloudWatch.
-
-```kotlin
-dependencies {
-    implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.3.2")
-}
-```
-
-**Platform compatibility**: JVM only
+|       plugin       |                      artifact                      |           feature           |    Platform    |
+|:------------------:|:--------------------------------------------------:|:---------------------------:|:--------------:|
+| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.2` |      coroutine support      | Multi Platform |
+|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.2`    | as SLF4J backend (JVM only) |      JVM       |
+| colotok-cloudwath  | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.2` | send logs to AWS CloudWatch |      JVM       |
+|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.2`    |  send logs to Grafana Loki  | Multi Platform |
 
 # Dependencies
-
-if you will use the provider which File or Stream, your application needs to be depend on `Okio`
-```kotlin: buind.gradle.kts
-dependencies {
-  implementation("com.squareup.okio:okio:3.10.2")
-}
-```
-
 if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  
 when colotok formats into text from your structure, using `kotlinx.serialization` internally.
 
