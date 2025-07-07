@@ -15,7 +15,11 @@ dependencies {
     implementation(libs.okio)
     implementation(project(":colotok"))
     implementation(project(":colotok-cloudwatch"))
+    implementation(project(":colotok-coroutines"))
+    implementation(project(":colotok-loki"))
     testImplementation(kotlin("test"))
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
 }
 
 tasks.test {

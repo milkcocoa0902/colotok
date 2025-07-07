@@ -1,4 +1,9 @@
 # Custom Provider
+
+> Deprecated!  
+> Show [Plugin/CreatePlugin](Create-Plugin.md)
+{style=warning}
+
 Colotok can print the logs where you want.  
 For example, if you want to write log into slack, you create a SlackProvider like below.  
 
@@ -78,7 +83,7 @@ dependencies {
 now you can use SlackProvider to write the log into slack.
 
 ```kotlin
-val logger = LoggerFactory()
+val logger = ColotokLoggerFactory()
         .addProvider(ConsoleProvider{
             formatter = DetailTextFormatter
             level = LogLevel.DEBUG

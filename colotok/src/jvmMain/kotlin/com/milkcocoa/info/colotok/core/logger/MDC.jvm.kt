@@ -11,20 +11,19 @@ class MDCContext(
     private val contextData: MDCContextData
 ) : ThreadContextElement<MDCContextData> {
     companion object Key : CoroutineContext.Key<MDCContext>
-
-    override val key: CoroutineContext.Key<*> get() = Key
+    override val key: CoroutineContext.Key<MDCContext> get() = Key
 
     override fun updateThreadContext(context: CoroutineContext): MDCContextData {
-        val oldContext = MDC.getThreadLocalContext()
-        MDC.setThreadLocalContext(contextData)
-        return oldContext
+        val oldContext = MDC.getThreadLocalContext().deepCopy()
+        MDC.setThreadLocalContext(contextData.copy())
+        return oldContext.copy()
     }
 
     override fun restoreThreadContext(
         context: CoroutineContext,
         oldState: MDCContextData
     ) {
-        MDC.setThreadLocalContext(oldState)
+        MDC.setThreadLocalContext(oldState.copy())
     }
 }
 
@@ -55,6 +54,5 @@ actual object MDC {
 }
 
 suspend inline fun <R> withMdcScope(
-    context: CoroutineContext,
     crossinline block: suspend () -> R
-): R = withContext(context + MDC.asCoroutineContext()) { block() }
+): R = withContext(MDC.asCoroutineContext()) { block() }

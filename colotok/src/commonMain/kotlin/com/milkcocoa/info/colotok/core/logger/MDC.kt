@@ -2,7 +2,9 @@ package com.milkcocoa.info.colotok.core.logger
 
 data class MDCContextData(
     val data: MutableMap<String, String> = mutableMapOf()
-)
+){
+    fun deepCopy() = MDCContextData(data.toMutableMap())
+}
 
 expect object MDC {
     fun put(
