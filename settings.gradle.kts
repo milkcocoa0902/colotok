@@ -42,3 +42,4 @@ dependencyResolutionManagement {
 include("colotok-cloudwatch")
 include("colotok-slf4j")
 include("colotok-coroutines")
+include("colotok-loki")

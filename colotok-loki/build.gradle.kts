@@ -1,4 +1,6 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import org.gradle.kotlin.dsl.api
+import org.gradle.kotlin.dsl.project
 
 plugins {
     kotlin("multiplatform")
@@ -52,12 +54,16 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":colotok"))
-            api(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlin.serialization.core)
+            api(project(":colotok-coroutines"))
+            api(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
+            implementation(libs.kotlin.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotlin.serialization.json)
         }
     }
 }
@@ -89,12 +95,12 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     coordinates(
-        artifactId = "colotok-coroutines",
+        artifactId = "colotok-loki",
     )
 
     pom {
         name.set("Colotok")
-        description.set("${CORE_LIBRARY_DESCRIPTION} - Coroutines integration")
+        description.set("${CORE_LIBRARY_DESCRIPTION} - Loki integration")
         url.set(PROJECT_URL)
 
         licenses {
