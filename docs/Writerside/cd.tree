@@ -18,4 +18,8 @@
         </toc-element>
         <toc-element topic="Custom-Formatter.md"/>
     </toc-element>
+    <toc-element topic="Plugin.md">
+        <toc-element topic="Official-Plugin.md"/>
+        <toc-element topic="Create-Plugin.md"/>
+    </toc-element>
 </instance-profile>

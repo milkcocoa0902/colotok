@@ -91,7 +91,7 @@ configure colotok with code.
 see below.
 
 ```kotlin
-val logger = LoggerFactory()
+val logger = ColotokLoggerFactory()
     .addProvider(ConsoleProvider())
     .getLogger()
 
@@ -99,13 +99,23 @@ val logger = LoggerFactory()
 
 more details config
 ```Kotlin
-val logger = LoggerFactory()
+val fileProvider: FileProvider
+val logger = ColotokLoggerFactory()
     .addProvider(ConsoleProvider{
         // show above info level in console
         level = LogLevel.INFO
     })
-    .addProvider(fileProvider)
-    .getLogger()
+    .addProvider(FileProvider(File("test.log").toOkioPath()){
+        level = LogLevel.INFO
+        // memory buffering to save i/o
+        enableBuffer = true
+        // memory buffer size, if buffer excced this, append to file
+        bufferSize = 2048
+        // use size base rotation
+        rotation = SizeBaseRotation(size = 4096L)
+    }.apply {
+        fileProvider = this
+    }).getLogger()
 
 logger.trace("TRACE LEVEL LOG")
 logger.debug("DEBUG LEVEL LOG")
@@ -307,7 +317,7 @@ class SlackProvider(config: SlackProviderConfig): Provider {
 now you can use SlackProvider to write the log into slack.
 
 ```kotlin
-val logger = LoggerFactory()
+val logger = ColotokLoggerFactory()
         .addProvider(ConsoleProvider{
             formatter = DetailTextFormatter
             level = LogLevel.DEBUG

@@ -5,12 +5,12 @@ Colotok output the log where you specified by the provider and formatted with yo
 ## Get Logger
 
 ```Kotlin
-val logger = LoggerFactory()
+val logger = ColotokLoggerFactory()
     .addProvider(ConsoleProvider())
     .getLogger()
 ```
 
-you can get the logger instance by `LoggerFactory.getLogger()`
+you can get the logger instance by `ColotokLoggerFactory.getLogger()`
 
 `ConsoleProvider` is a builtin provider which used for print the log into console
 
@@ -72,7 +72,7 @@ class Log(val name: String, val logDetail: LogDetail): LogStructure
 and use `DetailStructureFormatter` to format the log.
 
 ```Kotlin
-val logger = LoggerFactory()
+val logger = ColotokLoggerFactory()
     .addProvider(ConsoleProvider{
         formatter = DetailStructureFormatter
     })
