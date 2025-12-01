@@ -65,17 +65,6 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
         }
     }
 
-
-    @OptIn(ExperimentalTime::class)
-    override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) = runBlocking { 
-        this@CloudwatchProvider.writeAsync(name, msg, level, attr)
-    }
-
     @OptIn(ExperimentalTime::class)
     override suspend fun writeAsync(
         name: String,
@@ -121,17 +110,6 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
                 buf.clear()
             }
         }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) = runBlocking {
-        this@CloudwatchProvider.writeAsync(name, msg, serializer, level, attr)
     }
 
     @OptIn(ExperimentalTime::class)
