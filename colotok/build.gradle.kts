@@ -61,7 +61,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlin.serialization.core)
+            api(libs.kotlin.serialization.core)
             implementation(libs.kotlin.serialization.json)
             implementation(libs.kotlin.serialization.properties)
             implementation(libs.kotlinx.coroutines.core)

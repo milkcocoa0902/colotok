@@ -6,7 +6,7 @@ class ColotokLoggerFactory4J: ILoggerFactory {
     private val cache = mutableMapOf<String, ColotokLogger4J>()
 
     override fun getLogger(name: String): ColotokLogger4J {
-        return cache.getOrPut(name) {
+        return cache.computeIfAbsent(name) {
             ColotokLogger4J(name)
         }
     }

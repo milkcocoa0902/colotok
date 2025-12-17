@@ -21,7 +21,7 @@ import kotlin.time.ExperimentalTime
  * This provider sends log entries to a Loki server using its HTTP API.
  * It supports buffering log entries and sending them in batches for better performance.
  */
-class LokiProvider(config: LokiProviderConfig): AsyncProvider {
+class LokiProvider(private val config: LokiProviderConfig): AsyncProvider {
     /**
      * Convenience constructor that accepts a configuration lambda.
      * 

@@ -4,7 +4,12 @@ import org.slf4j.Logger
 import org.slf4j.Marker
 
 class ColotokLogger4J(private val name: String): Logger {
-    private val delegate = ColotokLogger.getDefault()
+    private val delegate: ColotokLogger by lazy {
+        ColotokLoggerContext.DEFAULT
+            .shallowCopy()
+            .putAttrs(mapOf("logger" to name))
+            .getLogger(name)
+    }
 
 
     override fun info(msg: String?) {
