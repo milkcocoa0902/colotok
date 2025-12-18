@@ -75,7 +75,7 @@ For example, to use the colotok-coroutines plugin:
 
 ```kotlin
 // Add dependency
-implementation("io.github.milkcocoa0902:colotok-coroutines:0.3.2")
+implementation("io.github.milkcocoa0902:colotok-coroutines:0.3.4")
 
 // Use the plugin
 runBlocking {

@@ -8,17 +8,17 @@ ConsoleProvider write the log into console
 
 ```Kotlin
 ....
-.addProvider(ConsoleProvider{
+.addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
     level = LogLevel.DEBUG
     formatter = DetailTextFormatter
     colorize = true
-    
+
     traceLevelColor = AnsiColor.WHITE
     debugLevelColor = AnsiColor.BLUE
     infoLevelColor = AnsiColor.GEEN
     warnLevelColor = AnsiColor.YELLOW
     errorLevelColor = AnsiColor.RED
-})
+}))
 ```
 
 ConsoleProvider can colorize with ANSI-Color

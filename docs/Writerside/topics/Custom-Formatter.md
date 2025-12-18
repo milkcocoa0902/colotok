@@ -68,10 +68,10 @@ object CustomTextFormatter: TextFormatter(
 Then you can use formatter.
 
 ```kotlin
-val logger = LoggerFactory()
-    .addProvider(ConsoleProvider{
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
         this.formatter = CustomTextFormatter
-    })
+    }))
     .getLogger()
 ```
 
@@ -99,10 +99,10 @@ object CustomStructuredFormatter : StructuredFormatter(
 and then, you can use this formatter.
 
 ```kotlin
-val logger = LoggerFactory()
-    .addProvider(ConsoleProvider{
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
         this.formatter = CustomStructuredFormatter
-    })
+    }))
     .getLogger()
 ```
 

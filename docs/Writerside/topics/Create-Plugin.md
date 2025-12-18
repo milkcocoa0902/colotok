@@ -241,7 +241,7 @@ class SlackProvider(config: SlackProviderConfig) : AsyncProvider {
 Now you can use your custom provider with Colotok:
 
 ```kotlin
-val logger = ColotokLoggerFactory()
+val logger = ColotokLoggerContext()
     .addProvider(SlackProvider {
         webhookUrl = "https://hooks.slack.com/services/your/webhook/url"
         level = LogLevel.WARN  // Only send WARN and ERROR logs to Slack
@@ -445,7 +445,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.milkcocoa0902:colotok:0.3.2")
+    implementation("io.github.milkcocoa0902:colotok:0.3.4")
 
     // Add any other dependencies your plugin needs
 

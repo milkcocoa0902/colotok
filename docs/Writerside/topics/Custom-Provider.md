@@ -83,11 +83,11 @@ dependencies {
 now you can use SlackProvider to write the log into slack.
 
 ```kotlin
-val logger = ColotokLoggerFactory()
-        .addProvider(ConsoleProvider{
+val logger = ColotokLoggerContext()
+        .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
             formatter = DetailTextFormatter
             level = LogLevel.DEBUG
-        })
+        }))
         .addProvider(SlackProvider{
             webhook_url = "your slack webhook url"
             formatter = SimpleTextFormatter
