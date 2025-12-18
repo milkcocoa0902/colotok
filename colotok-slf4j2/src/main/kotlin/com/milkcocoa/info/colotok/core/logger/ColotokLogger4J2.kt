@@ -50,7 +50,12 @@ class ColotokLogger4J2(
         MDC.getCopyOfContextMap().forEach { k, v ->
             com.milkcocoa.info.colotok.core.logger.MDC.put(k, v)
         }
-        delegate.at(colotokLevel, formatted)
+
+        if(throwable != null){
+            delegate.at(colotokLevel, formatted, mapOf("cause" to throwable.toString()))
+        }else{
+            delegate.at(colotokLevel, formatted)
+        }
     }
 
     override fun isTraceEnabled() = true

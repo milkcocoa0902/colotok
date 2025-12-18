@@ -7,12 +7,19 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
+group = "com.milkcocoa.info"
+version = "unspecified"
+
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation(project(":colotok"))
-    compileOnly(libs.slf4j.api)
-    testImplementation(libs.slf4j.api)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.kotlin.serialization.core)
+    compileOnly(libs.slf4j2.api)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.slf4j2.api)
 }
 
 tasks.test {
@@ -43,12 +50,12 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     coordinates(
-        artifactId = "colotok-slf4j",
+        artifactId = "colotok-slf4j2",
     )
 
     pom {
         name.set("Colotok")
-        description.set("${CORE_LIBRARY_DESCRIPTION} - SLF4J integration")
+        description.set("${CORE_LIBRARY_DESCRIPTION} - SLF4J 2.x integration")
         url.set(PROJECT_URL)
 
         licenses {

@@ -26,17 +26,21 @@ class ColotokMDCAdapter: MDCAdapter {
     }
 
     override fun getCopyOfContextMap(): Map<String?, String?> {
+        // 不変のコピーを返す（外部で破壊できない）
         return MDC.getThreadLocalContext().data.toMap()
     }
 
     override fun setContextMap(contextMap: Map<String?, String?>?) {
         val data = MDCContextData()
-        if(contextMap != null){
-            @Suppress("UNCHECKED_CAST")
-            val tmp = contextMap.filterKeys { it == null }.filterValues { it == null } as? Map<String, String> ?: return
-            data.data.putAll(tmp)
+        if (contextMap != null) {
+            // null キー/値を除外し、String/String に絞る
+            val filtered: MutableMap<String, String> = mutableMapOf()
+            for ((k, v) in contextMap) {
+                if (k != null && v != null) filtered[k] = v
+            }
+            data.data.putAll(filtered)
         }
-        return MDC.setThreadLocalContext(data)
+        MDC.setThreadLocalContext(data)
     }
 
     override fun pushByKey(key: String?, value: String?) {

@@ -51,7 +51,7 @@ sealed class Element(private val typeString: String) {
 
     object CALLER : Element("%C")
 
-    class CUSTOM(val raw: String) : Element("%$raw")
+    class CUSTOM(val raw: String) : Element("%{$raw}")
 
     override fun toString(): String {
         return typeString
