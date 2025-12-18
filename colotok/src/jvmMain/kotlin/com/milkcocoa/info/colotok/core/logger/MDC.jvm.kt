@@ -44,7 +44,7 @@ actual object MDC {
 
     actual fun clear() = threadLocalContext.remove()
 
-    actual fun getThreadLocalContext() = threadLocalContext.get() ?: MDCContextData()
+    actual fun getThreadLocalContext(): MDCContextData = threadLocalContext.getOrSet { MDCContextData() }
 
     actual fun setThreadLocalContext(data: MDCContextData) {
         threadLocalContext.set(data)

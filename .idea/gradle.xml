@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/colotok-coroutines" />
             <option value="$PROJECT_DIR$/colotok-loki" />
             <option value="$PROJECT_DIR$/colotok-slf4j" />
+            <option value="$PROJECT_DIR$/colotok-slf4j2" />
             <option value="$PROJECT_DIR$/sample" />
           </set>
         </option>

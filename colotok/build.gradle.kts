@@ -61,7 +61,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlin.serialization.core)
+            api(libs.kotlin.serialization.core)
             implementation(libs.kotlin.serialization.json)
             implementation(libs.kotlin.serialization.properties)
             implementation(libs.kotlinx.coroutines.core)
@@ -82,6 +82,7 @@ kotlin {
             implementation(project.dependencies.platform(libs.junit.bom))
             implementation(libs.junit.jupiter)
             implementation(libs.mockk)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
     compilerOptions {

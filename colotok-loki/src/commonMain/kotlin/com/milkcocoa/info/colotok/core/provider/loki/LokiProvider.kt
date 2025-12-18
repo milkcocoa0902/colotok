@@ -8,9 +8,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
@@ -180,61 +177,6 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider {
             if(shouldSendLogs){
                 sendLogsToLoki()
             }
-        }
-    }
-
-    /**
-     * Synchronously writes a string log message to Loki.
-     * 
-     * This method launches a coroutine to perform the actual writing asynchronously.
-     * 
-     * @param name The logger name
-     * @param msg The log message
-     * @param level The log level
-     * @param attr Additional attributes to include with the log
-     */
-    override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        CoroutineScope(Dispatchers.Default).launch {
-            writeAsync(
-                name = name,
-                msg = msg,
-                level = level,
-                attr = attr
-            )
-        }
-    }
-
-    /**
-     * Synchronously writes a structured log message to Loki.
-     * 
-     * This method launches a coroutine to perform the actual writing asynchronously.
-     * 
-     * @param name The logger name
-     * @param msg The structured log message
-     * @param serializer The serializer for the structured log message
-     * @param level The log level
-     * @param attr Additional attributes to include with the log
-     */
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        CoroutineScope(Dispatchers.Default).launch {
-            writeAsync(
-                name = name,
-                msg = msg,
-                serializer = serializer,
-                level = level,
-                attr = attr
-            )
         }
     }
 

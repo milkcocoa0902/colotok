@@ -386,29 +386,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
             level = level
         ).block()
     }
-
-    companion object {
-        private var defaultLogger: ColotokLogger =
-            ColotokLogger(
-                name = "default logger"
-            ) {
-                providers =
-                    listOf(
-                        ConsoleProvider(
-                            ConsoleProviderConfig().apply {
-                                level = LogLevel.DEBUG
-                                formatter = DetailTextFormatter
-                            }
-                        )
-                    )
-            }
-
-        fun getDefault(): ColotokLogger {
-            return defaultLogger
-        }
-
-        fun setDefault(logger: ColotokLogger) {
-            defaultLogger = logger
-        }
-    }
 }
+
+val Colotok get() = ColotokLoggerContext.DEFAULT.getLogger()

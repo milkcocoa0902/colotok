@@ -24,7 +24,7 @@ basic dependency
 ```kotlin
 dependencies {
     // add this line
-    implementation("io.github.milkcocoa0902:colotok:0.3.3")
+    implementation("io.github.milkcocoa0902:colotok:0.3.4")
 }
 ```
 
@@ -32,19 +32,19 @@ or when you use kotlin multiplatform(;KMP)
 
 ```kotlin
 commonMain.dependncies{
-    implementation("io.github.milkcocoa0902:colotok:0.3.3")
+    implementation("io.github.milkcocoa0902:colotok:0.3.4")
 }
 
 jvmMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.3")
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.4")
 }
 
 androidMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-android:0.3.3")
+    implementation("io.github.milkcocoa0902:colotok-android:0.3.4")
 }
 
 jsMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-js:0.3.3")
+    implementation("io.github.milkcocoa0902:colotok-js:0.3.4")
 }
 ```
 
@@ -52,12 +52,13 @@ jsMain.dependencies{
 
 Colotok provides several plugins to extend its functionality:
 
-|       plugin       |                      artifact                      |           feature           |    Platform    |
-|:------------------:|:--------------------------------------------------:|:---------------------------:|:--------------:|
-| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.3` |      coroutine support      | Multi Platform |
-|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.3`    | as SLF4J backend (JVM only) |      JVM       |
-| colotok-cloudwath  | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.3` | send logs to AWS CloudWatch |      JVM       |
-|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.3`    |  send logs to Grafana Loki  | Multi Platform |
+|       plugin       |                      artifact                      |             feature             |    Platform    |
+|:------------------:|:--------------------------------------------------:|:-------------------------------:|:--------------:|
+| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.4` |        coroutine support        | Multi Platform |
+|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.4`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
+|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.3.4`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
+| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.4` |   send logs to AWS CloudWatch   |      JVM       |
+|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.4`    |    send logs to Grafana Loki    | Multi Platform |
 
 # Dependencies
 if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  
@@ -85,7 +86,7 @@ configure colotok with code.
 see below.
 
 ```kotlin
-val logger = LoggerFactory()
+val logger = ColotokLoggerContext()
     .addProvider(ConsoleProvider())
     .getLogger()
 
@@ -94,11 +95,11 @@ val logger = LoggerFactory()
 more details config
 ```Kotlin
 val fileProvider: FileProvider
-val logger = ColotokLoggerFactory()
-    .addProvider(ConsoleProvider{
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
         // show above info level in console
         level = LogLevel.INFO
-    })
+    }))
     .addProvider(FileProvider(File("test.log").toOkioPath()){
         level = LogLevel.INFO
         // memory buffering to save i/o

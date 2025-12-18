@@ -11,7 +11,7 @@ class LoggerTest {
     @Test
     fun test_00001() {
         val logger =
-            ColotokLoggerFactory()
+            ColotokLoggerContext()
                 .addProvider(
                     ConsoleProvider {
                         formatter = DetailTextFormatter
@@ -25,7 +25,7 @@ class LoggerTest {
     @Test
     fun test_00002() {
         val logger =
-            ColotokLoggerFactory()
+            ColotokLoggerContext()
                 .addProvider(
                     ConsoleProvider {
                         formatter =

@@ -20,6 +20,10 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
+
+    implementation(libs.slf4j2.api)
+    implementation(project(":colotok-slf4j2"))
+
 }
 
 tasks.test {
