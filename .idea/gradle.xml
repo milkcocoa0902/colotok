@@ -9,6 +9,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/colotok" />
+            <option value="$PROJECT_DIR$/colotok-cloudwatch" />
+            <option value="$PROJECT_DIR$/colotok-coroutines" />
+            <option value="$PROJECT_DIR$/colotok-loki" />
+            <option value="$PROJECT_DIR$/colotok-slf4j" />
             <option value="$PROJECT_DIR$/sample" />
           </set>
         </option>
