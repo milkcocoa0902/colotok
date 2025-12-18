@@ -62,7 +62,7 @@ Colotok provides several plugins to extend its functionality:
 |:------------------:|:--------------------------------------------------:|:-------------------------------:|:--------------:|
 | colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.4` |        coroutine support        | Multi Platform |
 |   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.4`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
-|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j2:0.3.4`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
+|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.3.4`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
 | colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.4` |   send logs to AWS CloudWatch   |      JVM       |
 |    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.4`    |    send logs to Grafana Loki    | Multi Platform |
 
