@@ -3,6 +3,7 @@ package com.milkcocoa.info.colotok.core.provider.builtin.console
 import android.util.Log
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
@@ -31,11 +32,11 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
         }
         runCatching {
             when(record.level){
-                LogLevel.TRACE -> Logg.v(record.name, record.format(formatter))
-                LogLevel.DEBUG -> Logg.d(record.name, record.format(formatter))
-                LogLevel.INFO -> Logg.i(record.name, record.format(formatter))
-                LogLevel.WARN -> Logg.w(record.name, record.format(formatter))
-                LogLevel.ERROR -> Logg.e(record.name, record.format(formatter))
+                LogLevel.TRACE -> Log.v(record.name, record.format(formatter))
+                LogLevel.DEBUG -> Log.d(record.name, record.format(formatter))
+                LogLevel.INFO -> Log.i(record.name, record.format(formatter))
+                LogLevel.WARN -> Log.w(record.name, record.format(formatter))
+                LogLevel.ERROR -> Log.e(record.name, record.format(formatter))
             }
         }
     }

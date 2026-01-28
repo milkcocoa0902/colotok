@@ -1,6 +1,7 @@
 package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
@@ -20,24 +21,18 @@ class ColotokLogger4J2Test {
         var lastLevel: Level? = null
         var lastAttr: Map<String, String>? = null
 
-        override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
-            lastName = name
-            lastMsg = msg
-            lastLevel = level
-            lastAttr = attr
-        }
-
-        override fun <T : LogStructure> write(
-            name: String,
-            msg: T,
-            serializer: KSerializer<T>,
-            level: Level,
-            attr: Map<String, String>
-        ) {
-            lastName = name
-            lastMsg = msg.toString()
-            lastLevel = level
-            lastAttr = attr
+        override fun write(record: LogRecord) {
+            lastName = record.name
+            lastLevel = record.level
+            lastAttr = record.attr
+            when(record){
+                is LogRecord.PlainText -> {
+                    lastMsg = record.msg
+                }
+                is LogRecord.StructuredText<*> -> {
+                    lastMsg = record.msg.toString()
+                }
+            }
         }
     }
 

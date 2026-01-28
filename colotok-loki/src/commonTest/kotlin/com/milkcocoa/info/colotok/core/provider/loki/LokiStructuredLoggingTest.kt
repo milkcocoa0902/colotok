@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.provider.loki
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import kotlinx.serialization.Serializable
@@ -34,11 +35,13 @@ class LokiStructuredLoggingTest {
         // Test that we can call write with a structured message without exceptions
         try {
             provider.write(
-                name = "auth-service",
-                msg = logMessage,
-                serializer = serializer<TestLogStructure>(),
-                level = LogLevel.INFO,
-                attr = mapOf("component" to "authentication")
+                LogRecord.StructuredText(
+                    name = "auth-service",
+                    msg = logMessage,
+                    serializer = serializer<TestLogStructure>(),
+                    level = LogLevel.INFO,
+                    attr = mapOf("component" to "authentication")
+                )
             )
             // If we get here, the test passes
         } catch (e: Exception) {
@@ -63,10 +66,10 @@ class LokiStructuredLoggingTest {
 
         // Test that we can log at different levels without exceptions
         try {
-            provider.write(name = "test", msg = debugMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.DEBUG, attr = emptyMap())
-            provider.write(name = "test", msg = infoMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.INFO, attr = emptyMap())
-            provider.write(name = "test", msg = warnMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.WARN, attr = emptyMap())
-            provider.write(name = "test", msg = errorMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.ERROR, attr = emptyMap())
+            provider.write(LogRecord.StructuredText(name = "test", msg = debugMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.DEBUG, attr = emptyMap()))
+            provider.write(LogRecord.StructuredText(name = "test", msg = infoMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.INFO, attr = emptyMap()))
+            provider.write(LogRecord.StructuredText(name = "test", msg = warnMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.WARN, attr = emptyMap()))
+            provider.write(LogRecord.StructuredText(name = "test", msg = errorMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.ERROR, attr = emptyMap()))
             // If we get here, the test passes
         } catch (e: Exception) {
             kotlin.test.fail("Structured logging at different levels should not throw: ${e.message}")
@@ -90,30 +93,34 @@ class LokiStructuredLoggingTest {
         // Test that we can log with different attributes without exceptions
         try {
             // Log with empty attributes
-            provider.write(name = "api", msg = logMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.INFO, attr = emptyMap())
+            provider.write(LogRecord.StructuredText(name = "api", msg = logMessage, serializer = serializer<TestLogStructure>(), level = LogLevel.INFO, attr = emptyMap()))
 
             // Log with some attributes
             provider.write(
-                name = "api", 
-                msg = logMessage, 
-                serializer = serializer<TestLogStructure>(),
-                level = LogLevel.INFO, 
-                attr = mapOf("endpoint" to "/users", "method" to "GET")
+                LogRecord.StructuredText(
+                    name = "api",
+                    msg = logMessage,
+                    serializer = serializer<TestLogStructure>(),
+                    level = LogLevel.INFO,
+                    attr = mapOf("endpoint" to "/users", "method" to "GET")
+                )
             )
 
             // Log with many attributes
             provider.write(
-                name = "api", 
-                msg = logMessage, 
-                serializer = serializer<TestLogStructure>(),
-                level = LogLevel.INFO, 
-                attr = mapOf(
-                    "endpoint" to "/users",
-                    "method" to "GET",
-                    "status" to "200",
-                    "duration" to "150ms",
-                    "user-agent" to "Mozilla/5.0",
-                    "referer" to "https://example.com"
+                LogRecord.StructuredText(
+                    name = "api",
+                    msg = logMessage,
+                    serializer = serializer<TestLogStructure>(),
+                    level = LogLevel.INFO,
+                    attr = mapOf(
+                        "endpoint" to "/users",
+                        "method" to "GET",
+                        "status" to "200",
+                        "duration" to "150ms",
+                        "user-agent" to "Mozilla/5.0",
+                        "referer" to "https://example.com"
+                    )
                 )
             )
 
