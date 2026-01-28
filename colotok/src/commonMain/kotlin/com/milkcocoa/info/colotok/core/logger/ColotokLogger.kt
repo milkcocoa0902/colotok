@@ -1,11 +1,8 @@
 package com.milkcocoa.info.colotok.core.logger
 
-import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
-import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
@@ -25,14 +22,13 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
         level: Level,
         msg: String
     ) {
-        if (attrs.isEmpty()) {
-            providers.forEach {
-                it.write(name, msg, level)
-            }
-        } else {
-            providers.forEach {
-                it.write(name, msg, level, attrs)
-            }
+        providers.forEach {
+            it.write(LogRecord.PlainText(
+                name = name,
+                msg = msg,
+                level = level,
+                attr = attrs
+            ))
         }
     }
 
@@ -48,7 +44,12 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
         attr: Map<String, String>
     ) {
         providers.forEach {
-            it.write(name, msg, level, attr.plus(this.attrs))
+            it.write(LogRecord.PlainText(
+                name = name,
+                msg = msg,
+                level = level,
+                attr = attrs.plus(attr)
+            ))
         }
     }
 
@@ -62,14 +63,14 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
         level: Level,
         msg: T
     ) {
-        if (this.attrs.isEmpty()) {
-            providers.forEach {
-                it.write(name, msg, T::class.serializer(), level)
-            }
-        } else {
-            providers.forEach {
-                it.write(name, msg, T::class.serializer(), level, this.attrs)
-            }
+        providers.forEach {
+            it.write(LogRecord.StructuredText(
+                name = name,
+                msg = msg,
+                level = level,
+                serializer = T::class.serializer(),
+                attr = attrs
+            ))
         }
     }
 
@@ -86,7 +87,13 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
         attr: Map<String, String>
     ) {
         providers.forEach {
-            it.write(name, msg, T::class.serializer(), level, attr.plus(this.attrs))
+            it.write(LogRecord.StructuredText(
+                name = name,
+                msg = msg,
+                level = level,
+                serializer = T::class.serializer(),
+                attr = attrs.plus(attr)
+            ))
         }
     }
 

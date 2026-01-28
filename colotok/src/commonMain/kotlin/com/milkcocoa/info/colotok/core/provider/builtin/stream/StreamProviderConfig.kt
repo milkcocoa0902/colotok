@@ -6,7 +6,6 @@ import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.util.unit.Size.KiB
-import okio.BufferedSink
 import okio.Sink
 import okio.blackholeSink
 import okio.buffer

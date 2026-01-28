@@ -2,7 +2,9 @@ package com.milkcocoa.info.colotok
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.logger.ColotokLoggerContext
+import com.milkcocoa.info.colotok.core.logger.infoAsync
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 class CLKMain
@@ -25,8 +27,10 @@ fun main() {
         .addProvider(ConsoleProvider())
         .getLogger()
 
-    logger.info("test001")
-    logger.info("test002")
-    logger.info("test003")
-    logger.info("test004")
+    runBlocking {
+        logger.infoAsync("test0001")
+        logger.infoAsync("test002")
+        logger.infoAsync("test003")
+        logger.infoAsync("test004")
+    }
 }

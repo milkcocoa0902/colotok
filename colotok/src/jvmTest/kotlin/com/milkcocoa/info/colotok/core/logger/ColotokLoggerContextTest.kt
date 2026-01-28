@@ -16,18 +16,15 @@ class ColotokLoggerContextTest {
         data class Record(val name: String, val msg: String, val level: Level, val attr: Map<String, String>)
         val records = mutableListOf<Record>()
 
-        override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
-            records += Record(name, msg, level, attr)
-        }
-
-        override fun <T : LogStructure> write(
-            name: String,
-            msg: T,
-            serializer: KSerializer<T>,
-            level: Level,
-            attr: Map<String, String>
-        ) {
-            records += Record(name, msg.toString(), level, attr)
+        override fun write(record: LogRecord) {
+            when(record){
+                is LogRecord.PlainText -> {
+                    records += Record(record.name, record.msg, record.level, record.attr)
+                }
+                is LogRecord.StructuredText<*> -> {
+                    records += Record(record.name, record.msg.toString(), record.level, record.attr)
+                }
+            }
         }
     }
 

@@ -1,9 +1,9 @@
 package com.milkcocoa.info.colotok.core.logger
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
@@ -19,53 +19,25 @@ class ColotokLoggerExtensionTest {
     @Serializable
     data class TestLogStructure(val message: String) : LogStructure
 
-    class TestAsyncProvider : AsyncProvider {
+    class TestAsyncProvider : Provider {
         var lastLogName: String = ""
         var lastLogMessage: String = ""
         var lastLogLevel: Level = LogLevel.INFO
         var lastLogAttributes: Map<String, String> = emptyMap()
         var lastLogStructure: LogStructure? = null
 
-        override fun write(name: String, msg: String, level: Level) {
-            lastLogName = name
-            lastLogMessage = msg
-            lastLogLevel = level
-            lastLogAttributes = emptyMap()
-        }
-
-        override fun write(name: String, msg: String, level: Level, attr: Map<String, String>) {
-            lastLogName = name
-            lastLogMessage = msg
-            lastLogLevel = level
-            lastLogAttributes = attr
-        }
-
-        override fun <T : LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: Level) {
-            lastLogName = name
-            lastLogStructure = msg
-            lastLogLevel = level
-            lastLogAttributes = emptyMap()
-        }
-
-        override fun <T : LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: Level, attr: Map<String, String>) {
-            lastLogName = name
-            lastLogStructure = msg
-            lastLogLevel = level
-            lastLogAttributes = attr
-        }
-
-        override suspend fun writeAsync(name: String, msg: String, level: Level, attr: Map<String, String>) {
-            lastLogName = name
-            lastLogMessage = msg
-            lastLogLevel = level
-            lastLogAttributes = attr
-        }
-
-        override suspend fun <T : LogStructure> writeAsync(name: String, msg: T, serializer: KSerializer<T>, level: Level, attr: Map<String, String>) {
-            lastLogName = name
-            lastLogStructure = msg
-            lastLogLevel = level
-            lastLogAttributes = attr
+        override fun write(record: LogRecord) {
+            lastLogName = record.name
+            lastLogLevel = record.level
+            lastLogAttributes = record.attr
+            when(record){
+                is LogRecord.PlainText -> {
+                    lastLogMessage = record.msg
+                }
+                is LogRecord.StructuredText<*> -> {
+                    lastLogStructure = record.msg
+                }
+            }
         }
     }
 

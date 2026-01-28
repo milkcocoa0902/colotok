@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.util
 
-import com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger
 import com.milkcocoa.info.colotok.core.logger.ColotokLogger
+import com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger
 
 actual object ThreadWrapper {
     actual fun getCurrentThreadName() = Thread.currentThread().name

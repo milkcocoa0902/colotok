@@ -1,6 +1,4 @@
 import com.vanniktech.maven.publish.SonatypeHost
-import org.gradle.kotlin.dsl.api
-import org.gradle.kotlin.dsl.project
 
 plugins {
     kotlin("multiplatform")

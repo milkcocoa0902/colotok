@@ -1,10 +1,8 @@
 package com.milkcocoa.info.colotok.core.provider.builtin.file
 
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.util.SinkUtil.write
-import kotlinx.serialization.KSerializer
 import okio.Path
 
 /**
@@ -51,66 +49,27 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
             }
         }
 
-    override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
+    override fun write(record: LogRecord) {
+        if(record.level.isEnabledFor(logLevel).not()) return
+
         runCatching {
-            if (enableBuffer) {
-                sb.appendLine(formatter.format(msg, level, attr))
-                if (sb.length > bufferSize) {
+            if(enableBuffer){
+                sb.appendLine(record.format(formatter))
+                if(sb.length > bufferSize){
                     getFileSystem().appendingSink(
                         file = filePath,
                         mustExist = false
                     ).write(sb.toString().encodeToByteArray())
                     sb.clear()
                 }
-            } else {
+            }else{
                 getFileSystem().appendingSink(
                     file = filePath,
                     mustExist = false
-                ).write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
+                ).write(record.format(formatter).plus("\n").encodeToByteArray())
             }
 
-            if (rotation?.isRotateNeeded(filePath) == true) {
-                rotation.doRotate(filePath)
-            }
-        }
-    }
-
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-        runCatching {
-            if (enableBuffer) {
-                sb.appendLine(formatter.format(msg, serializer, level, attr))
-                if (sb.length > bufferSize) {
-                    getFileSystem().appendingSink(
-                        file = filePath,
-                        mustExist = false
-                    ).write(sb.toString().encodeToByteArray())
-                    sb.clear()
-                }
-            } else {
-                getFileSystem().appendingSink(
-                    file = filePath,
-                    mustExist = false
-                ).write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
-            }
-
-            if (rotation?.isRotateNeeded(filePath) == true) {
+            if(rotation?.isRotateNeeded(filePath) == true){
                 rotation.doRotate(filePath)
             }
         }

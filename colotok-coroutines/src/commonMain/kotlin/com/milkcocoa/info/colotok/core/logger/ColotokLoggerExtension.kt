@@ -4,11 +4,9 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.writeAsync
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
@@ -18,19 +16,16 @@ suspend fun ColotokLogger.atAsync(
     msg: String
 ) {
     withContext(Dispatchers.Default) {
-        if (attrs.isEmpty()) {
-            providers.map {
-                async {
-                    it.writeAsync(name, msg, level)
-                }
-            }.awaitAll()
-        } else {
-            providers.map {
-                async {
-                    it.writeAsync(name, msg, level, attrs)
-                }
-            }.awaitAll()
-        }
+        providers.map {
+            async {
+                it.writeAsync(LogRecord.PlainText(
+                    name = name,
+                    msg = msg,
+                    level = level,
+                    attr = attrs
+                ))
+            }
+        }.awaitAll()
     }
 }
 
@@ -43,7 +38,12 @@ suspend fun ColotokLogger.atAsync(
     withContext(Dispatchers.Default) {
         providers.map {
             async {
-                it.writeAsync(name, msg, level, attr.plus(this@atAsync.attrs))
+                it.writeAsync(LogRecord.PlainText(
+                    name = name,
+                    msg = msg,
+                    level = level,
+                    attr = attrs.plus(attr)
+                ))
             }
         }.awaitAll()
     }
@@ -56,19 +56,17 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     msg: T
 ) {
     withContext(Dispatchers.Default) {
-        if (this@atAsync.attrs.isEmpty()) {
-            providers.map {
-                async {
-                    it.writeAsync(name, msg, T::class.serializer(), level)
-                }
-            }.awaitAll()
-        } else {
-            providers.map {
-                async {
-                    it.writeAsync(name, msg, T::class.serializer(), level, this@atAsync.attrs)
-                }
-            }.awaitAll()
-        }
+        providers.map {
+            async {
+                it.writeAsync(LogRecord.StructuredText(
+                    name = name,
+                    msg = msg,
+                    level = level,
+                    serializer = T::class.serializer(),
+                    attr = attrs
+                ))
+            }
+        }.awaitAll()
     }
 }
 
@@ -81,7 +79,13 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     withContext(Dispatchers.Default) {
         providers.map {
             async {
-                it.writeAsync(name, msg, T::class.serializer(), level, attr.plus(this@atAsync.attrs))
+                it.writeAsync(LogRecord.StructuredText(
+                    name = name,
+                    msg = msg,
+                    level = level,
+                    serializer = T::class.serializer(),
+                    attr = attrs.plus(attr)
+                ))
             }
         }.awaitAll()
     }

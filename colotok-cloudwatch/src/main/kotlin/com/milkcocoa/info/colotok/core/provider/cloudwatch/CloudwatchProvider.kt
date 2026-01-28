@@ -9,17 +9,15 @@ import aws.sdk.kotlin.services.cloudwatchlogs.createLogGroup
 import aws.sdk.kotlin.services.cloudwatchlogs.createLogStream
 import aws.sdk.kotlin.services.cloudwatchlogs.model.InputLogEvent
 import aws.sdk.kotlin.services.cloudwatchlogs.putLogEvents
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.KSerializer
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
+class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
     constructor(config: CloudwatchProviderConfig.()->Unit): this(CloudwatchProviderConfig().apply(config))
     constructor(): this(CloudwatchProviderConfig())
 
@@ -35,51 +33,51 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
 
     private val buf = mutableListOf<InputLogEvent>()
     private val logBufferSize = config.logBufferSize
+    private val region = credential.region
 
-    private suspend fun client() = CloudWatchLogsClient.invoke { 
-        this.region = credential.region
-        this.credentialsProvider = when(this@CloudwatchProvider.credential){
-            is CloudwatchCredential.Default -> DefaultChainCredentialsProvider()
-            is CloudwatchCredential.StaticCredentials -> StaticCredentialsProvider.invoke {
-                this.accessKeyId = credential.accessKeyId
-                this.secretAccessKey = credential.secretAccessKey
+    private val client by lazy {
+        CloudWatchLogsClient {
+            this.region = this@CloudwatchProvider.region
+            this.credentialsProvider = when (val c = this@CloudwatchProvider.credential) {
+                is CloudwatchCredential.Default -> DefaultChainCredentialsProvider()
+                is CloudwatchCredential.StaticCredentials -> StaticCredentialsProvider {
+                    this.accessKeyId = c.accessKeyId
+                    this.secretAccessKey = c.secretAccessKey
+                }
+
+                is CloudwatchCredential.Profile -> ProfileCredentialsProvider(
+                    profileName = c.profileName
+                )
+
+                is CloudwatchCredential.FromEnvironments -> EnvironmentCredentialsProvider()
             }
-            is CloudwatchCredential.Profile -> ProfileCredentialsProvider(
-                profileName = credential.profileName
-            )
-            is CloudwatchCredential.FromEnvironments -> EnvironmentCredentialsProvider()
         }
     }
 
 
     private suspend fun createGroupIfNotExists() = runCatching {
-        client().createLogGroup {
+        client.createLogGroup {
             this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
         }
     }
 
     private suspend fun createStreamIfNotExists() = runCatching {
-        client().createLogStream createLogStream@{
+        client.createLogStream {
             this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
             this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
         }
     }
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun writeAsync(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
+    override suspend fun writeAsync(record: LogRecord) {
+        if(record.level.isEnabledFor(logLevel).not()){
             return
         }
 
         val shouldSendLogs = mutex.withLock {
             buf.add(InputLogEvent {
                 this.timestamp = Clock.System.now().toEpochMilliseconds()
-                this.message = formatter.format(msg, level, attr)
+                this.message = record.format(formatter)
             })
 
             buf.size >= logBufferSize
@@ -90,6 +88,7 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
         }
     }
 
+
     /**
      * Sends the buffered logs to CloudWatch.
      * This method is synchronized with the mutex to prevent concurrent modifications to the buffer.
@@ -99,7 +98,10 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
             mutex.withLock {
                 if (buf.isEmpty()) return@withLock
 
-                val response = client().putLogEvents putLogEvents@{
+                createGroupIfNotExists()
+                createStreamIfNotExists()
+                
+                val response = client.putLogEvents {
                     this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
                     this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
                     this.sequenceToken = this@CloudwatchProvider.sequenceToken
@@ -112,32 +114,6 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
         }
     }
 
-    @OptIn(ExperimentalTime::class)
-    override suspend fun <T : LogStructure> writeAsync(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        val shouldSendLogs = mutex.withLock {
-            buf.add(InputLogEvent {
-                this.timestamp = Clock.System.now().toEpochMilliseconds()
-                this.message = formatter.format(msg, serializer, level, attr)
-            })
-
-            buf.size >= logBufferSize
-        }
-
-        if (shouldSendLogs) {
-            sendLogsToCloudWatch()
-        }
-    }
-
     /**
      * Flushes the buffer to CloudWatch regardless of buffer size.
      */
@@ -145,10 +121,8 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
         sendLogsToCloudWatch()
     }
 
-    init {
-        runBlocking {
-            createGroupIfNotExists()
-            createStreamIfNotExists()
-        }
+    override suspend fun onClosed() {
+        flush()
+        client.close()
     }
 }

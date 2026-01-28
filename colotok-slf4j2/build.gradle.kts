@@ -7,13 +7,6 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
-group = "com.milkcocoa.info"
-version = "unspecified"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":colotok"))
     compileOnly(libs.slf4j2.api)
