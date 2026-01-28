@@ -10,8 +10,7 @@ plugins {
 dependencies {
     implementation(project(":colotok"))
     compileOnly(libs.slf4j2.api)
-    testImplementation(platform(libs.junit.bom))
-    testImplementation(libs.junit.jupiter)
+    testImplementation(kotlin("test"))
     testImplementation(libs.slf4j2.api)
 }
 
