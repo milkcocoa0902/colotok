@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.provider.builtin
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.DetailStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.Path
 import kotlin.io.path.createFile
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.notExists
@@ -67,9 +67,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
         )
 
         Assertions.assertEquals(
@@ -89,9 +92,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
         )
 
         Assertions.assertEquals(
@@ -117,9 +123,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
         )
 
         Assertions.assertEquals(
@@ -145,9 +154,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.TRACE
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.TRACE,
+                attr = emptyMap()
+            )
         )
 
         Assertions.assertEquals(
@@ -173,10 +185,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.ERROR,
-            mapOf("additional" to "additional param")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.ERROR,
+                attr = mapOf("additional" to "additional param")
+            )
         )
 
         Assertions.assertEquals(
@@ -204,10 +218,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.ERROR,
-            mapOf("additional" to "additional param")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.ERROR,
+                attr = mapOf("additional" to "additional param")
+            )
         )
 
         Assertions.assertEquals(
@@ -241,10 +257,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.ERROR,
-            mapOf("additional" to "additional param")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.ERROR,
+                attr = mapOf("additional" to "additional param")
+            )
         )
 
         Assertions.assertTrue { testLogFile.notExists() }
@@ -276,10 +294,12 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.ERROR,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.ERROR,
+                attr = mapOf("attr" to "attributes")
+            )
         )
 
         Assertions.assertEquals(
@@ -311,19 +331,21 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.WARN,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.WARN,
+                attr = mapOf("attr" to "attributes")
+            )
         )
 
         Assertions.assertEquals(
@@ -357,19 +379,21 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.WARN,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.WARN,
+                attr = mapOf("attr" to "attributes")
+            )
         )
 
         Assertions.assertEquals(
@@ -409,19 +433,21 @@ object FileProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.WARN,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.WARN,
+                attr = mapOf("attr" to "attributes")
+            )
         )
 
         Assertions.assertEquals(

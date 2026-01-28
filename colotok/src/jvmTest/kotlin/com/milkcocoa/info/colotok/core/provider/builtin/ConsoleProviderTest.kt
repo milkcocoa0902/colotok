@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.provider.builtin
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.DetailStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
@@ -59,9 +60,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.TRACE
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.TRACE,
+                attr = emptyMap()
+            )
         )
         Assertions.assertEquals(
             "",
@@ -79,9 +83,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
         )
         Assertions.assertEquals(
             "2023-12-31 12:34:56  [INFO] - message",
@@ -100,9 +107,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
         )
         Assertions.assertEquals(
             Color.foreground("2023-12-31 12:34:56  [INFO] - message", AnsiColor.BLUE),
@@ -121,10 +131,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO,
-            attr = mapOf("additional" to "additional param")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = mapOf("additional" to "additional param")
+            )
         )
         Assertions.assertEquals(
             @Suppress("ktlint:standard:max-line-length")
@@ -147,10 +159,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.TRACE,
-            attr = mapOf("additional" to "additional param")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.TRACE,
+                attr = mapOf("additional" to "additional param")
+            )
         )
         Assertions.assertEquals(
             "",
@@ -168,10 +182,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.INFO,
-            attr = mapOf("additional" to "additional param")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = mapOf("additional" to "additional param")
+            )
         )
         @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
@@ -196,18 +212,21 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.INFO
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
         )
         Assertions.assertEquals(
             """
@@ -237,19 +256,21 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.INFO,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.INFO,
+                attr = mapOf("attr" to "attributes")
+            )
         )
         Assertions.assertEquals(
             """
@@ -281,19 +302,21 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.INFO,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.INFO,
+                attr = mapOf("attr" to "attributes")
+            )
         )
         Assertions.assertEquals(
             "",
@@ -313,19 +336,21 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg =
-                Log(
-                    name = "range error",
-                    logDetail =
-                        LogDetail(
-                            scope = "arg",
-                            message = "illegal argument"
-                        )
-                ),
-            serializer = Log::class.serializer(),
-            level = LogLevel.WARN,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.StructuredText(
+                name = "default logger",
+                msg =
+                    Log(
+                        name = "range error",
+                        logDetail =
+                            LogDetail(
+                                scope = "arg",
+                                message = "illegal argument"
+                            )
+                    ),
+                serializer = Log::class.serializer(),
+                level = LogLevel.WARN,
+                attr = mapOf("attr" to "attributes")
+            )
         )
         Assertions.assertEquals(
             """
@@ -359,9 +384,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.WARN
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.WARN,
+                attr = emptyMap()
+            )
         )
         Assertions.assertEquals(
             """
@@ -387,10 +415,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.ERROR,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.ERROR,
+                attr = mapOf("attr" to "attributes")
+            )
         )
         Assertions.assertEquals(
             """
@@ -416,10 +446,12 @@ class ConsoleProviderTest {
             }
 
         provider.write(
-            name = "default logger",
-            msg = "message",
-            level = LogLevel.ERROR,
-            attr = mapOf("attr" to "attributes")
+            LogRecord.PlainText(
+                name = "default logger",
+                msg = "message",
+                level = LogLevel.ERROR,
+                attr = mapOf("attr" to "attributes")
+            )
         )
         Assertions.assertEquals(
             """

@@ -5,8 +5,8 @@ import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 
 /**
  * Represents authentication credentials for Loki API access.

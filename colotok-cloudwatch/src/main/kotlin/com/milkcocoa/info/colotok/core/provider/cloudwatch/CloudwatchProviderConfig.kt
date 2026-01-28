@@ -1,6 +1,5 @@
 package com.milkcocoa.info.colotok.core.provider.cloudwatch
 
-import aws.smithy.kotlin.runtime.auth.awscredentials.Credentials
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level

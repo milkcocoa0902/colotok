@@ -1,11 +1,9 @@
 package com.milkcocoa.info.colotok.core.logger
 
-import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import org.slf4j.IMarkerFactory
 import org.slf4j.MDC
 import org.slf4j.Marker
-import org.slf4j.MarkerFactory
 import org.slf4j.event.Level
 import org.slf4j.helpers.AbstractLogger
 import org.slf4j.helpers.MessageFormatter

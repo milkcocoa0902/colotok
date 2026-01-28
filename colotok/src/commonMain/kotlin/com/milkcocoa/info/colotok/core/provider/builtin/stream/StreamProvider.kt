@@ -1,9 +1,7 @@
 package com.milkcocoa.info.colotok.core.provider.builtin.stream
 
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
-import kotlinx.serialization.KSerializer
 import okio.buffer
 import okio.use
 
@@ -20,59 +18,22 @@ class StreamProvider(config: StreamProviderConfig) : Provider {
 
     private val sb: StringBuilder = StringBuilder()
 
-    override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
+    override fun write(record: LogRecord) {
+        if(record.level.isEnabledFor(logLevel).not()) return
 
         runCatching {
-            if (enableBuffer) {
-                sb.appendLine(formatter.format(msg, level, attr))
-                if (sb.length > bufferSize) {
+            if(enableBuffer){
+                sb.appendLine(record.format(formatter))
+                if(sb.length > bufferSize){
                     outputStream.invoke().buffer().use { sink ->
                         sink.write(sb.toString().encodeToByteArray())
                         sink.flush()
                     }
                     sb.clear()
                 }
-            } else {
+            }else{
                 outputStream.invoke().buffer().use { sink ->
-                    sink.write(formatter.format(msg.plus("\n"), level, attr).encodeToByteArray())
-                    sink.flush()
-                }
-            }
-        }
-    }
-
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        runCatching {
-            if (enableBuffer) {
-                sb.appendLine(formatter.format(msg, serializer, level, attr))
-                if (sb.length > bufferSize) {
-                    outputStream.invoke().buffer().use { sink ->
-                        sink.write(sb.toString().encodeToByteArray())
-                        sink.flush()
-                    }
-                    sb.clear()
-                }
-            } else {
-                outputStream.invoke().buffer().use { sink ->
-                    sink.write(formatter.format(msg, serializer, level, attr).plus("\n").encodeToByteArray())
+                    sink.write(record.format(formatter).plus("\n").encodeToByteArray())
                     sink.flush()
                 }
             }

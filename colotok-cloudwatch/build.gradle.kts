@@ -1,5 +1,4 @@
 import com.vanniktech.maven.publish.SonatypeHost
-import org.gradle.api.JavaVersion
 
 plugins {
     kotlin("jvm")

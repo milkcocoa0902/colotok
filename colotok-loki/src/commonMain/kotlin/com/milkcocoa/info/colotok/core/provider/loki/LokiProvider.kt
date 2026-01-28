@@ -1,16 +1,12 @@
 package com.milkcocoa.info.colotok.core.provider.loki
 
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.coroutines.blocking
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
-import io.ktor.client.request.basicAuth
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
+import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -21,7 +17,7 @@ import kotlin.time.ExperimentalTime
  * This provider sends log entries to a Loki server using its HTTP API.
  * It supports buffering log entries and sending them in batches for better performance.
  */
-class LokiProvider(config: LokiProviderConfig): AsyncProvider {
+class LokiProvider(config: LokiProviderConfig): AsyncProvider() {
     /**
      * Convenience constructor that accepts a configuration lambda.
      * 
@@ -96,16 +92,8 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider {
      * @param attr Additional attributes to include with the log
      */
     @OptIn(ExperimentalTime::class)
-    override suspend fun writeAsync(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        // Skip if the log level is not enabled
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
+    override suspend fun writeAsync(record: LogRecord) {
+        if(record.level.isEnabledFor(logLevel).not()) return
 
         runCatching {
             // Add the log entry to the buffer and check if we should send logs
@@ -113,59 +101,7 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider {
                 buffer.add(
                     LokiValue(
                         timestamp = Clock.System.now(),
-                        value = formatter.format(
-                            msg = msg,
-                            level = level,
-                            attrs = attr
-                        )
-                    )
-                )
-
-                // Return true if buffer has reached the configured size
-                buffer.size >= bufferSize
-            }
-
-            // Send logs if the buffer is full
-            if(shouldSendLogs){
-                sendLogsToLoki()
-            }
-        }
-    }
-
-    /**
-     * Asynchronously writes a structured log message to Loki.
-     * 
-     * @param name The logger name
-     * @param msg The structured log message
-     * @param serializer The serializer for the structured log message
-     * @param level The log level
-     * @param attr Additional attributes to include with the log
-     */
-    @OptIn(ExperimentalTime::class)
-    override suspend fun <T : LogStructure> writeAsync(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        // Skip if the log level is not enabled
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        runCatching {
-            // Add the log entry to the buffer and check if we should send logs
-            val shouldSendLogs = mutex.withLock {
-                buffer.add(
-                    LokiValue(
-                        timestamp = Clock.System.now(),
-                        value = formatter.format(
-                            msg = msg,
-                            serializer = serializer,
-                            level = level,
-                            attrs = attr
-                        )
+                        value = record.format(formatter)
                     )
                 )
 
@@ -188,5 +124,9 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider {
      */
     suspend fun flush(){
         sendLogsToLoki()
+    }
+
+    override suspend fun onClosed() {
+        flush() // チャンネル終了時に自動的にフラッシュ
     }
 }

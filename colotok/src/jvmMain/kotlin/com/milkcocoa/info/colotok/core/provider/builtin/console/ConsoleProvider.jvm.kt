@@ -1,12 +1,11 @@
 package com.milkcocoa.info.colotok.core.provider.builtin.console
 
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
-import kotlinx.serialization.KSerializer
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider {
@@ -24,48 +23,17 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
         config.getColorForLevel(level = it)
     }
 
-    actual override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
+    actual override fun write(record: LogRecord) {
+        if(record.level.isEnabledFor(logLevel).not()) return
         runCatching {
-            if (colorize.not()) {
-                println(formatter.format(msg, level, attr))
-            } else {
-                getColor(level)?.let {
-                    println(Color.foreground(formatter.format(msg, level, attr), it))
-                } ?: run {
-                    println(formatter.format(msg, level, attr))
-                }
+            val color = when{
+                colorize.not() -> null
+                else -> getColor(record.level)
             }
-        }
-    }
-
-    actual override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-        runCatching {
-            if (colorize.not()) {
-                println(formatter.format(msg, serializer, level, attr))
-            } else {
-                getColor(level)?.let {
-                    println(Color.foreground(formatter.format(msg, serializer, level, attr), it))
-                } ?: run {
-                    println(formatter.format(msg, serializer, level, attr))
-                }
+            if(color != null){
+                println(Color.foreground(record.format(formatter), color))
+            }else{
+                println(record.format(formatter))
             }
         }
     }
