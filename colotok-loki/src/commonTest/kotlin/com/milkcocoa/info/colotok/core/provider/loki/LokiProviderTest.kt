@@ -2,9 +2,7 @@ package com.milkcocoa.info.colotok.core.provider.loki
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.test.fail

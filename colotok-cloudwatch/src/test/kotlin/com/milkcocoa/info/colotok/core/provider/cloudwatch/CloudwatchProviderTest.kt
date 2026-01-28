@@ -2,7 +2,6 @@ package com.milkcocoa.info.colotok.core.provider.cloudwatch
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import kotlinx.serialization.Serializable
 import kotlin.test.Test

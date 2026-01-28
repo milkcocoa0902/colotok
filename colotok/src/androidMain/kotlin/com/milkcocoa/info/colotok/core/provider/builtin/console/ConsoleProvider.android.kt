@@ -22,46 +22,21 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
     val isEnabledForRelease: Boolean = config.isEnabledForRelease
     val detectDebugModeFn: (() -> Boolean) = config.detectDebugModeFn ?: { false }
 
-    actual override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
+
+    actual override fun write(record: LogRecord) {
         if (isEnabledForRelease.not() and detectDebugModeFn.invoke().not()) return
 
-        if (level.isEnabledFor(logLevel).not()) {
+        if (record.level.isEnabledFor(logLevel).not()) {
             return
         }
-        when (level) {
-            LogLevel.TRACE -> Log.v(name, formatter.format(msg, level, attr))
-            LogLevel.DEBUG -> Log.d(name, formatter.format(msg, level, attr))
-            LogLevel.INFO -> Log.i(name, formatter.format(msg, level, attr))
-            LogLevel.WARN -> Log.w(name, formatter.format(msg, level, attr))
-            LogLevel.ERROR -> Log.e(name, formatter.format(msg, level, attr))
-            else -> Log.println(level.levelInt, name, formatter.format(msg, level, attr))
-        }
-    }
-
-    actual override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (isEnabledForRelease.not() and detectDebugModeFn.invoke().not()) return
-
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-        when (level) {
-            LogLevel.TRACE -> Log.v(name, formatter.format(msg, serializer, level, attr))
-            LogLevel.DEBUG -> Log.d(name, formatter.format(msg, serializer, level, attr))
-            LogLevel.INFO -> Log.i(name, formatter.format(msg, serializer, level, attr))
-            LogLevel.WARN -> Log.w(name, formatter.format(msg, serializer, level, attr))
-            LogLevel.ERROR -> Log.e(name, formatter.format(msg, serializer, level, attr))
-            else -> Log.println(level.levelInt, name, formatter.format(msg, serializer, level, attr))
+        runCatching {
+            when(record.level){
+                LogLevel.TRACE -> Logg.v(record.name, record.format(formatter))
+                LogLevel.DEBUG -> Logg.d(record.name, record.format(formatter))
+                LogLevel.INFO -> Logg.i(record.name, record.format(formatter))
+                LogLevel.WARN -> Logg.w(record.name, record.format(formatter))
+                LogLevel.ERROR -> Logg.e(record.name, record.format(formatter))
+            }
         }
     }
 }

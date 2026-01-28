@@ -14,14 +14,13 @@ final class LevelScopedColotokLogger(
     val attrs get() = config.defaultAttrs
 
     fun print(msg: String) {
-        if (this.attrs.isEmpty()) {
-            providers.forEach {
-                it.write(name, msg, level)
-            }
-        } else {
-            providers.forEach {
-                it.write(name, msg, level, this.attrs)
-            }
+        providers.forEach {
+            it.write(LogRecord.PlainText(
+                name = name,
+                msg = msg,
+                level = level,
+                attr = attrs
+            ))
         }
     }
 
@@ -30,20 +29,25 @@ final class LevelScopedColotokLogger(
         attr: Map<String, String>
     ) {
         providers.forEach {
-            it.write(name, msg, level, attr.plus(this.attrs))
+            it.write(LogRecord.PlainText(
+                name = name,
+                msg = msg,
+                level = level,
+                attr = attrs.plus(attr)
+            ))
         }
     }
 
     @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> print(msg: T) {
-        if (this.attrs.isEmpty()) {
-            providers.forEach {
-                it.write(name, msg, T::class.serializer(), level)
-            }
-        } else {
-            providers.forEach {
-                it.write(name, msg, T::class.serializer(), level, this.attrs)
-            }
+        providers.forEach {
+            it.write(LogRecord.StructuredText(
+                name = name,
+                msg = msg,
+                level = level,
+                serializer = T::class.serializer(),
+                attr = attrs
+            ))
         }
     }
 
@@ -53,7 +57,13 @@ final class LevelScopedColotokLogger(
         attr: Map<String, String>
     ) {
         providers.forEach {
-            it.write(name, msg, T::class.serializer(), level, attr.plus(this.attrs))
+            it.write(LogRecord.StructuredText(
+                name = name,
+                msg = msg,
+                level = level,
+                serializer = T::class.serializer(),
+                attr = attrs.plus(attr)
+            ))
         }
     }
 }

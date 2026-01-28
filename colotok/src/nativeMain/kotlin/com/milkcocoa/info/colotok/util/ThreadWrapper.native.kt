@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.util
 
-import com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger
 import com.milkcocoa.info.colotok.core.logger.ColotokLogger
+import com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.concurrent.ObsoleteWorkersApi
 import kotlin.native.concurrent.Worker

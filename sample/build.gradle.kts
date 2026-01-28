@@ -1,6 +1,3 @@
-import org.gradle.api.JavaVersion
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")

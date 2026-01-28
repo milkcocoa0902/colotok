@@ -9,17 +9,15 @@ import aws.sdk.kotlin.services.cloudwatchlogs.createLogGroup
 import aws.sdk.kotlin.services.cloudwatchlogs.createLogStream
 import aws.sdk.kotlin.services.cloudwatchlogs.model.InputLogEvent
 import aws.sdk.kotlin.services.cloudwatchlogs.putLogEvents
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.KSerializer
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
+class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
     constructor(config: CloudwatchProviderConfig.()->Unit): this(CloudwatchProviderConfig().apply(config))
     constructor(): this(CloudwatchProviderConfig())
 
@@ -66,20 +64,15 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
     }
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun writeAsync(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
+    override suspend fun writeAsync(record: LogRecord) {
+        if(record.level.isEnabledFor(logLevel).not()){
             return
         }
 
         val shouldSendLogs = mutex.withLock {
             buf.add(InputLogEvent {
                 this.timestamp = Clock.System.now().toEpochMilliseconds()
-                this.message = formatter.format(msg, level, attr)
+                this.message = record.format(formatter)
             })
 
             buf.size >= logBufferSize
@@ -89,6 +82,7 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
             sendLogsToCloudWatch()
         }
     }
+
 
     /**
      * Sends the buffered logs to CloudWatch.
@@ -109,32 +103,6 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider {
                 this@CloudwatchProvider.sequenceToken = response.nextSequenceToken
                 buf.clear()
             }
-        }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    override suspend fun <T : LogStructure> writeAsync(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        val shouldSendLogs = mutex.withLock {
-            buf.add(InputLogEvent {
-                this.timestamp = Clock.System.now().toEpochMilliseconds()
-                this.message = formatter.format(msg, serializer, level, attr)
-            })
-
-            buf.size >= logBufferSize
-        }
-
-        if (shouldSendLogs) {
-            sendLogsToCloudWatch()
         }
     }
 

@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalEncodingApi::class)
 
 import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 import kotlin.io.encoding.ExperimentalEncodingApi
 

@@ -2,11 +2,9 @@ package com.milkcocoa.info.colotok.core.provider.loki
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 class LokiStructuredLoggingTest {
 
