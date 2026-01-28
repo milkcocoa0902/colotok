@@ -84,4 +84,18 @@ class CloudwatchProviderTest {
         // In a real test, you would mock the AWS SDK and verify that the correct methods are called
         assertNotNull(provider)
     }
+
+    @Test
+    fun `test close and onClosed`() {
+        val provider = CloudwatchProvider {
+            level = LogLevel.INFO
+            formatter = SimpleStructureFormatter
+            logGroup = "test-group"
+            logStream = "test-stream"
+            credential = CloudwatchCredential.Default("us-west-2")
+        }
+
+        // Closing the provider should close the client
+        provider.close()
+    }
 }

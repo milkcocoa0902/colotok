@@ -33,31 +33,36 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
 
     private val buf = mutableListOf<InputLogEvent>()
     private val logBufferSize = config.logBufferSize
+    private val region = credential.region
 
-    private suspend fun client() = CloudWatchLogsClient.invoke { 
-        this.region = credential.region
-        this.credentialsProvider = when(this@CloudwatchProvider.credential){
-            is CloudwatchCredential.Default -> DefaultChainCredentialsProvider()
-            is CloudwatchCredential.StaticCredentials -> StaticCredentialsProvider.invoke {
-                this.accessKeyId = credential.accessKeyId
-                this.secretAccessKey = credential.secretAccessKey
+    private val client by lazy {
+        CloudWatchLogsClient {
+            this.region = this@CloudwatchProvider.region
+            this.credentialsProvider = when (val c = this@CloudwatchProvider.credential) {
+                is CloudwatchCredential.Default -> DefaultChainCredentialsProvider()
+                is CloudwatchCredential.StaticCredentials -> StaticCredentialsProvider {
+                    this.accessKeyId = c.accessKeyId
+                    this.secretAccessKey = c.secretAccessKey
+                }
+
+                is CloudwatchCredential.Profile -> ProfileCredentialsProvider(
+                    profileName = c.profileName
+                )
+
+                is CloudwatchCredential.FromEnvironments -> EnvironmentCredentialsProvider()
             }
-            is CloudwatchCredential.Profile -> ProfileCredentialsProvider(
-                profileName = credential.profileName
-            )
-            is CloudwatchCredential.FromEnvironments -> EnvironmentCredentialsProvider()
         }
     }
 
 
     private suspend fun createGroupIfNotExists() = runCatching {
-        client().createLogGroup {
+        client.createLogGroup {
             this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
         }
     }
 
     private suspend fun createStreamIfNotExists() = runCatching {
-        client().createLogStream createLogStream@{
+        client.createLogStream {
             this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
             this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
         }
@@ -93,7 +98,10 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
             mutex.withLock {
                 if (buf.isEmpty()) return@withLock
 
-                val response = client().putLogEvents putLogEvents@{
+                createGroupIfNotExists()
+                createStreamIfNotExists()
+                
+                val response = client.putLogEvents {
                     this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
                     this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
                     this.sequenceToken = this@CloudwatchProvider.sequenceToken
@@ -113,10 +121,8 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
         sendLogsToCloudWatch()
     }
 
-    init {
-        runBlocking {
-            createGroupIfNotExists()
-            createStreamIfNotExists()
-        }
+    override suspend fun onClosed() {
+        flush()
+        client.close()
     }
 }

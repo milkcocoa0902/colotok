@@ -22,11 +22,13 @@ abstract class AsyncProvider: Provider, AutoCloseable {
     private val channel = Channel<LogRecord>(
         capacity = Channel.BUFFERED
     )
-    init {
-        coroutineScope.launch {
-            for(record in channel){
+    private val job = coroutineScope.launch {
+        try {
+            for (record in channel) {
                 writeAsync(record)
             }
+        } finally {
+            onClosed()
         }
     }
 
@@ -37,6 +39,18 @@ abstract class AsyncProvider: Provider, AutoCloseable {
 
     override fun close() {
         channel.close()
-        coroutineScope.cancel()
+    }
+
+    suspend fun join() {
+        channel.close()
+        job.join()
+    }
+
+    /**
+     * チャンネルが閉じられ、すべてのログレコードが処理された後に呼び出されます。
+     * バッファのフラッシュなどのクリーンアップ処理をここに記述します。
+     */
+    protected open suspend fun onClosed() {
+        // デフォルトでは何もしない
     }
 }

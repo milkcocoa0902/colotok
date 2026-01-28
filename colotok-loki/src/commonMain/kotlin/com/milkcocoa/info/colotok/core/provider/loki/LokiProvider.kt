@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.provider.loki
 
+import com.milkcocoa.info.colotok.core.coroutines.blocking
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 import io.ktor.client.request.*
@@ -123,5 +124,9 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider() {
      */
     suspend fun flush(){
         sendLogsToLoki()
+    }
+
+    override suspend fun onClosed() {
+        flush() // チャンネル終了時に自動的にフラッシュ
     }
 }
