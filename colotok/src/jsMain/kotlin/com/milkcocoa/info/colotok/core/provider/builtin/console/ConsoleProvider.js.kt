@@ -8,7 +8,7 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 
 @OptIn(ExperimentalJsExport::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider() {
+public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider(config) {
     constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**
@@ -16,20 +16,16 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
      */
     constructor() : this(ConsoleProviderConfig())
 
-    actual val logLevel: Level = config.level
-    actual val formatter: Formatter = config.formatter
 
-
-    actual override fun onMessage(record: LogRecord) {
-        if(record.level.isEnabledFor(logLevel).not()) return
+    actual override suspend fun onMessage(record: LogRecord) {
         runCatching {
             when(record.level){
-                LogLevel.TRACE -> console.log(record.format(formatter))
-                LogLevel.DEBUG -> console.log(record.format(formatter))
-                LogLevel.INFO -> console.info(record.format(formatter))
-                LogLevel.WARN -> console.warn(record.format(formatter))
-                LogLevel.ERROR -> console.error(record.format(formatter))
-                else -> console.log(record.format(formatter))
+                LogLevel.TRACE -> console.log(record.format(config.formatter))
+                LogLevel.DEBUG -> console.log(record.format(config.formatter))
+                LogLevel.INFO -> console.info(record.format(config.formatter))
+                LogLevel.WARN -> console.warn(record.format(config.formatter))
+                LogLevel.ERROR -> console.error(record.format(config.formatter))
+                else -> console.log(record.format(config.formatter))
             }
         }
     }

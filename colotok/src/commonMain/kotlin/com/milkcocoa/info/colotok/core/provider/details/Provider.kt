@@ -17,6 +17,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 interface IProvider: AutoCloseable {
+    val config: ProviderConfig
     open val coroutineScope: CoroutineScope
     val channel: Channel<LogRecord>
     val job: Job
@@ -29,10 +30,9 @@ interface IProvider: AutoCloseable {
 }
 
 abstract class Provider(
+    override val config: ProviderConfig,
     onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
 ): IProvider {
-    constructor(): this(BufferOverflow.SUSPEND)
-
     private val handler = CoroutineExceptionHandler { _, throwable ->
         println("Failed to process async log: ${throwable.message}")
     }
@@ -60,7 +60,9 @@ abstract class Provider(
 
 
     override fun write(record: LogRecord) {
-        channel.trySend(record)
+        if (record.level.isEnabledFor(config.level)) {
+            channel.trySend(record)
+        }
     }
 
 

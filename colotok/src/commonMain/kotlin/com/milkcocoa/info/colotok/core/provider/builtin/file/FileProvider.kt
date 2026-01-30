@@ -10,7 +10,7 @@ import okio.Path
 /**
  * builtin provider which used to write the log into file.
  */
-class FileProvider(private val outputFileName: okio.Path, config: FileProviderConfig) : Provider() {
+class FileProvider(private val outputFileName: okio.Path, config: FileProviderConfig) : Provider(config) {
     /**
      * initialize provider with default configuration
      */
@@ -25,8 +25,6 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
     ) : this(outputFileName, FileProviderConfig().apply(config))
 
     private val rotation = config.rotation
-    private val logLevel = config.level
-    private val formatter = config.formatter
 
     /**
      * get file path where to write the log.
@@ -49,14 +47,12 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
 
     private val mutex = Mutex()
     override suspend fun onMessage(record: LogRecord) {
-        if(record.level.isEnabledFor(logLevel).not()) return
-
         mutex.withLock {
             runCatching {
                 getFileSystem().appendingSink(
                     file = filePath,
                     mustExist = false
-                ).write(record.format(formatter).plus("\n").encodeToByteArray())
+                ).write(record.format(config.formatter).plus("\n").encodeToByteArray())
 
                 if(rotation?.isRotateNeeded(filePath) == true){
                     rotation.doRotate(filePath)

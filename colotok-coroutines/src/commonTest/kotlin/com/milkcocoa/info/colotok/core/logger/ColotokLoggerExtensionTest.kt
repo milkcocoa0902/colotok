@@ -1,10 +1,13 @@
 package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
+import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -19,7 +22,11 @@ class ColotokLoggerExtensionTest {
     @Serializable
     data class TestLogStructure(val message: String) : LogStructure
 
-    class TestAsyncProvider : Provider() {
+    class TestProviderConfig(override var level: Level = LogLevel.DEBUG) : ProviderConfig {
+        override var formatter: Formatter = SimpleTextFormatter
+    }
+
+    class TestAsyncProvider(config: ProviderConfig = TestProviderConfig()) : Provider(config) {
         var lastLogName: String = ""
         var lastLogMessage: String = ""
         var lastLogLevel: Level = LogLevel.INFO
@@ -112,7 +119,7 @@ class ColotokLoggerExtensionTest {
 
     @Test
     fun testTraceAsync() = runTest {
-        val provider = TestAsyncProvider()
+        val provider = TestAsyncProvider(TestProviderConfig(LogLevel.TRACE))
         val logger = ColotokLogger("test-logger") {
             providers = listOf(provider)
         }
@@ -192,7 +199,7 @@ class ColotokLoggerExtensionTest {
 
     @Test
     fun testTraceAsyncWithAttributes() = runTest {
-        val provider = TestAsyncProvider()
+        val provider = TestAsyncProvider(TestProviderConfig(LogLevel.TRACE))
         val logger = ColotokLogger("test-logger") {
             providers = listOf(provider)
         }
@@ -209,7 +216,7 @@ class ColotokLoggerExtensionTest {
 
     @Test
     fun testTraceAsyncWithLogStructure() = runTest {
-        val provider = TestAsyncProvider()
+        val provider = TestAsyncProvider(TestProviderConfig(LogLevel.TRACE))
         val logger = ColotokLogger("test-logger") {
             providers = listOf(provider)
         }
@@ -226,7 +233,7 @@ class ColotokLoggerExtensionTest {
 
     @Test
     fun testTraceAsyncWithLogStructureAndAttributes() = runTest {
-        val provider = TestAsyncProvider()
+        val provider = TestAsyncProvider(TestProviderConfig(LogLevel.TRACE))
         val logger = ColotokLogger("test-logger") {
             providers = listOf(provider)
         }
@@ -244,7 +251,7 @@ class ColotokLoggerExtensionTest {
 
     @Test
     fun testAtTraceAsync() = runTest {
-        val provider = TestAsyncProvider()
+        val provider = TestAsyncProvider(TestProviderConfig(LogLevel.TRACE))
         val logger = ColotokLogger("test-logger") {
             providers = listOf(provider)
         }

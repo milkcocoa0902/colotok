@@ -4,7 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructu
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
+import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
 
 sealed interface CloudwatchCredential{
     val region: String
@@ -28,12 +28,12 @@ sealed interface CloudwatchCredential{
     ): CloudwatchCredential
 }
 
-class CloudwatchProviderConfig: ProviderConfig {
+class CloudwatchProviderConfig: AsyncProviderConfig {
     override var level: Level = LogLevel.DEBUG
     override var formatter: Formatter = SimpleStructureFormatter
 
     var logGroup: String? = null
     var logStream: String? = null
     var credential: CloudwatchCredential? = null
-    var logBufferSize:  Int = 50
+    override var bufferSize:  Int = 50
 }

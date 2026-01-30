@@ -1,5 +1,8 @@
 package com.milkcocoa.info.colotok.core.provider.details
 
+import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
+import com.milkcocoa.info.colotok.core.formatter.details.Formatter
+import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import kotlinx.coroutines.test.runTest
@@ -8,17 +11,23 @@ import kotlin.test.assertEquals
 
 class AsyncProviderTest {
 
-    class TestAsyncProvider : AsyncProvider() {
+    class TestAsyncProviderConfig : AsyncProviderConfig {
+        override var level: Level = LogLevel.DEBUG
+        override var formatter: Formatter = SimpleTextFormatter
+        override var bufferSize: Int = 1
+    }
+
+    class TestAsyncProvider(config: TestAsyncProviderConfig) : AsyncProvider(config) {
         val processedRecords = mutableListOf<LogRecord>()
 
-        override suspend fun onMessage(record: LogRecord) {
-            processedRecords.add(record)
+        override suspend fun onPublish(records: List<LogRecord>) {
+            processedRecords.addAll(records)
         }
     }
 
     @Test
     fun testAsyncLogging() = runTest {
-        val provider = TestAsyncProvider()
+        val provider = TestAsyncProvider(TestAsyncProviderConfig())
         val record1 = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
         val record2 = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
 

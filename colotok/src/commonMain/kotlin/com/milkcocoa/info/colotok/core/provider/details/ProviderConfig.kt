@@ -17,3 +17,4 @@ interface ProviderConfig {
      */
     var formatter: Formatter
 }
+
