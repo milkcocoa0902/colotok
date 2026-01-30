@@ -19,14 +19,14 @@ class ColotokLoggerExtensionTest {
     @Serializable
     data class TestLogStructure(val message: String) : LogStructure
 
-    class TestAsyncProvider : Provider {
+    class TestAsyncProvider : Provider() {
         var lastLogName: String = ""
         var lastLogMessage: String = ""
         var lastLogLevel: Level = LogLevel.INFO
         var lastLogAttributes: Map<String, String> = emptyMap()
         var lastLogStructure: LogStructure? = null
 
-        override fun write(record: LogRecord) {
+        override fun onMessage(record: LogRecord) {
             lastLogName = record.name
             lastLogLevel = record.level
             lastLogAttributes = record.attr
@@ -37,6 +37,7 @@ class ColotokLoggerExtensionTest {
                 is LogRecord.StructuredText<*> -> {
                     lastLogStructure = record.msg
                 }
+                is LogRecord.Pin -> {}
             }
         }
     }

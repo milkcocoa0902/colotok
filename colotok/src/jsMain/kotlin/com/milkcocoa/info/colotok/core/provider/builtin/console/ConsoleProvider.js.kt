@@ -8,7 +8,7 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 
 @OptIn(ExperimentalJsExport::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider {
+public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider() {
     constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**
@@ -20,7 +20,7 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
     actual val formatter: Formatter = config.formatter
 
 
-    actual override fun write(record: LogRecord) {
+    actual override fun onMessage(record: LogRecord) {
         if(record.level.isEnabledFor(logLevel).not()) return
         runCatching {
             when(record.level){
@@ -29,6 +29,7 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
                 LogLevel.INFO -> console.info(record.format(formatter))
                 LogLevel.WARN -> console.warn(record.format(formatter))
                 LogLevel.ERROR -> console.error(record.format(formatter))
+                else -> console.log(record.format(formatter))
             }
         }
     }

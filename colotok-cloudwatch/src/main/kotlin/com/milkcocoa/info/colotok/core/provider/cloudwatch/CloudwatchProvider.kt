@@ -117,12 +117,12 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
     /**
      * Flushes the buffer to CloudWatch regardless of buffer size.
      */
-    suspend fun flush() {
+    override suspend fun onFlush() {
+        super.onFlush()
         sendLogsToCloudWatch()
     }
 
-    override suspend fun onClosed() {
-        flush()
+    override fun onClosed() {
         client.close()
     }
 }

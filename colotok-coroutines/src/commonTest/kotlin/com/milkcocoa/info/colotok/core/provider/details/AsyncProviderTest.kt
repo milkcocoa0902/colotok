@@ -26,10 +26,12 @@ class AsyncProviderTest {
         provider.write(record2)
 
         // Wait for processing to complete
-        provider.join()
+        provider.flush()
 
         assertEquals(2, provider.processedRecords.size)
         assertEquals(record1, provider.processedRecords[0])
         assertEquals(record2, provider.processedRecords[1])
+
+        provider.join()
     }
 }

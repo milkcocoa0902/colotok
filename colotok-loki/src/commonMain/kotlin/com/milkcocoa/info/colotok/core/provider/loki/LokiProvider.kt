@@ -118,15 +118,16 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider() {
 
     /**
      * Flushes any buffered log entries to Loki immediately.
-     * 
+     *
      * This method can be called to ensure all logs are sent to Loki,
      * for example before application shutdown.
      */
-    suspend fun flush(){
+    override suspend fun onFlush() {
+        super.onFlush()
         sendLogsToLoki()
     }
 
-    override suspend fun onClosed() {
-        flush() // チャンネル終了時に自動的にフラッシュ
+    override fun onClosed() {
+
     }
 }

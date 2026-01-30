@@ -8,7 +8,7 @@ import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider {
+public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider() {
     constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**
@@ -23,7 +23,7 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
         config.getColorForLevel(level = it)
     }
 
-    actual override fun write(record: LogRecord) {
+    actual override fun onMessage(record: LogRecord) {
         if(record.level.isEnabledFor(logLevel).not()) return
         runCatching {
             val color = when{

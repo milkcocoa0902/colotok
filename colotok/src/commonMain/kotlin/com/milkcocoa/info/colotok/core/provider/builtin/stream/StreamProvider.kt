@@ -5,7 +5,7 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 import okio.buffer
 import okio.use
 
-class StreamProvider(config: StreamProviderConfig) : Provider {
+class StreamProvider(config: StreamProviderConfig) : Provider() {
     constructor(config: StreamProviderConfig.() -> Unit) : this(StreamProviderConfig().apply(config))
     constructor() : this(StreamProviderConfig())
 
@@ -18,7 +18,7 @@ class StreamProvider(config: StreamProviderConfig) : Provider {
 
     private val sb: StringBuilder = StringBuilder()
 
-    override fun write(record: LogRecord) {
+    override fun onMessage(record: LogRecord) {
         if(record.level.isEnabledFor(logLevel).not()) return
 
         runCatching {
@@ -43,7 +43,7 @@ class StreamProvider(config: StreamProviderConfig) : Provider {
     /**
      * flush buffered data into file.
      */
-    fun flush() {
+    override suspend fun onFlush() {
         outputStream.invoke().buffer().use { sink ->
             sink.write(sb.toString().encodeToByteArray())
             sink.flush()

@@ -8,7 +8,7 @@ import okio.Path
 /**
  * builtin provider which used to write the log into file.
  */
-class FileProvider(private val outputFileName: okio.Path, config: FileProviderConfig) : Provider {
+class FileProvider(private val outputFileName: okio.Path, config: FileProviderConfig) : Provider() {
     /**
      * initialize provider with default configuration
      */
@@ -49,7 +49,7 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
             }
         }
 
-    override fun write(record: LogRecord) {
+    override fun onMessage(record: LogRecord) {
         if(record.level.isEnabledFor(logLevel).not()) return
 
         runCatching {
@@ -78,7 +78,7 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
     /**
      * flush buffered data into file.
      */
-    fun flush() {
+    override suspend fun onFlush() {
         getFileSystem().appendingSink(
             file = filePath,
             mustExist = false
