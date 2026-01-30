@@ -5,33 +5,52 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
+interface IProvider: AutoCloseable {
+    open val coroutineScope: CoroutineScope
+    val channel: Channel<LogRecord>
+    val job: Job
+
+    fun write(record: LogRecord)
+    suspend fun flush(timeout: Duration = 1000.milliseconds)
+    suspend fun onFlush(){}
+    suspend fun onMessage(record: LogRecord)
+    fun onClosed(){}
+}
 
 abstract class Provider(
     onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
-): AutoCloseable {
+): IProvider {
     constructor(): this(BufferOverflow.SUSPEND)
+
     private val handler = CoroutineExceptionHandler { _, throwable ->
         println("Failed to process async log: ${throwable.message}")
     }
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + handler)
-    protected val channel = Channel<LogRecord>(
+    override val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + handler)
+    override val channel = Channel<LogRecord>(
         capacity = Channel.BUFFERED,
         onBufferOverflow = onBufferOverflow
     )
-    private val job = coroutineScope.launch {
+    override val job = coroutineScope.launch {
         try {
             for (record in channel) {
                 if (record is LogRecord.Pin) {
-                    onFlush()
+                    runCatching{ onFlush() }
                     record.deferred.complete(Unit)
                     continue
                 }
-                onMessage(record)
+                runCatching { onMessage(record) }
             }
         } finally {
             onFlush()
@@ -39,19 +58,11 @@ abstract class Provider(
         }
     }
 
-    /**
-     * チャンネルが閉じられ、すべてのログレコードが処理された後に呼び出されます。
-     * バッファのフラッシュなどのクリーンアップ処理をここに記述します。
-     */
-    protected open fun onClosed() {
-        // デフォルトでは何もしない
-    }
 
-    open fun write(record: LogRecord) {
+    override fun write(record: LogRecord) {
         channel.trySend(record)
     }
 
-    abstract fun onMessage(record: LogRecord)
 
     override fun close() {
         channel.close()
@@ -60,18 +71,14 @@ abstract class Provider(
      * 現在キューにあるすべてのログが処理され、
      * かつ Provider 固有のバッファがフラッシュされるまで待機します。
      */
-    suspend fun flush() {
+    override suspend fun flush(timeout: Duration) {
         val flushToken = CompletableDeferred<Unit>()
         channel.send(LogRecord.Pin(flushToken))
-        flushToken.await()
-    }
-
-    /**
-     * 派生クラスで実装される、固有のバッファフラッシュ処理です。
-     * FileProvider であればディスクへの書き込み、LokiProvider であれば HTTP 送信をここで行います。
-     */
-    protected open suspend fun onFlush() {
-        // デフォルトでは何もしない
+        withContext(Dispatchers.Default.limitedParallelism(1)){
+            withTimeout(timeout){
+                flushToken.await()
+            }
+        }
     }
 
     suspend fun join() {

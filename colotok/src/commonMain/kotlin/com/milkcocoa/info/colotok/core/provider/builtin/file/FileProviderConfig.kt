@@ -10,16 +10,6 @@ import com.milkcocoa.info.colotok.util.unit.Size.KiB
 
 class FileProviderConfig() : ProviderConfig {
     /**
-     * size of buffer in Byte. which is used for save i/o.
-     */
-    var bufferSize = 4.KiB()
-
-    /**
-     * use buffering. if enable this, provider does not write to file until buffered data exceed `bufferSize`. if false write data into file immediately.
-     */
-    var enableBuffer = true
-
-    /**
      * if not null, rotate after write
      */
     var rotation: Rotation? = null

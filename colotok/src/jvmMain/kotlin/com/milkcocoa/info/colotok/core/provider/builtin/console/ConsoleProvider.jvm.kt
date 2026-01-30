@@ -23,7 +23,7 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
         config.getColorForLevel(level = it)
     }
 
-    actual override fun onMessage(record: LogRecord) {
+    actual override suspend fun onMessage(record: LogRecord) {
         if(record.level.isEnabledFor(logLevel).not()) return
         runCatching {
             val color = when{

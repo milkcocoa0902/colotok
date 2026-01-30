@@ -11,7 +11,7 @@ class AsyncProviderTest {
     class TestAsyncProvider : AsyncProvider() {
         val processedRecords = mutableListOf<LogRecord>()
 
-        override suspend fun writeAsync(record: LogRecord) {
+        override suspend fun onMessage(record: LogRecord) {
             processedRecords.add(record)
         }
     }

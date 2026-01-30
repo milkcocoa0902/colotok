@@ -1,9 +1,17 @@
 package com.milkcocoa.info.colotok.core.formatter.details
 
 import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import kotlinx.serialization.KSerializer
 
 interface Formatter {
+    fun format(record: LogRecord.PlainText): String {
+        return format(record.msg, record.level, record.attr)
+    }
+
+    fun <T : LogStructure> format(record: LogRecord.StructuredText<T>): String {
+        return format(record.msg, record.serializer, record.level, record.attr)
+    }
     /**
      * used for formatting message
      * @param msg[String] message

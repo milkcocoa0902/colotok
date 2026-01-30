@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 
-suspend fun Provider.writeAsync(
+suspend fun IProvider.writeAsync(
     record: LogRecord
 ) {
     if(this is AsyncProvider) {

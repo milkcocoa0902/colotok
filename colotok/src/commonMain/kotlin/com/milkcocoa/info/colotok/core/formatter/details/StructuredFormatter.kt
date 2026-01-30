@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.core.formatter.details
 
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.logger.MDC
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.color.AnsiColor
@@ -13,6 +14,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -37,6 +39,68 @@ abstract class StructuredFormatter(
 ) : Formatter {
     private val lowerMask by lazy { mask.map { it.lowercase() } }
 
+    override fun format(record: LogRecord.PlainText): String {
+        val mdc = MDC.getThreadLocalContext().data
+        return buildJsonObject {
+            field.forEach { f ->
+                when (f) {
+                    is Element.MESSAGE -> put("message", JsonPrimitive(record.msg))
+                    is Element.LEVEL -> put("level", JsonPrimitive(record.level.toString()))
+                    is Element.THREAD -> put("thread", JsonPrimitive(record.threadName))
+                    is Element.ATTR -> record.attr.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
+                    is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
+                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
+                    else -> {}
+                }
+            }
+
+            currentTimeJsonField?.let {
+                put("date", it)
+            }
+        }.toString()
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    override fun <T : LogStructure> format(record: LogRecord.StructuredText<T>): String {
+        val s =
+            object : JsonTransformingSerializer<T>(record.serializer) {
+                override fun transformSerialize(element: JsonElement): JsonElement =
+                    JsonObject(
+                        element.jsonObject.mapValues {
+                            if (this@StructuredFormatter.lowerMask.contains(it.key.lowercase())) {
+                                return@mapValues JsonPrimitive(
+                                    "*".repeat(it.value.toString().length.coerceAtMost(32))
+                                )
+                            }
+                            return@mapValues when (it.value) {
+                                is JsonArray -> JsonArray(it.value.jsonArray.map { transformSerialize(it) })
+                                is JsonObject -> transformSerialize(it.value)
+                                else -> it.value
+                            }
+                        }
+                    )
+            }
+
+        val mdc = MDC.getThreadLocalContext().data
+        return buildJsonObject {
+            field.forEach { f ->
+                when (f) {
+                    is Element.MESSAGE -> put("message", Json.encodeToJsonElement(s, record.msg))
+                    is Element.LEVEL -> put("level", JsonPrimitive(record.level.toString()))
+                    is Element.THREAD -> put("thread", JsonPrimitive(record.threadName))
+                    is Element.ATTR -> record.attr.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
+                    is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
+                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
+                    else -> {}
+                }
+            }
+
+            currentTimeJsonField?.let {
+                put("date", it)
+            }
+        }.toString()
+    }
+
     override fun format(
         msg: String,
         level: Level
@@ -59,7 +123,6 @@ abstract class StructuredFormatter(
         attrs: Map<String, String>
     ): String {
         val mdc = MDC.getThreadLocalContext().data
-        val dt = Clock.System.now()
         return buildJsonObject {
             field.forEach { f ->
                 when (f) {

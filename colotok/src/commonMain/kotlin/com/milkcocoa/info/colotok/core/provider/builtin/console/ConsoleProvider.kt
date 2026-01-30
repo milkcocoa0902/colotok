@@ -9,5 +9,5 @@ public expect class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
     val logLevel: Level
     val formatter: Formatter
 
-    override fun onMessage(record: LogRecord): Unit
+    override suspend fun onMessage(record: LogRecord): Unit
 }

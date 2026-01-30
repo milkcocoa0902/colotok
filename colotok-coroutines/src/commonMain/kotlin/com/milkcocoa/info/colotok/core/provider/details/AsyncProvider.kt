@@ -2,6 +2,8 @@ package com.milkcocoa.info.colotok.core.provider.details
 
 import com.milkcocoa.info.colotok.core.coroutines.blocking
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.provider.details.Provider
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +12,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration
 
 /**
  * An interface for providers that support both synchronous and asynchronous logging operations.
@@ -22,12 +26,9 @@ import kotlinx.coroutines.launch
  */
 abstract class AsyncProvider(
     onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
-): Provider(onBufferOverflow), AutoCloseable {
-    override fun onMessage(record: LogRecord) {
-        blocking {
-            writeAsync(record)
-        }
+): Provider(onBufferOverflow) {
+    constructor(): this(BufferOverflow.SUSPEND)
+    suspend fun writeAsync(record: LogRecord) {
+        channel.send(record)
     }
-
-    abstract suspend fun writeAsync(record: LogRecord)
 }

@@ -26,7 +26,7 @@ class ColotokLoggerExtensionTest {
         var lastLogAttributes: Map<String, String> = emptyMap()
         var lastLogStructure: LogStructure? = null
 
-        override fun onMessage(record: LogRecord) {
+        override suspend fun onMessage(record: LogRecord) {
             lastLogName = record.name
             lastLogLevel = record.level
             lastLogAttributes = record.attr
@@ -50,6 +50,7 @@ class ColotokLoggerExtensionTest {
         }
 
         logger.atAsync(LogLevel.INFO, "Test message")
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -66,6 +67,7 @@ class ColotokLoggerExtensionTest {
 
         val attributes = mapOf("key1" to "value1", "key2" to "value2")
         logger.atAsync(LogLevel.INFO, "Test message", attributes)
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -82,6 +84,7 @@ class ColotokLoggerExtensionTest {
 
         val logStructure = TestLogStructure("Test message")
         logger.atAsync(LogLevel.INFO, logStructure)
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<TestLogStructure>(logStructure, provider.lastLogStructure as TestLogStructure)
@@ -99,6 +102,7 @@ class ColotokLoggerExtensionTest {
         val logStructure = TestLogStructure("Test message")
         val attributes = mapOf("key1" to "value1", "key2" to "value2")
         logger.atAsync(LogLevel.INFO, logStructure, attributes)
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<TestLogStructure>(logStructure, provider.lastLogStructure as TestLogStructure)
@@ -114,6 +118,7 @@ class ColotokLoggerExtensionTest {
         }
 
         logger.traceAsync("Test message")
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -129,6 +134,7 @@ class ColotokLoggerExtensionTest {
         }
 
         logger.debugAsync("Test message")
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -144,6 +150,7 @@ class ColotokLoggerExtensionTest {
         }
 
         logger.infoAsync("Test message")
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -159,6 +166,7 @@ class ColotokLoggerExtensionTest {
         }
 
         logger.warnAsync("Test message")
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -174,6 +182,7 @@ class ColotokLoggerExtensionTest {
         }
 
         logger.errorAsync("Test message")
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -190,6 +199,7 @@ class ColotokLoggerExtensionTest {
 
         val attributes = mapOf("key1" to "value1", "key2" to "value2")
         logger.traceAsync("Test message", attributes)
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -206,6 +216,7 @@ class ColotokLoggerExtensionTest {
 
         val logStructure = TestLogStructure("Test message")
         logger.traceAsync(logStructure)
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<TestLogStructure>(logStructure, provider.lastLogStructure as TestLogStructure)
@@ -223,6 +234,7 @@ class ColotokLoggerExtensionTest {
         val logStructure = TestLogStructure("Test message")
         val attributes = mapOf("key1" to "value1", "key2" to "value2")
         logger.traceAsync(logStructure, attributes)
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<TestLogStructure>(logStructure, provider.lastLogStructure as TestLogStructure)
@@ -240,6 +252,7 @@ class ColotokLoggerExtensionTest {
         logger.atTraceAsync {
             print("Test message")
         }
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -257,6 +270,7 @@ class ColotokLoggerExtensionTest {
         logger.atDebugAsync {
             print("Test message")
         }
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -274,6 +288,7 @@ class ColotokLoggerExtensionTest {
         logger.atInfoAsync {
             print("Test message")
         }
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -291,6 +306,7 @@ class ColotokLoggerExtensionTest {
         logger.atWarnAsync {
             print("Test message")
         }
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -308,6 +324,7 @@ class ColotokLoggerExtensionTest {
         logger.atErrorAsync {
             print("Test message")
         }
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)
@@ -325,6 +342,7 @@ class ColotokLoggerExtensionTest {
         logger.atAsync(LogLevel.INFO) {
             print("Test message")
         }
+        provider.flush()
 
         assertEquals<String>("test-logger", provider.lastLogName)
         assertEquals<String>("Test message", provider.lastLogMessage)

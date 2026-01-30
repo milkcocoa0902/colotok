@@ -11,6 +11,7 @@ sealed interface LogRecord{
     val name: String
     val level: Level
     val attr: Map<String, String>
+    val threadName: String
 
     // Formatter を受け取って、自分自身をフォーマットさせる
     fun format(formatter: Formatter): String
@@ -19,9 +20,10 @@ sealed interface LogRecord{
         override val name: String,
         val msg: String,
         override val level: Level,
-        override val attr: Map<String, String>
+        override val attr: Map<String, String>,
+        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
     ): LogRecord{
-        override fun format(formatter: Formatter): String = formatter.format(msg, level, attr)
+        override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
     data class StructuredText<T : LogStructure>(
@@ -29,9 +31,10 @@ sealed interface LogRecord{
         val msg: T,
         override val level: Level,
         override val attr: Map<String, String>,
-        val serializer: KSerializer<T>
+        val serializer: KSerializer<T>,
+        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
     ): LogRecord{
-        override fun format(formatter: Formatter): String = formatter.format(msg, serializer, level, attr)
+        override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
     data class Pin(
@@ -40,7 +43,8 @@ sealed interface LogRecord{
         override val name: String = "Pin"
         override val level: Level = LogLevel.OFF
         override val attr: Map<String, String> = emptyMap()
+        override val threadName: String = ""
 
-        override fun format(formatter: Formatter): String = formatter.format("Pin", level, attr)
+        override fun format(formatter: Formatter): String = formatter.format(LogRecord.PlainText(name, "Pin", level, attr, threadName))
     }
 }
