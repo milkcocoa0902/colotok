@@ -12,6 +12,7 @@ sealed interface LogRecord{
     val level: Level
     val attr: Map<String, String>
     val threadName: String
+    val mdcContextDataSnapshot: MDCContextData
 
     // Formatter を受け取って、自分自身をフォーマットさせる
     fun format(formatter: Formatter): String
@@ -21,8 +22,9 @@ sealed interface LogRecord{
         val msg: String,
         override val level: Level,
         override val attr: Map<String, String>,
-        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
     ): LogRecord{
+        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
+        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -32,8 +34,9 @@ sealed interface LogRecord{
         override val level: Level,
         override val attr: Map<String, String>,
         val serializer: KSerializer<T>,
-        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
     ): LogRecord{
+        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
+        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -44,7 +47,8 @@ sealed interface LogRecord{
         override val level: Level = LogLevel.OFF
         override val attr: Map<String, String> = emptyMap()
         override val threadName: String = ""
+        override val mdcContextDataSnapshot: MDCContextData = MDCContextData()
 
-        override fun format(formatter: Formatter): String = formatter.format(LogRecord.PlainText(name, "Pin", level, attr, threadName))
+        override fun format(formatter: Formatter): String = formatter.format(LogRecord.PlainText(name, "Pin", level, attr))
     }
 }

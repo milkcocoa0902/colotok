@@ -21,7 +21,7 @@ import kotlinx.datetime.toLocalDateTime
  */
 abstract class TextFormatter(private val fmt: String) : Formatter {
     override fun format(record: LogRecord.PlainText): String {
-        val mdc = MDC.getThreadLocalContext().data
+        val mdc = record.mdcContextDataSnapshot.data
 
         val dt = Clock.System.now()
         return fmt

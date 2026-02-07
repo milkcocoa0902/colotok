@@ -40,7 +40,7 @@ abstract class StructuredFormatter(
     private val lowerMask by lazy { mask.map { it.lowercase() } }
 
     override fun format(record: LogRecord.PlainText): String {
-        val mdc = MDC.getThreadLocalContext().data
+        val mdc = record.mdcContextDataSnapshot.data
         return buildJsonObject {
             field.forEach { f ->
                 when (f) {
@@ -81,7 +81,7 @@ abstract class StructuredFormatter(
                     )
             }
 
-        val mdc = MDC.getThreadLocalContext().data
+        val mdc = record.mdcContextDataSnapshot.data
         return buildJsonObject {
             field.forEach { f ->
                 when (f) {
