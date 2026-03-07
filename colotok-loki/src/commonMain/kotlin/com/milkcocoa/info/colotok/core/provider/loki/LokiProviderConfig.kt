@@ -4,7 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
+import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 
@@ -27,7 +27,7 @@ sealed class Credential{
  * This class contains all the settings needed to configure a connection to a Loki server
  * for sending log data.
  */
-class LokiProviderConfig: ProviderConfig {
+class LokiProviderConfig: AsyncProviderConfig {
     /** The minimum log level that will be sent to Loki */
     override var level: Level = LogLevel.INFO
 
@@ -41,7 +41,7 @@ class LokiProviderConfig: ProviderConfig {
     var logStream: Map<String, String>? = null
 
     /** Number of log entries to buffer before sending to Loki */
-    var bufferSize: Int = 50
+    override var bufferSize: Int = 50
 
     /** HTTP client used for API requests */
     var httpClient: HttpClient = HttpClient(CIO)

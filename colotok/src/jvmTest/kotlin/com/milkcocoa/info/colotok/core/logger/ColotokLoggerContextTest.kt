@@ -3,7 +3,9 @@ package com.milkcocoa.info.colotok.core.logger
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,11 +14,13 @@ import kotlin.test.assertTrue
 
 class ColotokLoggerContextTest {
 
-    private class RecordingProvider : Provider {
+    private class RecordingProvider : Provider(
+        config = ConsoleProviderConfig()
+    ) {
         data class Record(val name: String, val msg: String, val level: Level, val attr: Map<String, String>)
         val records = mutableListOf<Record>()
 
-        override fun write(record: LogRecord) {
+        override suspend fun onMessage(record: LogRecord) {
             when(record){
                 is LogRecord.PlainText -> {
                     records += Record(record.name, record.msg, record.level, record.attr)
@@ -24,6 +28,7 @@ class ColotokLoggerContextTest {
                 is LogRecord.StructuredText<*> -> {
                     records += Record(record.name, record.msg.toString(), record.level, record.attr)
                 }
+                is LogRecord.Pin -> {}
             }
         }
     }
@@ -45,6 +50,8 @@ class ColotokLoggerContextTest {
 
         loggerCopy.info("hello from copy")
         loggerOrig.info("hello from orig")
+
+        runBlocking { provider.flush() }
 
         // We expect first record (from copy) to NOT include the mutated key "mut"
         val first = provider.records.first()
@@ -68,6 +75,7 @@ class ColotokLoggerContextTest {
 
         val logger = ctx.getLogger("L1")
         logger.info("m1")
+        runBlocking { provider.flush() }
         val r1 = provider.records.last()
         assertEquals("v1", r1.attr["k1"])
 
@@ -86,6 +94,7 @@ class ColotokLoggerContextTest {
 
         val logger = ctx.getLogger("L2")
         logger.info("m2", mapOf("b" to "2"))
+        runBlocking { provider.flush() }
         val r = provider.records.last()
         // At logging time, attrs passed to logger are merged with context attrs
         assertEquals("1", r.attr["a"])

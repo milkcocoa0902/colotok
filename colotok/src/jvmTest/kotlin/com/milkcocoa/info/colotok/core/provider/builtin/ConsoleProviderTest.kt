@@ -18,6 +18,7 @@ import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.InternalSerializationApi
@@ -67,6 +68,7 @@ class ConsoleProviderTest {
                 attr = emptyMap()
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             "",
             stdOut.readLine() ?: ""
@@ -90,6 +92,8 @@ class ConsoleProviderTest {
                 attr = emptyMap()
             )
         )
+
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             "2023-12-31 12:34:56  [INFO] - message",
             stdOut.readLine() ?: ""
@@ -114,6 +118,7 @@ class ConsoleProviderTest {
                 attr = emptyMap()
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             Color.foreground("2023-12-31 12:34:56  [INFO] - message", AnsiColor.BLUE),
             stdOut.readLine() ?: ""
@@ -138,6 +143,7 @@ class ConsoleProviderTest {
                 attr = mapOf("additional" to "additional param")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             @Suppress("ktlint:standard:max-line-length")
             Color.foreground(
@@ -166,6 +172,7 @@ class ConsoleProviderTest {
                 attr = mapOf("additional" to "additional param")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             "",
             stdOut.readLine() ?: ""
@@ -189,6 +196,7 @@ class ConsoleProviderTest {
                 attr = mapOf("additional" to "additional param")
             )
         )
+        runBlocking { provider.flush() }
         @Suppress("ktlint:standard:max-line-length")
         Assertions.assertEquals(
             "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[INFO] - message, additional = {additional=additional param}",
@@ -228,6 +236,7 @@ class ConsoleProviderTest {
                 attr = emptyMap()
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             """
                 |{
@@ -272,6 +281,7 @@ class ConsoleProviderTest {
                 attr = mapOf("attr" to "attributes")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             """
                 |{
@@ -318,6 +328,7 @@ class ConsoleProviderTest {
                 attr = mapOf("attr" to "attributes")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             "",
             stdOut.readLine() ?: ""
@@ -352,6 +363,7 @@ class ConsoleProviderTest {
                 attr = mapOf("attr" to "attributes")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             """
                 |{
@@ -391,6 +403,7 @@ class ConsoleProviderTest {
                 attr = emptyMap()
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             """
             {
@@ -422,6 +435,7 @@ class ConsoleProviderTest {
                 attr = mapOf("attr" to "attributes")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             """
             {
@@ -453,6 +467,7 @@ class ConsoleProviderTest {
                 attr = mapOf("attr" to "attributes")
             )
         )
+        runBlocking { provider.flush() }
         Assertions.assertEquals(
             """
                 |{
