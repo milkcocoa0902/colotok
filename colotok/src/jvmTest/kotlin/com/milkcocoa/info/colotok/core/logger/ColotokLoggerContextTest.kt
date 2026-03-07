@@ -3,6 +3,7 @@ package com.milkcocoa.info.colotok.core.logger
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
@@ -13,7 +14,9 @@ import kotlin.test.assertTrue
 
 class ColotokLoggerContextTest {
 
-    private class RecordingProvider : Provider() {
+    private class RecordingProvider : Provider(
+        config = ConsoleProviderConfig()
+    ) {
         data class Record(val name: String, val msg: String, val level: Level, val attr: Map<String, String>)
         val records = mutableListOf<Record>()
 
