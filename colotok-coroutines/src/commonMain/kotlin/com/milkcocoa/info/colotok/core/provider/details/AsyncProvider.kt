@@ -1,12 +1,10 @@
 package com.milkcocoa.info.colotok.core.provider.details
 
 import com.milkcocoa.info.colotok.core.logger.LogRecord
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.BufferOverflow
+
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * An interface for providers that support both synchronous and asynchronous logging operations.
@@ -17,40 +15,51 @@ import kotlinx.coroutines.launch
  * Note that on Kotlin/JS platform, the synchronous methods will not actually block due to
  * platform limitations, and will return immediately while the logging happens asynchronously.
  */
-abstract class AsyncProvider: Provider, AutoCloseable {
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val channel = Channel<LogRecord>(
-        capacity = Channel.BUFFERED
-    )
-    private val job = coroutineScope.launch {
-        try {
-            for (record in channel) {
-                writeAsync(record)
+abstract class AsyncProvider(
+    config: AsyncProviderConfig,
+    onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
+): Provider(config, onBufferOverflow) {
+    private val buffer = mutableListOf<LogRecord>()
+    private val mutex = Mutex()
+
+    final override suspend fun onMessage(record: LogRecord) {
+        val batchToSend = mutex.withLock {
+            buffer.add(record)
+            if (buffer.size >= (config as AsyncProviderConfig).bufferSize) {
+                val copy = buffer.toList()
+                buffer.clear()
+                copy
+            } else {
+                null
             }
-        } finally {
-            onClosed()
+        }
+
+        batchToSend?.let { publishWithRetry(it) }
+    }
+
+    abstract suspend fun onPublish(records: List<LogRecord>)
+
+    private suspend fun publishWithRetry(records: List<LogRecord>) {
+        runCatching { onPublish(records) }
+            .onFailure {
+                println("Failed to publish logs: ${it.message}")
+            }
+    }
+
+    override suspend fun onFlush() {
+        val remaining = mutex.withLock {
+            val copy = buffer.toList()
+            buffer.clear()
+            copy
+        }
+        if (remaining.isNotEmpty()) {
+            publishWithRetry(remaining)
         }
     }
 
-    abstract suspend fun writeAsync(record: LogRecord)
-    override fun write(record: LogRecord) {
-        channel.trySend(record)
-    }
-
-    override fun close() {
-        channel.close()
-    }
-
-    suspend fun join() {
-        channel.close()
-        job.join()
-    }
-
-    /**
-     * チャンネルが閉じられ、すべてのログレコードが処理された後に呼び出されます。
-     * バッファのフラッシュなどのクリーンアップ処理をここに記述します。
-     */
-    protected open suspend fun onClosed() {
-        // デフォルトでは何もしない
+    suspend fun writeAsync(record: LogRecord) {
+        if (record.level.isEnabledFor(config.level)) {
+            channel.send(record)
+        }
     }
 }

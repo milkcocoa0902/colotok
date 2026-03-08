@@ -7,7 +7,8 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 
-public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider {
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider(config) {
     constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**
@@ -15,25 +16,22 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
      */
     constructor() : this(ConsoleProviderConfig())
 
-    actual val logLevel: Level = config.level
-    actual val formatter: Formatter = config.formatter
-    val colorize: Boolean = config.colorize
-    val getColor: ((Level) -> AnsiColor?) = {
+    private val colorize: Boolean = config.colorize
+    private val getColor: ((Level) -> AnsiColor?) = {
         config.getColorForLevel(level = it)
     }
 
 
-    actual override fun write(record: LogRecord) {
-        if(record.level.isEnabledFor(logLevel).not()) return
+    actual override suspend fun onMessage(record: LogRecord) {
         runCatching {
             val color = when{
                 colorize.not() -> null
                 else -> getColor(record.level)
             }
             if(color != null){
-                println(Color.foreground(record.format(formatter), color))
+                println(Color.foreground(record.format(config.formatter), color))
             }else{
-                println(record.format(formatter))
+                println(record.format(config.formatter))
             }
         }
     }

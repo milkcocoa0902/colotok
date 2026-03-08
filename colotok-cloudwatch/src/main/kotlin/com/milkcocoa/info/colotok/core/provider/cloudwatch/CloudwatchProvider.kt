@@ -11,28 +11,19 @@ import aws.sdk.kotlin.services.cloudwatchlogs.model.InputLogEvent
 import aws.sdk.kotlin.services.cloudwatchlogs.putLogEvents
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
+class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider(config) {
     constructor(config: CloudwatchProviderConfig.()->Unit): this(CloudwatchProviderConfig().apply(config))
     constructor(): this(CloudwatchProviderConfig())
 
-    private val logLevel = config.level
-    private val formatter = config.formatter
     private val cloudwatchLogGroup = config.logGroup ?: error("Cloudwatch log group is null")
     private val cloudwatchLogStream = config.logStream ?: error("Cloudwatch log stream is null")
     private val credential = config.credential ?:  error("Credential is null")
 
     private var sequenceToken: String? = null
 
-    private val mutex = Mutex()
-
-    private val buf = mutableListOf<InputLogEvent>()
-    private val logBufferSize = config.logBufferSize
     private val region = credential.region
 
     private val client by lazy {
@@ -68,61 +59,34 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider() {
         }
     }
 
-    @OptIn(ExperimentalTime::class)
-    override suspend fun writeAsync(record: LogRecord) {
-        if(record.level.isEnabledFor(logLevel).not()){
-            return
-        }
-
-        val shouldSendLogs = mutex.withLock {
-            buf.add(InputLogEvent {
-                this.timestamp = Clock.System.now().toEpochMilliseconds()
-                this.message = record.format(formatter)
-            })
-
-            buf.size >= logBufferSize
-        }
-
-        if (shouldSendLogs) {
-            sendLogsToCloudWatch()
-        }
-    }
-
-
     /**
      * Sends the buffered logs to CloudWatch.
      * This method is synchronized with the mutex to prevent concurrent modifications to the buffer.
      */
-    private suspend fun sendLogsToCloudWatch() {
+    @OptIn(ExperimentalTime::class)
+    override suspend fun onPublish(records: List<LogRecord>) {
         runCatching {
-            mutex.withLock {
-                if (buf.isEmpty()) return@withLock
+            createGroupIfNotExists()
+            createStreamIfNotExists()
 
-                createGroupIfNotExists()
-                createStreamIfNotExists()
-                
-                val response = client.putLogEvents {
-                    this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
-                    this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
-                    this.sequenceToken = this@CloudwatchProvider.sequenceToken
-                    this.logEvents = buf
+            val response = client.putLogEvents {
+                this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
+                this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
+                this.sequenceToken = this@CloudwatchProvider.sequenceToken
+                this.logEvents = records.map {
+                    InputLogEvent {
+                        this.timestamp = Clock.System.now().toEpochMilliseconds()
+                        this.message = it.format(config.formatter)
+                    }
                 }
-
-                this@CloudwatchProvider.sequenceToken = response.nextSequenceToken
-                buf.clear()
             }
+
+            this@CloudwatchProvider.sequenceToken = response.nextSequenceToken
         }
     }
 
-    /**
-     * Flushes the buffer to CloudWatch regardless of buffer size.
-     */
-    suspend fun flush() {
-        sendLogsToCloudWatch()
-    }
 
-    override suspend fun onClosed() {
-        flush()
+    override fun onClosed() {
         client.close()
     }
 }

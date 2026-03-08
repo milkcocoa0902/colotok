@@ -6,8 +6,5 @@ import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 
 public expect class ConsoleProvider(config: ConsoleProviderConfig) : Provider {
-    val logLevel: Level
-    val formatter: Formatter
-
-    override fun write(record: LogRecord): Unit
+    override suspend fun onMessage(record: LogRecord): Unit
 }

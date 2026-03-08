@@ -4,8 +4,11 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.logger.ColotokLoggerContext
 import com.milkcocoa.info.colotok.core.logger.infoAsync
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.time.delay
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration.Companion.milliseconds
 
 class CLKMain
 
@@ -32,5 +35,7 @@ fun main() {
         logger.infoAsync("test002")
         logger.infoAsync("test003")
         logger.infoAsync("test004")
+
+        delay(1000.milliseconds)
     }
 }

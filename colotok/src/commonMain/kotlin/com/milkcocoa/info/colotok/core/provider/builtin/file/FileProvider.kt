@@ -3,12 +3,14 @@ package com.milkcocoa.info.colotok.core.provider.builtin.file
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.util.SinkUtil.write
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.Path
 
 /**
  * builtin provider which used to write the log into file.
  */
-class FileProvider(private val outputFileName: okio.Path, config: FileProviderConfig) : Provider {
+class FileProvider(private val outputFileName: okio.Path, config: FileProviderConfig) : Provider(config) {
     /**
      * initialize provider with default configuration
      */
@@ -22,13 +24,7 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
         config: FileProviderConfig.() -> Unit
     ) : this(outputFileName, FileProviderConfig().apply(config))
 
-    private val enableBuffer = config.enableBuffer
-    private val bufferSize = config.bufferSize
     private val rotation = config.rotation
-    private val logLevel = config.level
-    private val formatter = config.formatter
-
-    private val sb: StringBuilder = StringBuilder()
 
     /**
      * get file path where to write the log.
@@ -49,28 +45,18 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
             }
         }
 
-    override fun write(record: LogRecord) {
-        if(record.level.isEnabledFor(logLevel).not()) return
-
-        runCatching {
-            if(enableBuffer){
-                sb.appendLine(record.format(formatter))
-                if(sb.length > bufferSize){
-                    getFileSystem().appendingSink(
-                        file = filePath,
-                        mustExist = false
-                    ).write(sb.toString().encodeToByteArray())
-                    sb.clear()
-                }
-            }else{
+    private val mutex = Mutex()
+    override suspend fun onMessage(record: LogRecord) {
+        mutex.withLock {
+            runCatching {
                 getFileSystem().appendingSink(
                     file = filePath,
                     mustExist = false
-                ).write(record.format(formatter).plus("\n").encodeToByteArray())
-            }
+                ).write(record.format(config.formatter).plus("\n").encodeToByteArray())
 
-            if(rotation?.isRotateNeeded(filePath) == true){
-                rotation.doRotate(filePath)
+                if(rotation?.isRotateNeeded(filePath) == true){
+                    rotation.doRotate(filePath)
+                }
             }
         }
     }
@@ -78,15 +64,11 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
     /**
      * flush buffered data into file.
      */
-    fun flush() {
-        getFileSystem().appendingSink(
-            file = filePath,
-            mustExist = false
-        ).write(sb.toString().encodeToByteArray())
-        sb.clear()
-
-        if (rotation?.isRotateNeeded(filePath) == true) {
-            rotation.doRotate(filePath)
+    override suspend fun onFlush() {
+        runCatching {
+            if (rotation?.isRotateNeeded(filePath) == true) {
+                rotation.doRotate(filePath)
+            }
         }
     }
 }

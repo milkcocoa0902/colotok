@@ -10,7 +10,7 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.serialization.KSerializer
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider {
+public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider(config) {
     constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**
@@ -18,25 +18,21 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
      */
     constructor() : this(ConsoleProviderConfig())
 
-    actual val logLevel: Level = config.level
-    actual val formatter: Formatter = config.formatter
-    val isEnabledForRelease: Boolean = config.isEnabledForRelease
-    val detectDebugModeFn: (() -> Boolean) = config.detectDebugModeFn ?: { false }
+    private val isEnabledForRelease: Boolean = config.isEnabledForRelease
+    private val detectDebugModeFn: (() -> Boolean) = config.detectDebugModeFn ?: { false }
 
 
-    actual override fun write(record: LogRecord) {
+    actual override suspend fun onMessage(record: LogRecord) {
         if (isEnabledForRelease.not() and detectDebugModeFn.invoke().not()) return
 
-        if (record.level.isEnabledFor(logLevel).not()) {
-            return
-        }
         runCatching {
             when(record.level){
-                LogLevel.TRACE -> Log.v(record.name, record.format(formatter))
-                LogLevel.DEBUG -> Log.d(record.name, record.format(formatter))
-                LogLevel.INFO -> Log.i(record.name, record.format(formatter))
-                LogLevel.WARN -> Log.w(record.name, record.format(formatter))
-                LogLevel.ERROR -> Log.e(record.name, record.format(formatter))
+                LogLevel.TRACE -> Log.v(record.name, record.format(config.formatter))
+                LogLevel.DEBUG -> Log.d(record.name, record.format(config.formatter))
+                LogLevel.INFO -> Log.i(record.name, record.format(config.formatter))
+                LogLevel.WARN -> Log.w(record.name, record.format(config.formatter))
+                LogLevel.ERROR -> Log.e(record.name, record.format(config.formatter))
+                else -> Log.d(record.name, record.format(config.formatter))
             }
         }
     }

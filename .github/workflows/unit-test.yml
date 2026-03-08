@@ -19,10 +19,12 @@ jobs:
                   distribution: 'corretto'
                   cache: gradle
 
-            - name: Build with Gradle
-              run: ./gradlew test
+            - name: Run tests and generate coverage report
+              run: ./gradlew koverXmlReport
 
             - name: Upload coverage reports to Codecov
-              uses: codecov/codecov-action@v3
-              env:
-                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+              uses: codecov/codecov-action@v5
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  files: "**/build/reports/kover/report.xml"
+                  fail_ci_if_error: true
