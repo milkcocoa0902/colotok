@@ -1,6 +1,8 @@
 package com.milkcocoa.info.colotok.core.provider.details
 
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +35,8 @@ abstract class Provider(
     override val config: ProviderConfig,
     onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
 ): IProvider {
+    public var effectiveMetricsCollector: MetricsCollector = NoOpMetricsCollector
+
     private val handler = CoroutineExceptionHandler { _, throwable ->
         println("Failed to process async log: ${throwable.message}")
     }
@@ -61,7 +65,11 @@ abstract class Provider(
 
     override fun write(record: LogRecord) {
         if (record.level.isEnabledFor(config.level)) {
-            channel.trySend(record)
+            effectiveMetricsCollector.incrementLogCount(record.level, this::class.simpleName ?: "unknown")
+            val success = channel.trySend(record).isSuccess
+            if (!success) {
+                effectiveMetricsCollector.incrementErrorCount(this::class.simpleName ?: "unknown", "buffer_full")
+            }
         }
     }
 

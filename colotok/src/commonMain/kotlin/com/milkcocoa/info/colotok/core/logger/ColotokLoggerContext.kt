@@ -2,6 +2,9 @@ package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
+import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
@@ -15,6 +18,7 @@ class ColotokLoggerContext {
 
     private val providers: MutableList<Provider> = mutableListOf()
     private val attrs = mutableMapOf<String, String>()
+    private var metricsCollector: MetricsCollector = NoOpMetricsCollector
     private var frozen: Boolean = false
 
     fun freeze() { frozen = true }
@@ -38,6 +42,16 @@ class ColotokLoggerContext {
         this.attrs.putAll(attrs)
     }
 
+    /**
+     * set metrics collector to current logger context
+     * @param collector[MetricsCollector] metrics collector
+     * @return [ColotokLoggerContext] this instance
+     */
+    fun withMetrics(collector: MetricsCollector) = apply {
+        ensureNotFrozen()
+        this.metricsCollector = collector
+    }
+
 
     fun putAttrs(attr: Map<String, String>) =
         apply {
@@ -53,6 +67,13 @@ class ColotokLoggerContext {
     fun addProvider(provider: Provider) =
         apply {
             ensureNotFrozen()
+
+            provider.effectiveMetricsCollector = when (val spec = provider.config.metricsSpec) {
+                is MetricsCollectorSpec.Explicit -> spec.collector
+                is MetricsCollectorSpec.Inherit -> this.metricsCollector
+                is MetricsCollectorSpec.NoOp -> NoOpMetricsCollector
+            }
+
             providers.add(provider)
         }
 

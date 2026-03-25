@@ -25,9 +25,11 @@ abstract class AsyncProvider(
     final override suspend fun onMessage(record: LogRecord) {
         val batchToSend = mutex.withLock {
             buffer.add(record)
+            effectiveMetricsCollector.updateBufferSize(this::class.simpleName ?: "unknown", buffer.size)
             if (buffer.size >= (config as AsyncProviderConfig).bufferSize) {
                 val copy = buffer.toList()
                 buffer.clear()
+                effectiveMetricsCollector.updateBufferSize(this::class.simpleName ?: "unknown", 0)
                 copy
             } else {
                 null
@@ -42,6 +44,7 @@ abstract class AsyncProvider(
     private suspend fun publishWithRetry(records: List<LogRecord>) {
         runCatching { onPublish(records) }
             .onFailure {
+                effectiveMetricsCollector.incrementErrorCount(this::class.simpleName ?: "unknown", "publish_failed")
                 println("Failed to publish logs: ${it.message}")
             }
     }
@@ -50,6 +53,7 @@ abstract class AsyncProvider(
         val remaining = mutex.withLock {
             val copy = buffer.toList()
             buffer.clear()
+            effectiveMetricsCollector.updateBufferSize(this::class.simpleName ?: "unknown", 0)
             copy
         }
         if (remaining.isNotEmpty()) {

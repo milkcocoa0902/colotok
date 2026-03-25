@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.core.provider.details
 
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 
 /**
  * provider's basic config
@@ -16,5 +17,10 @@ interface ProviderConfig {
      * formatter
      */
     var formatter: Formatter
+
+    /**
+     * metrics collector specification
+     */
+    var metricsSpec: MetricsCollectorSpec
 }
 
