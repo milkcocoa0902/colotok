@@ -20,4 +20,6 @@ class FileProviderConfig() : ProviderConfig {
     override var formatter: Formatter = DetailTextFormatter
 
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+
+    override var enableInternalMetricsLogging: Boolean = false
 }

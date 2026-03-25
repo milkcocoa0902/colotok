@@ -13,6 +13,7 @@ actual class ConsoleProviderConfig actual constructor() : ProviderConfig, Provid
     actual override var level: Level = LogLevel.DEBUG
     actual override var formatter: Formatter = DetailTextFormatter
     actual override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    actual override var enableInternalMetricsLogging: Boolean = false
     override var colorize: Boolean = true
     override var traceLevelColor: AnsiColor = LogLevel.TRACE.color
     override var debugLevelColor: AnsiColor = LogLevel.DEBUG.color

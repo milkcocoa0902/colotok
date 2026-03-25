@@ -36,6 +36,7 @@ class LokiProviderConfig: AsyncProviderConfig {
     override var formatter: Formatter = SimpleTextFormatter
 
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    override var enableInternalMetricsLogging: Boolean = false
 
     /** The Loki server host URL */
     var host: String? = null

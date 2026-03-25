@@ -2,6 +2,8 @@ package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.CompositeMetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.InternalLoggingMetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
@@ -68,10 +70,27 @@ class ColotokLoggerContext {
         apply {
             ensureNotFrozen()
 
-            provider.effectiveMetricsCollector = when (val spec = provider.config.metricsSpec) {
-                is MetricsCollectorSpec.Explicit -> spec.collector
+            val baseCollector = when (val spec = provider.config.metricsSpec) {
+                is MetricsCollectorSpec.Explicit -> {
+                    if (spec.inheritParent) {
+                        CompositeMetricsCollector(listOf(this.metricsCollector, spec.collector))
+                    } else {
+                        spec.collector
+                    }
+                }
                 is MetricsCollectorSpec.Inherit -> this.metricsCollector
                 is MetricsCollectorSpec.NoOp -> NoOpMetricsCollector
+            }
+
+            if (provider.config.enableInternalMetricsLogging) {
+                val internalCollector = InternalLoggingMetricsCollector(provider)
+                if (baseCollector == NoOpMetricsCollector) {
+                    provider.effectiveMetricsCollector = internalCollector
+                } else {
+                    provider.effectiveMetricsCollector = CompositeMetricsCollector(listOf(baseCollector, internalCollector))
+                }
+            } else {
+                provider.effectiveMetricsCollector = baseCollector
             }
 
             providers.add(provider)

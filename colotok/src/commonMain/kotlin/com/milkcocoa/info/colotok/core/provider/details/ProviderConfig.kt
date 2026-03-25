@@ -22,5 +22,11 @@ interface ProviderConfig {
      * metrics collector specification
      */
     var metricsSpec: MetricsCollectorSpec
+
+    /**
+     * whether to enable internal metrics logging.
+     * if true, the provider will log its metrics using itself.
+     */
+    var enableInternalMetricsLogging: Boolean
 }
 

@@ -65,9 +65,11 @@ abstract class Provider(
 
     override fun write(record: LogRecord) {
         if (record.level.isEnabledFor(config.level)) {
-            effectiveMetricsCollector.incrementLogCount(record.level, this::class.simpleName ?: "unknown")
+            if (record !is LogRecord.Metrics) {
+                effectiveMetricsCollector.incrementLogCount(record.level, this::class.simpleName ?: "unknown")
+            }
             val success = channel.trySend(record).isSuccess
-            if (!success) {
+            if (!success && record !is LogRecord.Metrics) {
                 effectiveMetricsCollector.incrementErrorCount(this::class.simpleName ?: "unknown", "buffer_full")
             }
         }

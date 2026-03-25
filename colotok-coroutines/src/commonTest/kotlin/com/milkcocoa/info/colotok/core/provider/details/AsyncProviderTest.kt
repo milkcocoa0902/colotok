@@ -17,6 +17,7 @@ class AsyncProviderTest {
         override var formatter: Formatter = SimpleTextFormatter
         override var bufferSize: Int = 1
         override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+        override var enableInternalMetricsLogging: Boolean = false
     }
 
     class TestAsyncProvider(config: TestAsyncProviderConfig) : AsyncProvider(config) {

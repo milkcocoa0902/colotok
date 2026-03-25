@@ -61,6 +61,30 @@ sealed class MetricsCollectorSpec {
 
     /**
      * Use an explicitly provided [MetricsCollector].
+     * @param collector The collector to use.
+     * @param inheritParent If true, also use the inherited collector from the context.
      */
-    data class Explicit(val collector: MetricsCollector) : MetricsCollectorSpec()
+    data class Explicit(val collector: MetricsCollector, val inheritParent: Boolean = false) : MetricsCollectorSpec()
+}
+
+/**
+ * A [MetricsCollector] that delegates to multiple collectors.
+ */
+class CompositeMetricsCollector(private val collectors: List<MetricsCollector>) : MetricsCollector {
+
+    override fun incrementLogCount(level: Level, providerName: String) {
+        collectors.forEach { it.incrementLogCount(level, providerName) }
+    }
+
+    override fun incrementErrorCount(providerName: String, errorType: String) {
+        collectors.forEach { it.incrementErrorCount(providerName, errorType) }
+    }
+
+    override fun updateBufferSize(providerName: String, size: Int) {
+        collectors.forEach { it.updateBufferSize(providerName, size) }
+    }
+
+    override fun recordWriteDuration(providerName: String, durationMs: Long) {
+        collectors.forEach { it.recordWriteDuration(providerName, durationMs) }
+    }
 }

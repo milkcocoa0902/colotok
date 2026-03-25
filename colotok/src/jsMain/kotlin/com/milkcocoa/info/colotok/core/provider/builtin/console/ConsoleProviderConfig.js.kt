@@ -11,4 +11,5 @@ actual class ConsoleProviderConfig actual constructor() : ProviderConfig {
     actual override var level: Level = LogLevel.DEBUG
     actual override var formatter: Formatter = DetailTextFormatter
     actual override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    actual override var enableInternalMetricsLogging: Boolean = false
 }

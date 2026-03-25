@@ -1,10 +1,12 @@
 package com.milkcocoa.info.colotok.core.metrics
 
 import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.ColotokLoggerContext
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -88,5 +90,91 @@ class MetricsIntegrationTest {
         
         // Provider should use NoOp collector
         assertEquals(0, contextCollector.logCounts.values.sum())
+    }
+
+    @Test
+    fun testInternalLoggingMetrics() = runBlocking {
+        val receivedRecords = mutableListOf<LogRecord>()
+        class RecordingProvider(config: ConsoleProviderConfig) : Provider(config) {
+            override suspend fun onMessage(record: LogRecord) {
+                receivedRecords.add(record)
+            }
+        }
+
+        val provider = RecordingProvider(ConsoleProviderConfig().apply {
+            enableInternalMetricsLogging = true
+        })
+
+        val context = ColotokLoggerContext()
+            .addProvider(provider)
+
+        val logger = context.getLogger()
+        logger.info("test message")
+
+        // Wait for processing
+        provider.flush()
+
+        // Should have "test message" and the metrics log record
+        assertTrue(receivedRecords.any { it is LogRecord.PlainText && it.msg == "test message" })
+        assertTrue(receivedRecords.any { it is LogRecord.Metrics && it.msg.contains("LogCount increased") })
+
+        // Check that LogRecord.Metrics itself did not trigger another LogRecord.Metrics
+        // (If it did, we'd have many LogRecord.Metrics or an infinite loop if not guarded)
+        val metricsRecordsCount = receivedRecords.count { it is LogRecord.Metrics }
+        assertEquals(1, metricsRecordsCount, "Should only have 1 metrics record for the initial log")
+    }
+
+    @Test
+    fun testMetricsBothInheritAndExplicit() {
+        val contextCollector = TestMetricsCollector()
+        val explicitCollector = TestMetricsCollector()
+
+        val provider = StubProvider(ConsoleProviderConfig().apply {
+            metricsSpec = MetricsCollectorSpec.Explicit(explicitCollector, inheritParent = true)
+        })
+
+        val context = ColotokLoggerContext()
+            .withMetrics(contextCollector)
+            .addProvider(provider)
+
+        val logger = context.getLogger()
+        logger.info("test message")
+
+        // Provider should use both collectors
+        assertEquals(1, contextCollector.logCounts.values.sum(), "Inherited collector should be called")
+        assertEquals(1, explicitCollector.logCounts.values.sum(), "Explicit collector should be called")
+        assertTrue(contextCollector.logCounts.containsKey(LogLevel.INFO to "StubProvider"))
+        assertTrue(explicitCollector.logCounts.containsKey(LogLevel.INFO to "StubProvider"))
+    }
+
+    @Test
+    fun testMetricsInternalAndInherit() = runBlocking {
+        val contextCollector = TestMetricsCollector()
+        val receivedRecords = mutableListOf<LogRecord>()
+        class RecordingProvider(config: ConsoleProviderConfig) : Provider(config) {
+            override suspend fun onMessage(record: LogRecord) {
+                receivedRecords.add(record)
+            }
+        }
+
+        val provider = RecordingProvider(ConsoleProviderConfig().apply {
+            metricsSpec = MetricsCollectorSpec.Inherit
+            enableInternalMetricsLogging = true
+        })
+
+        val context = ColotokLoggerContext()
+            .withMetrics(contextCollector)
+            .addProvider(provider)
+
+        val logger = context.getLogger()
+        logger.info("test message")
+
+        provider.flush()
+
+        // Should have incremented the context collector
+        assertEquals(1, contextCollector.logCounts.values.sum(), "Inherited collector should be called even with internal logging")
+
+        // Should also have the metrics log record
+        assertTrue(receivedRecords.any { it is LogRecord.Metrics && it.msg.contains("LogCount increased") }, "Internal logging should be performed")
     }
 }

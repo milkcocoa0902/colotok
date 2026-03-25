@@ -26,6 +26,7 @@ class ColotokLoggerExtensionTest {
     class TestProviderConfig(override var level: Level = LogLevel.DEBUG) : ProviderConfig {
         override var formatter: Formatter = SimpleTextFormatter
         override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+        override var enableInternalMetricsLogging: Boolean = false
     }
 
     class TestAsyncProvider(config: ProviderConfig = TestProviderConfig()) : Provider(config) {
@@ -45,6 +46,9 @@ class ColotokLoggerExtensionTest {
                 }
                 is LogRecord.StructuredText<*> -> {
                     lastLogStructure = record.msg
+                }
+                is LogRecord.Metrics -> {
+                    lastLogMessage = record.msg
                 }
                 is LogRecord.Pin -> {}
             }

@@ -13,6 +13,7 @@ dependencies {
     testImplementation(libs.slf4j.api)
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlin.serialization.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 tasks.test {

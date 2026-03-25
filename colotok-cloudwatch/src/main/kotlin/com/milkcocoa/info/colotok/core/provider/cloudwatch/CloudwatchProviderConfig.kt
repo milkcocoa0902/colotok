@@ -33,6 +33,7 @@ class CloudwatchProviderConfig: AsyncProviderConfig {
     override var level: Level = LogLevel.DEBUG
     override var formatter: Formatter = SimpleStructureFormatter
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    override var enableInternalMetricsLogging: Boolean = false
 
     var logGroup: String? = null
     var logStream: String? = null

@@ -15,6 +15,7 @@ class StreamProviderConfig : ProviderConfig {
     override var level: Level = LogLevel.DEBUG
     override var formatter: Formatter = DetailTextFormatter
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    override var enableInternalMetricsLogging: Boolean = false
 
     var outputStreamBuilder: (() -> Sink) = { blackholeSink().buffer() }
 }
