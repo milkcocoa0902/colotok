@@ -1,10 +1,10 @@
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlinJvm)
     id("maven-publish")
     id("signing")
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.mavenPublish)
 }
 
 dependencies {

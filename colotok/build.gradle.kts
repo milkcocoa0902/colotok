@@ -1,35 +1,26 @@
 @file:OptIn(ExperimentalEncodingApi::class)
-
 import com.vanniktech.maven.publish.SonatypeHost
-import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import kotlin.io.encoding.ExperimentalEncodingApi
 
+import java.util.Properties
+
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    kotlin("plugin.serialization")
-    id("org.jetbrains.kotlinx.kover") version "0.9.1"
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.kover)
     id("maven-publish")
     id("signing")
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    alias(libs.plugins.mavenPublish)
 }
-
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11)) // 実際のビルド環境
-    }
-}
-
 
 kotlin {
     jvmToolchain(11)
+
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -38,14 +29,11 @@ kotlin {
     }
 
     androidTarget {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
 
-        publishLibraryVariants(
-            "release",
-//            "debug"
-        )
+        publishLibraryVariants("release")
     }
 
     iosX64()
@@ -70,10 +58,6 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        androidMain.dependencies {
-        }
-        nativeMain.dependencies {
-        }
         jsMain.dependencies {
             implementation(libs.okio.nodefilesystem)
         }
@@ -84,23 +68,15 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
     }
-    compilerOptions {
-        // Common compiler options applied to all Kotlin source sets
-        freeCompilerArgs.add("-Xexpect-actual-classes")
-    }
-//    explicitApi()
 
-    targets.configureEach {
-        compilations.configureEach {
-            compilerOptions.configure {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
-            }
-        }
+    // すべてのターゲットに共通のコンパイラオプション
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 36
     namespace = "com.milkcocoa.info.colotok"
 
     compileOptions {

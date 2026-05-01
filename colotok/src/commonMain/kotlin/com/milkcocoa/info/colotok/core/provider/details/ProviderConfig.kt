@@ -19,13 +19,14 @@ interface ProviderConfig {
     var formatter: Formatter
 
     /**
-     * metrics collector specification
+     * metrics collector specification.
+     * default is [MetricsCollectorSpec.Inherit].
      */
     var metricsSpec: MetricsCollectorSpec
 
     /**
      * whether to enable internal metrics logging.
-     * if true, the provider will log its metrics using itself.
+     * if true, metrics will be logged as [com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics] to this provider.
      */
     var enableInternalMetricsLogging: Boolean
 }

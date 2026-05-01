@@ -19,7 +19,14 @@ class FileProviderConfig() : ProviderConfig {
 
     override var formatter: Formatter = DetailTextFormatter
 
+    /**
+     * metrics collector specification.
+     * default is [MetricsCollectorSpec.Inherit].
+     */
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
 
+    /**
+     * if true, metrics will be logged as [com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics] to this provider.
+     */
     override var enableInternalMetricsLogging: Boolean = false
 }
