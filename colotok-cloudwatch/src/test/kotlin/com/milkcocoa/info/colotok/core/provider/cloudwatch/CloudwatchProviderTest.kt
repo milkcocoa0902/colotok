@@ -22,7 +22,7 @@ class CloudwatchProviderTest {
             logGroup = "test-group"
             logStream = "test-stream"
             credential = CloudwatchCredential.Default("us-west-2")
-            logBufferSize = 100
+            bufferSize = 100
         }
         
         // Just assert that the provider was created
@@ -53,7 +53,7 @@ class CloudwatchProviderTest {
             logGroup = "test-group"
             logStream = "test-stream"
             credential = CloudwatchCredential.Default("us-west-2")
-            logBufferSize = 100
+            bufferSize = 100
         }
         
         val provider = CloudwatchProvider(config)

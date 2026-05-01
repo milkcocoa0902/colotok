@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -15,6 +16,8 @@ class AsyncProviderTest {
         override var level: Level = LogLevel.DEBUG
         override var formatter: Formatter = SimpleTextFormatter
         override var bufferSize: Int = 1
+        override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+        override var enableInternalMetricsLogging: Boolean = false
     }
 
     class TestAsyncProvider(config: TestAsyncProviderConfig) : AsyncProvider(config) {

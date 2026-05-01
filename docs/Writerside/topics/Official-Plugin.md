@@ -70,6 +70,14 @@ implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.3.4")
 
 **Usage**: Configure the CloudWatch provider with your AWS credentials and log group/stream information:
 
+| Property | Description | Default |
+| :--- | :--- | :--- |
+| `logGroup` | CloudWatch log group name | `null` |
+| `logStream` | CloudWatch log stream name | `null` |
+| `credential` | CloudWatch credentials | `null` |
+| `bufferSize` | Batch size for sending logs | `50` |
+
+
 ```kotlin
 val logger = ColotokLoggerContext()
     .addProvider(CloudwatchProvider {
@@ -93,7 +101,7 @@ val logger = ColotokLoggerContext()
         // credential = CloudwatchCredential.FromEnvironments(region = "us-west-2")
 
         // Configure buffer size (optional)
-        logBufferSize = 50 // Default: logs are sent when buffer reaches this size
+        bufferSize = 50 // Default: logs are sent when buffer reaches this size
     })
     .getLogger()
 
@@ -102,7 +110,7 @@ logger.info("This log will be sent to CloudWatch")
 ```
 
 **Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Logs are sent to CloudWatch when:
-1. The buffer reaches the configured size (`logBufferSize`)
+1. The buffer reaches the configured size (`bufferSize`)
 2. You explicitly call `flush()` on the provider
 
 ```kotlin
@@ -191,6 +199,15 @@ implementation("io.github.milkcocoa0902:colotok-loki:0.3.4")
 ```
 
 **Usage**: Configure the Loki provider with your Loki server information:
+
+
+| Property | Description | Default |
+| :--- | :--- | :--- |
+| `host` | Loki host URL | `null` |
+| `logStream` | Labels for Loki stream | `null` |
+| `credential` | Loki credentials | `null` |
+| `bufferSize` | Batch size for sending logs | `50` |
+| `httpClient` | Ktor HTTP client | `HttpClient(CIO)` |
 
 ```kotlin
 val logger = ColotokLoggerContext()

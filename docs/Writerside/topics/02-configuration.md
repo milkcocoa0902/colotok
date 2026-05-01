@@ -94,3 +94,15 @@ logger.info(
 
 // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29T12:34:56"}
 ```
+
+## Synchronizing Logs
+
+Since Colotok processes logs asynchronously using Channels, you might need to wait for all logs to be processed before the application exits.
+
+```kotlin
+runBlocking {
+    logger.info("Last message")
+    // Wait for all providers to finish processing
+    context.providers.forEach { it.flush() }
+}
+```

@@ -28,6 +28,9 @@ class ColotokLoggerContextTest {
                 is LogRecord.StructuredText<*> -> {
                     records += Record(record.name, record.msg.toString(), record.level, record.attr)
                 }
+                is LogRecord.Metrics -> {
+                    records += Record(record.name, record.msg, record.level, record.attr)
+                }
                 is LogRecord.Pin -> {}
             }
         }

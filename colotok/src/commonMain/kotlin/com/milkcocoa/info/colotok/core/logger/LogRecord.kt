@@ -40,6 +40,17 @@ sealed interface LogRecord{
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
+    data class Metrics(
+        override val name: String,
+        val msg: String,
+        override val level: Level,
+        override val attr: Map<String, String>,
+    ): LogRecord {
+        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
+        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext()
+        override fun format(formatter: Formatter): String = formatter.format(this)
+    }
+
     data class Pin(
         val deferred: CompletableDeferred<Unit>
     ): LogRecord {

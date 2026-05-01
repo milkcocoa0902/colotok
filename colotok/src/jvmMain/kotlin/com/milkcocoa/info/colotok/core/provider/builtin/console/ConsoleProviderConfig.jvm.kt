@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.ProviderColorConfig
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.util.color.AnsiColor
@@ -11,6 +12,8 @@ import com.milkcocoa.info.colotok.util.color.AnsiColor
 actual class ConsoleProviderConfig actual constructor() : ProviderConfig, ProviderColorConfig {
     actual override var level: Level = LogLevel.DEBUG
     actual override var formatter: Formatter = DetailTextFormatter
+    actual override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    actual override var enableInternalMetricsLogging: Boolean = false
     override var colorize: Boolean = true
     override var traceLevelColor: AnsiColor = LogLevel.TRACE.color
     override var debugLevelColor: AnsiColor = LogLevel.DEBUG.color

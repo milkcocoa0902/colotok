@@ -3,6 +3,17 @@
 colotok has builtin provider.
 Provider is used for output log.
 
+## Common Provider Configuration
+
+All providers support the following configuration options:
+
+| Property | Description | Default |
+| :--- | :--- | :--- |
+| `level` | Minimum log level for this provider | `LogLevel.DEBUG` |
+| `formatter` | Formatter to use | `DetailTextFormatter` |
+| `metricsSpec` | How to collect metrics (`Inherit`, `Explicit`, `NoOp`) | `MetricsCollectorSpec.Inherit` |
+| `enableInternalMetricsLogging` | Whether to log metrics as internal records (`LogRecord.Metrics`) | `false` |
+
 ## ConsoleProvider
 ConsoleProvider write the log into console
 
@@ -25,29 +36,24 @@ ConsoleProvider can colorize with ANSI-Color
 
 
 ## FileProvider
-FileProvider write the log into file.  
+FileProvider writes the log into a file asynchronously.
 
-> FileProvider depends on Okio, so you need additional dependency to use it.
-
-If `enableBuffer` is true, FileProvider will buffering until buffer is full,  
-when buffer becomes full, write content into file and cleared the buffer.  
-
+> FileProvider depends on Okio, so you need the additional dependency to use it.
 
 ```Kotlin
-val fileProvider: FileProvider
-
-....
 .addProvider(FileProvider(File("./test.log").toOkioPath()){
     level = LogLevel.TRACE
     formatter = DetailTextFormatter
-    enableBuffer = true
-    bufferSize = 2048
+    // use size base rotation
     rotation = SizeBaseRotation(size = 8192)
-}.apply { fileProvider = this }
+    
+    // Metrics configuration
+    enableInternalMetricsLogging = true
+    metricsSpec = MetricsCollectorSpec.Inherit
+})
 ```
 
-### LogRotation
-FileProvider can log-rotation.
+FileProvider can rotate log files using `rotation`.
 
 
 #### SizeBaseRotation
@@ -65,8 +71,6 @@ rotation = DateBaseRotation(period = 7.days)
 ```
 
 
-
-
 ## StreamProvider
 StreamProvider write the log into stream
 
@@ -77,13 +81,10 @@ val streamProvider: StreamProvider
 
 ....
 .addProvider(StreamProvider{
-    enableBuffer = true
-    bufferSize = 64.KiB()
     formatter = SimpleStructureFormatter
     outputStreamBuilder = { blackholeSink() }
 }.apply { streamProvider = this })
 ```
 
-
-> if you want to flash buffer immediately, you can call `flush()` on FileProvider and StreamProvider. when end of application, buffered contents will discard.
+> Note: すべての Provider は Channel を使用して非同期に動作します。バッファに残っているログを失わないよう、アプリケーション終了前には `flush()` または `close()` を呼び出して、すべての Provider が処理を完了するのを待機してください。
 {style="note"}

@@ -1,12 +1,13 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinSerialization)
     id("maven-publish")
     id("signing")
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.mavenPublish)
 }
 
 java {
@@ -20,8 +21,8 @@ java {
 
 kotlin {
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -29,10 +30,9 @@ kotlin {
     }
 
     androidTarget {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
-
         publishLibraryVariants(
             "release",
 //            "debug"

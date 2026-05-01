@@ -1,10 +1,10 @@
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlinJvm)
     id("maven-publish")
     id("signing")
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
@@ -13,6 +13,7 @@ dependencies {
     testImplementation(libs.slf4j.api)
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlin.serialization.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 tasks.test {

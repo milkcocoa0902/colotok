@@ -1,26 +1,21 @@
 plugins {
-    kotlin("plugin.serialization") version "2.1.21" apply false
-    kotlin("multiplatform") version "2.1.21" apply false
-    kotlin("jvm") version "2.1.21" apply false
-    id("com.android.library") version "8.7.0" apply false
-//    id("org.jetbrains.kotlin.android") version "2.1.10"
-    id("cl.franciscosolis.sonatype-central-upload") version "1.0.3" apply false
+    alias(libs.plugins.kotlinSerialization) apply false
+    alias(libs.plugins.kotlinJvm) apply false
+    alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.sonatypeCentralUpload) apply false
     id("maven-publish")
     id("signing")
-    id("com.vanniktech.maven.publish") version "0.30.0" apply false
-    id("org.jetbrains.kotlinx.kover") version "0.9.1" apply false
+    alias(libs.plugins.mavenPublish) apply false
+    alias(libs.plugins.kover) apply false
     jacoco
 }
 // ルート build.gradle.kts
 subprojects {
     group = "io.github.milkcocoa0902"
-    version = "0.3.4"
+    version = "0.4.0"
 }
 
-repositories {
-    mavenCentral()
-    maven(url = "https://plugins.gradle.org/m2/")
-}
 
 val ktlint by configurations.creating
 
