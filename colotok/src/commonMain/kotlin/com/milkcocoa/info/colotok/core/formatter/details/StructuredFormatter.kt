@@ -7,7 +7,6 @@ import com.milkcocoa.info.colotok.core.logger.MDC
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -143,7 +142,7 @@ abstract class StructuredFormatter(
     }
 
     private val currentTimeJsonField: JsonPrimitive? get() {
-        val instant = Clock.System.now()
+        val instant = kotlin.time.Clock.System.now()
         val d = this.field.find { it == Element.DATE }
         val t = this.field.find { it == Element.TIME }
         val dt =
