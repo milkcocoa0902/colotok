@@ -13,7 +13,7 @@ class CloudwatchProviderConfigTest {
         
         assertEquals(LogLevel.DEBUG, config.level)
         assertEquals(SimpleStructureFormatter, config.formatter)
-        assertEquals(50, config.logBufferSize)
+        assertEquals(50, config.bufferSize)
     }
     
     @Test
@@ -23,14 +23,14 @@ class CloudwatchProviderConfigTest {
             logGroup = "test-group"
             logStream = "test-stream"
             credential = CloudwatchCredential.Default("us-west-2")
-            logBufferSize = 100
+            bufferSize = 100
         }
         
         assertEquals(LogLevel.INFO, config.level)
         assertEquals("test-group", config.logGroup)
         assertEquals("test-stream", config.logStream)
         assertEquals(CloudwatchCredential.Default("us-west-2"), config.credential)
-        assertEquals(100, config.logBufferSize)
+        assertEquals(100, config.bufferSize)
     }
     
     @Test

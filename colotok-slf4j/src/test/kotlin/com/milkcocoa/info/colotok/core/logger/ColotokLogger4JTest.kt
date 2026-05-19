@@ -4,8 +4,10 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.serialization.KSerializer
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -15,13 +17,13 @@ import kotlin.test.assertTrue
 
 class ColotokLogger4JTest {
 
-    private class TestProvider : Provider {
+    private class TestProvider : Provider(config = ConsoleProviderConfig()) {
         var lastName: String? = null
         var lastMsg: String? = null
         var lastLevel: Level? = null
         var lastAttr: Map<String, String>? = null
 
-        override fun write(record: LogRecord) {
+        override suspend fun onMessage(record: LogRecord) {
             lastName = record.name
             lastLevel = record.level
             lastAttr = record.attr
@@ -32,6 +34,10 @@ class ColotokLogger4JTest {
                 is LogRecord.StructuredText<*> -> {
                     lastMsg = record.msg.toString()
                 }
+                is LogRecord.Metrics -> {
+                    lastMsg = record.msg
+                }
+                is LogRecord.Pin -> {}
             }
         }
     }
@@ -55,10 +61,11 @@ class ColotokLogger4JTest {
     }
 
     @Test
-    fun info_logs_are_delegated_with_default_attrs_and_logger_name() {
+    fun info_logs_are_delegated_with_default_attrs_and_logger_name() = runBlocking {
         val logger = LoggerFactory.getLogger("slf4j-test")
 
         logger.info("hello world")
+        provider.flush()
 
         assertEquals("slf4j-test", provider.lastName)
         assertEquals("hello world", provider.lastMsg)
@@ -69,10 +76,11 @@ class ColotokLogger4JTest {
     }
 
     @Test
-    fun format_overloads_work() {
+    fun format_overloads_work() = runBlocking {
         val logger = LoggerFactory.getLogger("format-test")
 
         logger.debug("value=%s", "A")
+        provider.flush()
 
         assertEquals(LogLevel.DEBUG, provider.lastLevel)
         assertEquals("value=A", provider.lastMsg)
@@ -81,11 +89,12 @@ class ColotokLogger4JTest {
     }
 
     @Test
-    fun throwable_is_added_as_attribute() {
+    fun throwable_is_added_as_attribute() = runBlocking {
         val logger = LoggerFactory.getLogger("throwable-test")
         val ex = IllegalArgumentException("boom")
 
         logger.error("oops", ex)
+        provider.flush()
 
         assertEquals(LogLevel.ERROR, provider.lastLevel)
         assertEquals("oops", provider.lastMsg)

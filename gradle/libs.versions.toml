@@ -1,15 +1,19 @@
 [versions]
-kotlin = "2.1.10"
-kotlin-serialization = "1.8.0"
-kotlinx-coroutines-core = "1.10.1"
-kotlinx-datetime = "0.6.1"
-ktor-client-core = "3.2.0"
-mockk = "1.13.16"
-junit-bom = "5.11.0"
-okio = "3.10.2"
-okio-nodefilesystem = "3.10.2"
+kotlin = "2.3.21"
+kotlin-serialization = "1.11.0"
+kotlinx-coroutines-core = "1.10.2"
+kotlinx-datetime = "0.7.1"
+ktor = "3.4.3"
+mockk = "1.14.9"
+junit-bom = "5.14.4"
+okio = "3.17.0"
 slf4j-api = "1.7.36"
 slf4j2-api = "2.0.17"
+android-gradle-plugin = "8.13.2"
+maven-publish-plugin = "0.30.0"
+kover-plugin = "0.9.8"
+sonatype-central-upload-plugin = "1.0.3"
+ktlint = "1.8.0"
 
 
 [libraries]
@@ -20,17 +24,26 @@ kotlin-serialization-properties = { group = "org.jetbrains.kotlinx", name = "kot
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-core" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-client-core" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-client-core" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit-bom" }
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter"}
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
-okio-nodefilesystem = { module = "com.squareup.okio:okio-nodefilesystem", version.ref = "okio-nodefilesystem" }
+okio-nodefilesystem = { module = "com.squareup.okio:okio-nodefilesystem", version.ref = "okio" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 #noinspection SimilarGradleDependency
 slf4j2-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j2-api" }
+ktlint = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
 
 
 [plugins]
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+androidLibrary = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+sonatypeCentralUpload = { id = "cl.franciscosolis.sonatype-central-upload", version.ref = "sonatype-central-upload-plugin" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish-plugin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover-plugin" }
+
 [bundles]

@@ -12,6 +12,10 @@ interface Formatter {
     fun <T : LogStructure> format(record: LogRecord.StructuredText<T>): String {
         return format(record.msg, record.serializer, record.level, record.attr)
     }
+
+    fun format(record: LogRecord.Metrics): String {
+        return format(record.msg, record.level, record.attr)
+    }
     /**
      * used for formatting message
      * @param msg[String] message

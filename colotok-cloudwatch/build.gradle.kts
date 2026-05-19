@@ -1,10 +1,10 @@
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlinJvm)
     id("maven-publish")
     id("signing")
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.mavenPublish)
 }
 
 dependencies {
@@ -19,7 +19,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
-
+//
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11

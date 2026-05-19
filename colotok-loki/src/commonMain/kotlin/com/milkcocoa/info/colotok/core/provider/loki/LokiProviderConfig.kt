@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -33,6 +34,9 @@ class LokiProviderConfig: AsyncProviderConfig {
 
     /** The formatter used to format log messages */
     override var formatter: Formatter = SimpleTextFormatter
+
+    override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    override var enableInternalMetricsLogging: Boolean = false
 
     /** The Loki server host URL */
     var host: String? = null

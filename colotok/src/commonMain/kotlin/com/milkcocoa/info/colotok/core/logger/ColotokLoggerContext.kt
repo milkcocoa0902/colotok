@@ -2,6 +2,11 @@ package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.CompositeMetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.InternalLoggingMetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
+import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
@@ -15,6 +20,7 @@ class ColotokLoggerContext {
 
     private val providers: MutableList<Provider> = mutableListOf()
     private val attrs = mutableMapOf<String, String>()
+    private var metricsCollector: MetricsCollector = NoOpMetricsCollector
     private var frozen: Boolean = false
 
     fun freeze() { frozen = true }
@@ -38,6 +44,16 @@ class ColotokLoggerContext {
         this.attrs.putAll(attrs)
     }
 
+    /**
+     * set metrics collector to current logger context
+     * @param collector[MetricsCollector] metrics collector
+     * @return [ColotokLoggerContext] this instance
+     */
+    fun withMetrics(collector: MetricsCollector) = apply {
+        ensureNotFrozen()
+        this.metricsCollector = collector
+    }
+
 
     fun putAttrs(attr: Map<String, String>) =
         apply {
@@ -53,6 +69,30 @@ class ColotokLoggerContext {
     fun addProvider(provider: Provider) =
         apply {
             ensureNotFrozen()
+
+            val baseCollector = when (val spec = provider.config.metricsSpec) {
+                is MetricsCollectorSpec.Explicit -> {
+                    if (spec.inheritParent) {
+                        CompositeMetricsCollector(listOf(this.metricsCollector, spec.collector))
+                    } else {
+                        spec.collector
+                    }
+                }
+                is MetricsCollectorSpec.Inherit -> this.metricsCollector
+                is MetricsCollectorSpec.NoOp -> NoOpMetricsCollector
+            }
+
+            if (provider.config.enableInternalMetricsLogging) {
+                val internalCollector = InternalLoggingMetricsCollector(provider)
+                if (baseCollector == NoOpMetricsCollector) {
+                    provider.effectiveMetricsCollector = internalCollector
+                } else {
+                    provider.effectiveMetricsCollector = CompositeMetricsCollector(listOf(baseCollector, internalCollector))
+                }
+            } else {
+                provider.effectiveMetricsCollector = baseCollector
+            }
+
             providers.add(provider)
         }
 

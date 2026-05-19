@@ -1,11 +1,10 @@
 package com.milkcocoa.info.colotok.core.provider.rotation
 
 import com.milkcocoa.info.colotok.core.provider.builtin.file.getFileSystem
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import okio.Path
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 /**
  * date base log-rotation.(duration base)
@@ -22,7 +21,7 @@ class DateBaseRotation(private val period: Duration = 7.days) : Rotation {
             getFileSystem().metadata(filePath).createdAtMillis?.let {
                 Instant.fromEpochMilliseconds(it)
             }!!
-        val currentTime = Clock.System.now()
+        val currentTime = kotlin.time.Clock.System.now()
         return fileCreationTimeInstant.plus(period) > currentTime
     }
 

@@ -23,6 +23,10 @@ COLOTOK; Code-Base Logging Runtime  for Kotlin
 　🌟 example [print log into slack](https://github.com/milkcocoa0902/colotok_slack_integration_sample)  
 ✅ Structure Logging  
 ✅ MDC (Mapped Diagnostic Context)  
+✅ Metrics Collection
+　🌟 Built-in metrics (Log count, Error count, Buffer size, Write duration)
+　🌟 Multiple collection strategies (Inherit, Explicit, Internal Logging)
+　🌟 Composite metrics (Collect to multiple destinations simultaneously)
 
 
 # Integration
@@ -31,7 +35,7 @@ basic dependency
 ```kotlin
 dependencies {
     // add this line
-    implementation("io.github.milkcocoa0902:colotok:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok:0.4.0")
 }
 ```
 
@@ -39,19 +43,19 @@ or when you use kotlin multiplatform(;KMP)
 
 ```kotlin
 commonMain.dependncies{
-    implementation("io.github.milkcocoa0902:colotok:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok:0.4.0")
 }
 
 jvmMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.4.0")
 }
 
 androidMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-android:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok-android:0.4.0")
 }
 
 jsMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-js:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok-js:0.4.0")
 }
 ```
 
@@ -61,27 +65,22 @@ Colotok provides several plugins to extend its functionality:
 
 |       plugin       |                      artifact                      |             feature             |    Platform    |
 |:------------------:|:--------------------------------------------------:|:-------------------------------:|:--------------:|
-| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.4` |        coroutine support        | Multi Platform |
-|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.4`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
-|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.3.4`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
-| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.4` |   send logs to AWS CloudWatch   |      JVM       |
-|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.4`    |    send logs to Grafana Loki    | Multi Platform |
+| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.4.0` |        coroutine support        | Multi Platform |
+|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.4.0`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
+|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.4.0`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
+| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.4.0` |   send logs to AWS CloudWatch   |      JVM       |
+|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.4.0`    |    send logs to Grafana Loki    | Multi Platform |
 
 # Dependencies
-if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  
-when colotok formats into text from your structure, using `kotlinx.serialization` internally.
+
+If you want to use **Structured Logging** or **Internal Metrics Logging**, you need to enable the Kotlin Serialization plugin in your project. 
+
+Colotok already includes the necessary serialization libraries, so you generally don't need to add them manually unless you want to use a specific version.
 
 ```kotlin
-
 plugins {
-    // add this.
-    // set version for your use
-    kotlin("plugin.serialization") version "2.1.10"
-}
-
-dependencies {
-    // add this line to use @Serializable
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
+    // Required for @Serializable
+    kotlin("plugin.serialization") version "2.1.10" 
 }
 ```
 
@@ -109,10 +108,6 @@ val logger = ColotokLoggerContext()
     }))
     .addProvider(FileProvider(File("test.log").toOkioPath()){
         level = LogLevel.INFO
-        // memory buffering to save i/o
-        enableBuffer = true
-        // memory buffer size, if buffer excced this, append to file
-        bufferSize = 2048
         // use size base rotation
         rotation = SizeBaseRotation(size = 4096L)
     }.apply {
@@ -398,6 +393,26 @@ fun processRequest() {
         someOperation()
     }
 }
+```
+
+## Metrics Configuration
+
+Colotok can collect metrics about its operation.
+
+```kotlin
+val logger = ColotokLoggerContext()
+    .withMetrics(CustomMetricsCollector()) // Global metrics collector
+    .addProvider(ConsoleProvider {
+        // This provider will inherit the global collector
+        metricsSpec = MetricsCollectorSpec.Inherit 
+    })
+    .addProvider(LokiProvider {
+        // This provider logs metrics to itself as LogRecord.Metrics
+        enableInternalMetricsLogging = true
+        // And also reports to an explicit collector, inheriting the global one too
+        metricsSpec = MetricsCollectorSpec.Explicit(lokiCollector, inheritParent = true)
+    })
+    .getLogger()
 ```
 
 # Document

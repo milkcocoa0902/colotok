@@ -6,6 +6,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import kotlinx.coroutines.test.runTest
@@ -24,6 +25,8 @@ class ColotokLoggerExtensionTest {
 
     class TestProviderConfig(override var level: Level = LogLevel.DEBUG) : ProviderConfig {
         override var formatter: Formatter = SimpleTextFormatter
+        override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+        override var enableInternalMetricsLogging: Boolean = false
     }
 
     class TestAsyncProvider(config: ProviderConfig = TestProviderConfig()) : Provider(config) {
@@ -43,6 +46,9 @@ class ColotokLoggerExtensionTest {
                 }
                 is LogRecord.StructuredText<*> -> {
                     lastLogStructure = record.msg
+                }
+                is LogRecord.Metrics -> {
+                    lastLogMessage = record.msg
                 }
                 is LogRecord.Pin -> {}
             }
