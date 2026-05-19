@@ -15,8 +15,6 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
@@ -33,6 +31,7 @@ import kotlin.io.path.deleteRecursively
 import kotlin.io.path.notExists
 import kotlin.io.path.pathString
 import kotlin.io.path.readLines
+import kotlin.time.Instant
 
 @OptIn(InternalSerializationApi::class)
 object FileProviderTest {
@@ -41,8 +40,8 @@ object FileProviderTest {
 
     @BeforeEach
     fun before() {
-        mockkObject(Clock.System)
-        every { Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
+        mockkObject(kotlin.time.Clock.System)
+        every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
 
         if (logFilesDir.notExists()) {
             Files.createDirectory(logFilesDir)
