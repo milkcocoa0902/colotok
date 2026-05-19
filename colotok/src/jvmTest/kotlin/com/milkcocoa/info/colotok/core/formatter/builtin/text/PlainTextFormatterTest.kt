@@ -5,12 +5,11 @@ import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
 import io.mockk.mockkObject
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 object PlainTextFormatterTest {
     private val stdIn = StdIn()
@@ -18,8 +17,8 @@ object PlainTextFormatterTest {
 
     @BeforeEach
     public fun before() {
-        mockkObject(Clock.System)
-        every { Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
+        mockkObject(kotlin.time.Clock.System)
+        every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
         System.setIn(stdIn)
         System.setOut(stdOut)
     }

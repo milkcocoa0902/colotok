@@ -19,8 +19,6 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
@@ -28,6 +26,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 @OptIn(InternalSerializationApi::class)
 class ConsoleProviderTest {
@@ -36,8 +35,8 @@ class ConsoleProviderTest {
 
     @BeforeEach
     public fun before() {
-        mockkObject(Clock.System)
-        every { Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
+        mockkObject(kotlin.time.Clock.System)
+        every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
 
         System.setIn(stdIn)
         System.setOut(stdOut)
