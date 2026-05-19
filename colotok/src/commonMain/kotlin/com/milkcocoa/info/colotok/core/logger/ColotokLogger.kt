@@ -58,7 +58,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> at(
         level: Level,
         msg: T
@@ -68,7 +67,7 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
                 name = name,
                 msg = msg,
                 level = level,
-                serializer = T::class.serializer(),
+                serializer = serializer<T>(),
                 attr = attrs
             ))
         }
@@ -80,7 +79,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attributes
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> at(
         level: Level,
         msg: T,
@@ -91,7 +89,7 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
                 name = name,
                 msg = msg,
                 level = level,
-                serializer = T::class.serializer(),
+                serializer = serializer<T>(),
                 attr = attrs.plus(attr)
             ))
         }
@@ -202,7 +200,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> trace(msg: T) {
         at(LogLevel.TRACE, msg)
     }
@@ -212,7 +209,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> debug(msg: T) {
         at(LogLevel.DEBUG, msg)
     }
@@ -222,7 +218,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> info(msg: T) {
         at(LogLevel.INFO, msg)
     }
@@ -232,7 +227,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> warn(msg: T) {
         at(LogLevel.WARN, msg)
     }
@@ -242,7 +236,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param msg[LogStructure] message to print
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> error(msg: T) {
         at(LogLevel.ERROR, msg)
     }
@@ -253,7 +246,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attributes
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> trace(
         msg: T,
         attr: Map<String, String>
@@ -267,7 +259,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> debug(
         msg: T,
         attr: Map<String, String>
@@ -281,7 +272,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> info(
         msg: T,
         attr: Map<String, String>
@@ -295,7 +285,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> warn(
         msg: T,
         attr: Map<String, String>
@@ -309,7 +298,6 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
      * @param serializer[KSerializer] serializer which used for serialize [msg]
      * @param attr[Map] additional attrs
      */
-    @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> error(
         msg: T,
         attr: Map<String, String>
