@@ -24,7 +24,7 @@ basic dependency
 ```kotlin
 dependencies {
     // add this line
-    implementation("io.github.milkcocoa0902:colotok:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok:0.4.2")
 }
 ```
 
@@ -32,19 +32,19 @@ or when you use kotlin multiplatform(;KMP)
 
 ```kotlin
 commonMain.dependncies{
-    implementation("io.github.milkcocoa0902:colotok:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok:0.4.2")
 }
 
 jvmMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-jvm:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok-jvm:0.4.2")
 }
 
 androidMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-android:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok-android:0.4.2")
 }
 
 jsMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-js:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok-js:0.4.2")
 }
 ```
 
@@ -54,11 +54,11 @@ Colotok provides several plugins to extend its functionality:
 
 |       plugin       |                      artifact                      |             feature             |    Platform    |
 |:------------------:|:--------------------------------------------------:|:-------------------------------:|:--------------:|
-| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.3.4` |        coroutine support        | Multi Platform |
-|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.3.4`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
-|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.3.4`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
-| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.3.4` |   send logs to AWS CloudWatch   |      JVM       |
-|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.3.4`    |    send logs to Grafana Loki    | Multi Platform |
+| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.4.2` |        coroutine support        | Multi Platform |
+|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.4.2`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
+|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.4.2`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
+| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.4.2` |   send logs to AWS CloudWatch   |      JVM       |
+|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.4.2`    |    send logs to Grafana Loki    | Multi Platform |
 
 # Dependencies
 if you use structure logging or create your own provider, you need to add `kotlinx.serialization`.  

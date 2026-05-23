@@ -2,16 +2,16 @@ package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 
 final class LevelScopedColotokLogger(
     val name: String,
-    private val config: ColotokConfig,
+    val providers: List<Provider>,
+    val attrs: Map<String, String>,
     val level: Level
 ) {
-    val providers get() = config.providers
-    val attrs get() = config.defaultAttrs
 
     fun print(msg: String) {
         providers.forEach {

@@ -95,14 +95,31 @@ logger.info(
 // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29T12:34:56"}
 ```
 
-## Synchronizing Logs
+## Shutdown and Flushing Logs
 
-Since Colotok processes logs asynchronously using Channels, you might need to wait for all logs to be processed before the application exits.
+Since Colotok processes logs asynchronously, you should explicitly shut down the logger context to ensure all logs are flushed and resources are released before the application exits.
+
+### Normal Shutdown
+`shutdown()` will stop accepting new logs and wait for all queued logs to be processed by the providers.
 
 ```kotlin
-runBlocking {
-    logger.info("Last message")
-    // Wait for all providers to finish processing
-    context.providers.forEach { it.flush() }
-}
+val context = ColotokLoggerContext()
+// ... setup providers and get logger ...
+
+// At the end of application
+context.shutdown()
+```
+
+### Force Shutdown
+If you need to close the logger immediately without waiting for the queue to be cleared, use `forceShutdown()`.
+
+```kotlin
+context.forceShutdown()
+```
+
+### Manual Flush
+If you only want to ensure that all current logs in the queue are written without shutting down the context, you can flush individual providers:
+
+```kotlin
+context.providers.forEach { it.flush() }
 ```

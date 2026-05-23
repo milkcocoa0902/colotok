@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
@@ -11,29 +12,33 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.time.Instant
 
-object PlainTextFormatterTest {
+class PlainTextFormatterTest {
     private val stdIn = StdIn()
     private val stdOut = StdOut()
+    private var originalIn = System.`in`
+    private var originalOut = System.out
 
     @BeforeEach
     public fun before() {
         mockkObject(kotlin.time.Clock.System)
         every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
+        originalIn = System.`in`
+        originalOut = System.out
         System.setIn(stdIn)
         System.setOut(stdOut)
     }
 
     @AfterEach
     public fun after() {
-        System.setIn(null)
-        System.setOut(null)
+        System.setIn(originalIn)
+        System.setOut(originalOut)
     }
 
     @Test
     fun plainTextFormatterTest01() {
         val formatter = PlainTextFormatter
         Assertions.assertTrue {
-            formatter.format("message", LogLevel.ERROR).equals(
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
                 "message"
             )
         }
@@ -44,9 +49,12 @@ object PlainTextFormatterTest {
         val formatter = PlainTextFormatter
         Assertions.assertTrue {
             formatter.format(
-                "message",
-                LogLevel.ERROR,
-                mapOf("additional" to "additional parameter")
+                LogRecord.PlainText(
+                    name = "test",
+                    msg = "message",
+                    level = LogLevel.ERROR,
+                    attr = mapOf("additional" to "additional parameter")
+                )
             ).equals(
                 "message"
             )

@@ -1,6 +1,7 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.structure
 
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.std.StdIn
@@ -18,22 +19,26 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Instant
 
 @OptIn(InternalSerializationApi::class)
-object StructureFormatterTest {
+class StructureFormatterTest {
     private val stdIn = StdIn()
     private val stdOut = StdOut()
+    private var originalIn = System.`in`
+    private var originalOut = System.out
 
     @BeforeEach
     public fun before() {
         mockkObject(kotlin.time.Clock.System)
         every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
+        originalIn = System.`in`
+        originalOut = System.out
         System.setIn(stdIn)
         System.setOut(stdOut)
     }
 
     @AfterEach
     public fun after() {
-        System.setIn(null)
-        System.setOut(null)
+        System.setIn(originalIn)
+        System.setOut(originalOut)
 
         unmockkAll()
     }
@@ -49,7 +54,7 @@ object StructureFormatterTest {
             "date":"2023-12-31"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(msg = "message", level = LogLevel.INFO)
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.INFO, attr = emptyMap()))
         )
     }
 
@@ -64,7 +69,7 @@ object StructureFormatterTest {
             "date":"2023-12-31"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(msg = "message", level = LogLevel.WARN, attrs = mapOf())
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.WARN, attr = emptyMap()))
         )
     }
 
@@ -80,7 +85,7 @@ object StructureFormatterTest {
             "date":"2023-12-31T12:34:56"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(msg = "message", level = LogLevel.ERROR)
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap()))
         )
     }
 
@@ -97,7 +102,7 @@ object StructureFormatterTest {
             "date":"2023-12-31T12:34:56"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(msg = "message", level = LogLevel.ERROR, attrs = mapOf("attr" to "attribute"))
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = mapOf("attr" to "attribute")))
         )
     }
 
@@ -125,17 +130,21 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg =
-                    Log(
-                        name = "range error",
-                        logDetail =
-                            LogDetail(
-                                scope = "arg",
-                                message = "illegal argument"
-                            )
-                    ),
-                serializer = Log::class.serializer(),
-                level = LogLevel.ERROR
+                LogRecord.StructuredText(
+                    name = "test",
+                    msg =
+                        Log(
+                            name = "range error",
+                            logDetail =
+                                LogDetail(
+                                    scope = "arg",
+                                    message = "illegal argument"
+                                )
+                        ),
+                    serializer = Log::class.serializer(),
+                    level = LogLevel.ERROR,
+                    attr = emptyMap()
+                )
             ).also {
                 println(it)
             }
@@ -160,18 +169,21 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg =
-                    Log(
-                        name = "range error",
-                        logDetail =
-                            LogDetail(
-                                scope = "arg",
-                                message = "illegal argument"
-                            )
-                    ),
-                serializer = Log::class.serializer(),
-                level = LogLevel.ERROR,
-                attrs = mapOf("attr" to "attribute")
+                LogRecord.StructuredText(
+                    name = "test",
+                    msg =
+                        Log(
+                            name = "range error",
+                            logDetail =
+                                LogDetail(
+                                    scope = "arg",
+                                    message = "illegal argument"
+                                )
+                        ),
+                    serializer = Log::class.serializer(),
+                    level = LogLevel.ERROR,
+                    attr = mapOf("attr" to "attribute")
+                )
             )
         )
     }
@@ -195,17 +207,21 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg =
-                    Log(
-                        name = "range error",
-                        logDetail =
-                            LogDetail(
-                                scope = "arg",
-                                message = "illegal argument"
-                            )
-                    ),
-                serializer = Log::class.serializer(),
-                level = LogLevel.ERROR
+                LogRecord.StructuredText(
+                    name = "test",
+                    msg =
+                        Log(
+                            name = "range error",
+                            logDetail =
+                                LogDetail(
+                                    scope = "arg",
+                                    message = "illegal argument"
+                                )
+                        ),
+                    serializer = Log::class.serializer(),
+                    level = LogLevel.ERROR,
+                    attr = emptyMap()
+                )
             )
         )
     }
@@ -230,18 +246,21 @@ object StructureFormatterTest {
                 |}
             """.trimMargin().replace("\n", ""),
             formatter.format(
-                msg =
-                    Log(
-                        name = "range error",
-                        logDetail =
-                            LogDetail(
-                                scope = "arg",
-                                message = "illegal argument"
-                            )
-                    ),
-                serializer = Log::class.serializer(),
-                level = LogLevel.INFO,
-                attrs = mapOf("attr" to "attribute")
+                LogRecord.StructuredText(
+                    name = "test",
+                    msg =
+                        Log(
+                            name = "range error",
+                            logDetail =
+                                LogDetail(
+                                    scope = "arg",
+                                    message = "illegal argument"
+                                )
+                        ),
+                    serializer = Log::class.serializer(),
+                    level = LogLevel.INFO,
+                    attr = mapOf("attr" to "attribute")
+                )
             )
         )
     }
