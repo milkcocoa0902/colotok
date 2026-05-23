@@ -26,11 +26,13 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 
 /**
- * base class for log formatter which used for structure log
+ * base class for log formatter which used for structure log.
+ *
+ * this formatter formats [LogRecord] into JSON string.
  *
  * @constructor
- * @param field[List] log fields
- * @param mask[List] field name list to mask value with '*'
+ * @param field[List] log fields to include in JSON.
+ * @param mask[List] field name list to mask value with '*' in structured message.
  */
 abstract class StructuredFormatter(
     private val field: List<Element>,
@@ -39,65 +41,25 @@ abstract class StructuredFormatter(
     private val lowerMask by lazy { mask.map { it.lowercase() } }
 
     override fun format(record: LogRecord.PlainText): String {
-        val mdc = record.mdcContextDataSnapshot.data
-        return buildJsonObject {
-            field.forEach { f ->
-                when (f) {
-                    is Element.MESSAGE -> put("message", JsonPrimitive(record.msg))
-                    is Element.LEVEL -> put("level", JsonPrimitive(record.level.toString()))
-                    is Element.THREAD -> put("thread", JsonPrimitive(record.threadName))
-                    is Element.ATTR -> record.attr.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
-                    is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
-                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
-                    else -> {}
-                }
-            }
-
-            currentTimeJsonField?.let {
-                put("date", it)
-            }
-        }.toString()
+        return format(
+            msg = record.msg,
+            level = record.level,
+            attrs = record.attr,
+            threadName = record.threadName,
+            mdc = record.mdcContextDataSnapshot.data
+        )
     }
 
     @OptIn(InternalSerializationApi::class)
     override fun <T : LogStructure> format(record: LogRecord.StructuredText<T>): String {
-        val s =
-            object : JsonTransformingSerializer<T>(record.serializer) {
-                override fun transformSerialize(element: JsonElement): JsonElement =
-                    JsonObject(
-                        element.jsonObject.mapValues {
-                            if (this@StructuredFormatter.lowerMask.contains(it.key.lowercase())) {
-                                return@mapValues JsonPrimitive(
-                                    "*".repeat(it.value.toString().length.coerceAtMost(32))
-                                )
-                            }
-                            return@mapValues when (it.value) {
-                                is JsonArray -> JsonArray(it.value.jsonArray.map { transformSerialize(it) })
-                                is JsonObject -> transformSerialize(it.value)
-                                else -> it.value
-                            }
-                        }
-                    )
-            }
-
-        val mdc = record.mdcContextDataSnapshot.data
-        return buildJsonObject {
-            field.forEach { f ->
-                when (f) {
-                    is Element.MESSAGE -> put("message", Json.encodeToJsonElement(s, record.msg))
-                    is Element.LEVEL -> put("level", JsonPrimitive(record.level.toString()))
-                    is Element.THREAD -> put("thread", JsonPrimitive(record.threadName))
-                    is Element.ATTR -> record.attr.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
-                    is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
-                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
-                    else -> {}
-                }
-            }
-
-            currentTimeJsonField?.let {
-                put("date", it)
-            }
-        }.toString()
+        return format(
+            msg = record.msg,
+            serializer = record.serializer,
+            level = record.level,
+            attrs = record.attr,
+            threadName = record.threadName,
+            mdc = record.mdcContextDataSnapshot.data
+        )
     }
 
     override fun format(
@@ -121,13 +83,28 @@ abstract class StructuredFormatter(
         level: Level,
         attrs: Map<String, String>
     ): String {
-        val mdc = MDC.getThreadLocalContext().data
+        return format(
+            msg = msg,
+            level = level,
+            attrs = attrs,
+            threadName = ThreadWrapper.getCurrentThreadName(),
+            mdc = MDC.getThreadLocalContext().data
+        )
+    }
+
+    private fun format(
+        msg: String,
+        level: Level,
+        attrs: Map<String, String>,
+        threadName: String,
+        mdc: Map<String, Any?>
+    ): String {
         return buildJsonObject {
             field.forEach { f ->
                 when (f) {
                     is Element.MESSAGE -> put("message", JsonPrimitive(msg))
                     is Element.LEVEL -> put("level", JsonPrimitive(level.name))
-                    is Element.THREAD -> put("thread", JsonPrimitive(ThreadWrapper.getCurrentThreadName()))
+                    is Element.THREAD -> put("thread", JsonPrimitive(threadName))
                     is Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
                     is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
@@ -139,6 +116,23 @@ abstract class StructuredFormatter(
                 put("date", it)
             }
         }.toString()
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun <T : LogStructure> format(
+        msg: T,
+        serializer: KSerializer<T>,
+        level: Level,
+        attrs: Map<String, String>
+    ): String {
+        return format(
+            msg = msg,
+            serializer = serializer,
+            level = level,
+            attrs = attrs,
+            threadName = ThreadWrapper.getCurrentThreadName(),
+            mdc = MDC.getThreadLocalContext().data
+        )
     }
 
     private val currentTimeJsonField: JsonPrimitive? get() {
@@ -174,12 +168,13 @@ abstract class StructuredFormatter(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override fun <T : LogStructure> format(
+    private fun <T : LogStructure> format(
         msg: T,
         serializer: KSerializer<T>,
         level: Level,
-        attrs: Map<String, String>
+        attrs: Map<String, String>,
+        threadName: String,
+        mdc: Map<String, Any?>
     ): String {
         val s =
             object : JsonTransformingSerializer<T>(serializer) {
@@ -200,13 +195,12 @@ abstract class StructuredFormatter(
                     )
             }
 
-        val mdc = MDC.getThreadLocalContext().data
         return buildJsonObject {
             field.forEach { f ->
                 when (f) {
                     is Element.MESSAGE -> put("message", Json.encodeToJsonElement(s, msg))
                     is Element.LEVEL -> put("level", JsonPrimitive(level.name))
-                    is Element.THREAD -> put("thread", JsonPrimitive(ThreadWrapper.getCurrentThreadName()))
+                    is Element.THREAD -> put("thread", JsonPrimitive(threadName))
                     is Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
                     is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
@@ -221,4 +215,6 @@ abstract class StructuredFormatter(
     }
 }
 
-interface LogStructure
+interface LogStructure {
+    fun stringify(): String = toString()
+}
