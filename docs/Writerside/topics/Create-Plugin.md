@@ -445,7 +445,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.milkcocoa0902:colotok:0.3.4")
+    implementation("io.github.milkcocoa0902:colotok:0.4.2")
 
     // Add any other dependencies your plugin needs
 
