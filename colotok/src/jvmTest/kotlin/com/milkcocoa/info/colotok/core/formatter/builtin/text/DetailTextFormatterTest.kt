@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.std.StdIn
@@ -38,7 +39,7 @@ object DetailTextFormatterTest {
     fun detailTextFormatterTest01() {
         val formatter = DetailTextFormatter
         Assertions.assertTrue {
-            formatter.format("message", LogLevel.ERROR).equals(
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
                 "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {}"
             )
         }
@@ -49,7 +50,7 @@ object DetailTextFormatterTest {
         val formatter = DetailTextFormatter
 
         Assertions.assertTrue {
-            formatter.format("message", LogLevel.ERROR).also {
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).also {
                 println(it)
             }.equals(
                 "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {}"
@@ -63,9 +64,12 @@ object DetailTextFormatterTest {
 
         Assertions.assertTrue {
             formatter.format(
-                "message",
-                LogLevel.ERROR,
-                mapOf("additional" to "additional param")
+                LogRecord.PlainText(
+                    name = "test",
+                    msg = "message",
+                    level = LogLevel.ERROR,
+                    attr = mapOf("additional" to "additional param")
+                )
             ).equals(
                 @Suppress("ktlint:standard:max-line-length")
                 "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {additional=additional param}"

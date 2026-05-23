@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 interface IProvider: AutoCloseable {
     val config: ProviderConfig
-    open val coroutineScope: CoroutineScope
+    val coroutineScope: CoroutineScope
     val channel: Channel<LogRecord>
     val job: Job
 

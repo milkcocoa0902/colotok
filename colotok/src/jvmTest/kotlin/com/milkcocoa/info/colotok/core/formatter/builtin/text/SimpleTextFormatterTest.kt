@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
@@ -36,7 +37,7 @@ object SimpleTextFormatterTest {
     fun simpleTextFormatterTest01() {
         val formatter = SimpleTextFormatter
         Assertions.assertTrue {
-            formatter.format("message", LogLevel.ERROR).equals(
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
                 "2023-12-31 12:34:56  [ERROR] - message"
             )
         }
@@ -47,7 +48,7 @@ object SimpleTextFormatterTest {
         val formatter = SimpleTextFormatter
 
         Assertions.assertTrue {
-            formatter.format("message", LogLevel.ERROR).equals(
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
                 "2023-12-31 12:34:56  [ERROR] - message"
             )
         }
@@ -59,9 +60,12 @@ object SimpleTextFormatterTest {
 
         Assertions.assertTrue {
             formatter.format(
-                "message",
-                LogLevel.ERROR,
-                mapOf("additional" to "additional param")
+                LogRecord.PlainText(
+                    name = "test",
+                    msg = "message",
+                    level = LogLevel.ERROR,
+                    attr = mapOf("additional" to "additional param")
+                )
             ).equals(
                 "2023-12-31 12:34:56  [ERROR] - message"
             )
