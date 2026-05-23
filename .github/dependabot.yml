@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # Gradle の依存関係を管理
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "daily"
