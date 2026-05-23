@@ -15,14 +15,16 @@ suspend fun ColotokLogger.atAsync(
     level: Level,
     msg: String
 ) {
+    val p = providers
+    val a = attrs
     withContext(Dispatchers.Default) {
-        providers.map {
+        p.map {
             async {
                 it.writeAsync(LogRecord.PlainText(
                     name = name,
                     msg = msg,
                     level = level,
-                    attr = attrs
+                    attr = a
                 ))
             }
         }.awaitAll()
@@ -35,14 +37,16 @@ suspend fun ColotokLogger.atAsync(
     msg: String,
     attr: Map<String, String>
 ) {
+    val p = providers
+    val a = attrs.plus(attr)
     withContext(Dispatchers.Default) {
-        providers.map {
+        p.map {
             async {
                 it.writeAsync(LogRecord.PlainText(
                     name = name,
                     msg = msg,
                     level = level,
-                    attr = attrs.plus(attr)
+                    attr = a
                 ))
             }
         }.awaitAll()
@@ -55,15 +59,17 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     level: Level,
     msg: T
 ) {
+    val p = providers
+    val a = attrs
     withContext(Dispatchers.Default) {
-        providers.map {
+        p.map {
             async {
                 it.writeAsync(LogRecord.StructuredText(
                     name = name,
                     msg = msg,
                     level = level,
                     serializer = T::class.serializer(),
-                    attr = attrs
+                    attr = a
                 ))
             }
         }.awaitAll()
@@ -76,15 +82,17 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     msg: T,
     attr: Map<String, String>
 ) {
+    val p = providers
+    val a = attrs.plus(attr)
     withContext(Dispatchers.Default) {
-        providers.map {
+        p.map {
             async {
                 it.writeAsync(LogRecord.StructuredText(
                     name = name,
                     msg = msg,
                     level = level,
                     serializer = T::class.serializer(),
-                    attr = attrs.plus(attr)
+                    attr = a
                 ))
             }
         }.awaitAll()

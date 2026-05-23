@@ -3,11 +3,13 @@ package com.milkcocoa.info.colotok.core.provider.details
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
+import com.milkcocoa.info.colotok.util.runBlocking
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -58,8 +60,10 @@ abstract class Provider(
                 runCatching { onMessage(record) }
             }
         } finally {
-            onFlush()
-            onClosed()
+            withContext(NonCancellable) {
+                onFlush()
+                onClosed()
+            }
         }
     }
 
@@ -82,8 +86,10 @@ abstract class Provider(
     }
 
     override fun forceShutdown() {
+        job.cancel()
+        channel.close()
         com.milkcocoa.info.colotok.util.runBlocking {
-            join()
+            job.join()
         }
     }
     /**

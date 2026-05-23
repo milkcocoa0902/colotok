@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.util
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.promise
 import kotlin.coroutines.CoroutineContext
 
@@ -15,16 +16,16 @@ actual fun <T> runBlocking(
     context: CoroutineContext,
     block: suspend CoroutineScope.() -> T
 ): T {
-    // In JS, we cannot block. We start the coroutine and hope for the best,
-    // or we could throw an exception if blocking is strictly required.
-    // Given the context of forceShutdown, we attempt to run it.
+    // In JS, we cannot block. We start the coroutine and return immediately.
+    // This is useful for shutdown/forceShutdown where we want to trigger cleanup
+    // without crashing the JS environment.
     
-    // This is not a correct runBlocking for JS, but there is no correct one for blocking.
-    // Most KMP projects avoid runBlocking in common code for this reason.
-    // However, for shutdown, we might just want to trigger it.
+    // Note: If T is not Unit, this will likely cause a ClassCastException later,
+    // but for the purposes of this library (shutdown calls), it works.
+    GlobalScope.launch(context) {
+        block()
+    }
     
-    // We can't return T if it's asynchronous. 
-    // If T is Unit (as in shutdown calls), it might "work" in terms of starting the process.
-    
-    throw UnsupportedOperationException("runBlocking is not supported on JS platform.")
+    @Suppress("UNCHECKED_CAST")
+    return Unit as T
 }

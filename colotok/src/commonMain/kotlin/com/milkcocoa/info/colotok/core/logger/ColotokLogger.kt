@@ -33,12 +33,14 @@ class ColotokLogger(
         level: Level,
         msg: String
     ) {
-        providers.forEach {
+        val p = providers
+        val a = attrs
+        p.forEach {
             it.write(LogRecord.PlainText(
                 name = name,
                 msg = msg,
                 level = level,
-                attr = attrs
+                attr = a
             ))
         }
     }
@@ -54,12 +56,14 @@ class ColotokLogger(
         msg: String,
         attr: Map<String, String>
     ) {
-        providers.forEach {
+        val p = providers
+        val a = attrs.plus(attr)
+        p.forEach {
             it.write(LogRecord.PlainText(
                 name = name,
                 msg = msg,
                 level = level,
-                attr = attrs.plus(attr)
+                attr = a
             ))
         }
     }
@@ -73,13 +77,15 @@ class ColotokLogger(
         level: Level,
         msg: T
     ) {
-        providers.forEach {
+        val p = providers
+        val a = attrs
+        p.forEach {
             it.write(LogRecord.StructuredText(
                 name = name,
                 msg = msg,
                 level = level,
                 serializer = serializer<T>(),
-                attr = attrs
+                attr = a
             ))
         }
     }
@@ -95,13 +101,15 @@ class ColotokLogger(
         msg: T,
         attr: Map<String, String>
     ) {
-        providers.forEach {
+        val p = providers
+        val a = attrs.plus(attr)
+        p.forEach {
             it.write(LogRecord.StructuredText(
                 name = name,
                 msg = msg,
                 level = level,
                 serializer = serializer<T>(),
-                attr = attrs.plus(attr)
+                attr = a
             ))
         }
     }
