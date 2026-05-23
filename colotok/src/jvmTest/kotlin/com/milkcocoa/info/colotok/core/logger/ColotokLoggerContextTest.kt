@@ -7,12 +7,36 @@ import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderC
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
+import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class ColotokLoggerContextTest {
+
+    @Test
+    fun getLogger_caches_instances_by_name() {
+        val ctx = ColotokLoggerContext()
+        val logger1 = ctx.getLogger("test")
+        val logger2 = ctx.getLogger("test")
+        val logger3 = ctx.getLogger("other")
+
+        assertSame(logger1, logger2)
+        assertTrue(logger1 !== logger3)
+    }
+
+    @Test
+    fun getLogger_default_name_is_also_cached() {
+        val ctx = ColotokLoggerContext()
+        val logger1 = ctx.getLogger()
+        val logger2 = ctx.getLogger()
+        val loggerDefault = ctx.getLogger("Default Logger")
+
+        assertSame(logger1, logger2)
+        assertSame(logger1, loggerDefault)
+    }
 
     private class RecordingProvider : Provider(
         config = ConsoleProviderConfig()

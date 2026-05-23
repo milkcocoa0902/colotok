@@ -7,17 +7,22 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-object ColorTest {
+class ColorTest {
+    private var originalIn = System.`in`
+    private var originalOut = System.out
+
     @BeforeEach
     public fun before() {
+        originalIn = System.`in`
+        originalOut = System.out
         System.setIn(StdIn())
         System.setOut(StdOut())
     }
 
     @AfterEach
     public fun after() {
-        System.setIn(null)
-        System.setOut(null)
+        System.setIn(originalIn)
+        System.setOut(originalOut)
     }
 
     @Test

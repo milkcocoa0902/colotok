@@ -3,11 +3,13 @@ package com.milkcocoa.info.colotok.core.provider.details
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
+import com.milkcocoa.info.colotok.util.runBlocking
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +31,7 @@ interface IProvider: AutoCloseable {
     suspend fun onFlush(){}
     suspend fun onMessage(record: LogRecord)
     fun onClosed(){}
+    fun forceShutdown(){}
 }
 
 abstract class Provider(
@@ -57,8 +60,10 @@ abstract class Provider(
                 runCatching { onMessage(record) }
             }
         } finally {
-            onFlush()
-            onClosed()
+            withContext(NonCancellable) {
+                onFlush()
+                onClosed()
+            }
         }
     }
 
@@ -78,6 +83,14 @@ abstract class Provider(
 
     override fun close() {
         channel.close()
+    }
+
+    override fun forceShutdown() {
+        job.cancel()
+        channel.close()
+        com.milkcocoa.info.colotok.util.runBlocking {
+            job.join()
+        }
     }
     /**
      * 現在キューにあるすべてのログが処理され、

@@ -19,22 +19,26 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Instant
 
 @OptIn(InternalSerializationApi::class)
-object StructureFormatterTest {
+class StructureFormatterTest {
     private val stdIn = StdIn()
     private val stdOut = StdOut()
+    private var originalIn = System.`in`
+    private var originalOut = System.out
 
     @BeforeEach
     public fun before() {
         mockkObject(kotlin.time.Clock.System)
         every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
+        originalIn = System.`in`
+        originalOut = System.out
         System.setIn(stdIn)
         System.setOut(stdOut)
     }
 
     @AfterEach
     public fun after() {
-        System.setIn(null)
-        System.setOut(null)
+        System.setIn(originalIn)
+        System.setOut(originalOut)
 
         unmockkAll()
     }

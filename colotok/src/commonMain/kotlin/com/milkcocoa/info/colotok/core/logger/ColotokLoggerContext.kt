@@ -10,6 +10,7 @@ import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
+import com.milkcocoa.info.colotok.util.createThreadSafeMap
 
 /**
  * builder class for get logger instance
@@ -20,8 +21,11 @@ class ColotokLoggerContext {
 
     private val providers: MutableList<Provider> = mutableListOf()
     private val attrs = mutableMapOf<String, String>()
+    private var immutableProviders: List<Provider> = emptyList()
+    private var immutableAttrs: Map<String, String> = emptyMap()
     private var metricsCollector: MetricsCollector = NoOpMetricsCollector
     private var frozen: Boolean = false
+    private val activeLoggers: MutableMap<String, ColotokLogger> = createThreadSafeMap()
 
     fun freeze() { frozen = true }
     private fun ensureNotFrozen() {
@@ -35,6 +39,7 @@ class ColotokLoggerContext {
      */
     fun shallowCopy() = ColotokLoggerContext().apply {
         this.providers.addAll(this@ColotokLoggerContext.providers)
+        this.immutableProviders = this.providers.toList()
         this.withAttrs(this@ColotokLoggerContext.attrs.toMap())
     }
 
@@ -42,6 +47,7 @@ class ColotokLoggerContext {
         ensureNotFrozen()
         this.attrs.clear()
         this.attrs.putAll(attrs)
+        this.immutableAttrs = this.attrs.toMap()
     }
 
     /**
@@ -59,6 +65,7 @@ class ColotokLoggerContext {
         apply {
             ensureNotFrozen()
             this@ColotokLoggerContext.attrs.putAll(attr)
+            this@ColotokLoggerContext.immutableAttrs = this@ColotokLoggerContext.attrs.toMap()
         }
 
     /**
@@ -94,6 +101,7 @@ class ColotokLoggerContext {
             }
 
             providers.add(provider)
+            immutableProviders = providers.toList()
         }
 
     /**
@@ -101,10 +109,7 @@ class ColotokLoggerContext {
      * @return [ColotokLogger] logger
      */
     fun getLogger(): ColotokLogger {
-        return ColotokLogger(name = "Default Logger") {
-            this.defaultAttrs = this@ColotokLoggerContext.attrs
-            this.providers = this@ColotokLoggerContext.providers
-        }
+        return getLogger("Default Logger")
     }
 
     /**
@@ -113,14 +118,39 @@ class ColotokLoggerContext {
      * @return [ColotokLogger] logger
      */
     fun getLogger(name: String): ColotokLogger {
-        return ColotokLogger(name = name) {
-            this.defaultAttrs = this@ColotokLoggerContext.attrs
-            this.providers = this@ColotokLoggerContext.providers
+        return activeLoggers.getOrPut(name) {
+            ColotokLogger(
+                name = name,
+                providersProvider = { this.immutableProviders },
+                attrsProvider = { this.immutableAttrs }
+            )
         }
+    }
+
+    /**
+     * Shutdown all loggers created in this context and wait for all providers to finish processing.
+     */
+    suspend fun shutdown() {
+        activeLoggers.values.forEach { it.shutdown() }
+        activeLoggers.clear()
+        providers.forEach { it.join() }
+    }
+
+    /**
+     * Shutdown all loggers created in this context immediately.
+     */
+    fun forceShutdown() {
+        activeLoggers.values.forEach { it.forceShutdown() }
+        activeLoggers.clear()
     }
 
 
     companion object {
+        /**
+         * get default logger context
+         */
+        val default: ColotokLoggerContext get() = _default
+
         private var _default: ColotokLoggerContext = ColotokLoggerContext()
             .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
                 this.formatter = DetailTextFormatter
