@@ -7,6 +7,7 @@ on:
 jobs:
     # build job
     build:
+        if: github.actor != 'dependabot[bot]'
         # Runnerを指定
         runs-on: ubuntu-latest
         # Step
