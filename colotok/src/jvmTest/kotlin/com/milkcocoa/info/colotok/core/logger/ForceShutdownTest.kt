@@ -44,9 +44,9 @@ class ForceShutdownTest {
         Assertions.assertTrue(slowProvider.isFinished.get())
         Assertions.assertTrue(slowProvider.messageReceived.get())
         
-        // delay(500) していたので、少なくとも500ms程度は経過しているはず
+        // delay(500) していたが、forceShutdownによってキャンセルされるため、500ms待たずに終了するはず
         val duration = endTime - startTime
         println("Duration: $duration ms")
-        Assertions.assertTrue(duration >= 500, "forceShutdown should wait for slow provider to finish")
+        Assertions.assertTrue(duration < 500, "forceShutdown should be immediate and not wait for slow provider to finish")
     }
 }

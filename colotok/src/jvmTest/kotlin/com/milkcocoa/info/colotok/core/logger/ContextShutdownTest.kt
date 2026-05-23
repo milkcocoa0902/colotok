@@ -10,10 +10,10 @@ import java.io.File
 
 class ContextShutdownTest {
     @Test
-    fun testContextShutdown() = runBlocking {
-        println("Running testContextShutdown")
-        val testLogFile1 = File("context_shutdown_1.log")
-        val testLogFile2 = File("context_shutdown_2.log")
+    fun testContextShutdown() {
+        runBlocking {
+            val testLogFile1 = File("context_shutdown_1.log")
+            val testLogFile2 = File("context_shutdown_2.log")
         testLogFile1.delete()
         testLogFile2.delete()
 
@@ -46,5 +46,6 @@ class ContextShutdownTest {
         
         testLogFile1.delete()
         testLogFile2.delete()
+        }
     }
 }
