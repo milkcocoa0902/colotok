@@ -3,15 +3,26 @@ package com.milkcocoa.info.colotok.core.logger
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
-class ColotokLogger(val name: String, config: ColotokConfig) {
-    constructor(name: String, config: ColotokConfig.() -> Unit) : this(name = name, ColotokConfig().apply(config))
+class ColotokLogger(
+    val name: String,
+    private val providersProvider: () -> List<Provider>,
+    private val attrsProvider: () -> Map<String, String>
+) {
+    val providers get() = providersProvider()
+    val attrs get() = attrsProvider()
 
-    val providers = config.providers
-    val attrs = config.defaultAttrs
+    constructor(name: String, config: ColotokConfig) : this(
+        name = name,
+        providersProvider = { config.providers },
+        attrsProvider = { config.defaultAttrs }
+    )
+
+    constructor(name: String, config: ColotokConfig.() -> Unit) : this(name = name, ColotokConfig().apply(config))
 
     /**
      * print log with providers into passed [level]
@@ -92,6 +103,24 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
                 serializer = serializer<T>(),
                 attr = attrs.plus(attr)
             ))
+        }
+    }
+
+    /**
+     * Shutdown the logger and wait for all providers to finish processing.
+     */
+    suspend fun shutdown() {
+        providers.forEach {
+            it.join()
+        }
+    }
+
+    /**
+     * Shutdown the logger immediately.
+     */
+    fun forceShutdown() {
+        providers.forEach {
+            it.close()
         }
     }
 
@@ -373,11 +402,8 @@ class ColotokLogger(val name: String, config: ColotokConfig) {
     ) {
         LevelScopedColotokLogger(
             name = name,
-            config =
-                ColotokConfig().apply {
-                    this.providers = this@ColotokLogger.providers
-                    this.defaultAttrs = this@ColotokLogger.attrs
-                },
+            providers = providers,
+            attrs = attrs,
             level = level
         ).block()
     }

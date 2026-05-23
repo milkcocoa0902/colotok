@@ -22,6 +22,7 @@ class ColotokLoggerContext {
     private val attrs = mutableMapOf<String, String>()
     private var metricsCollector: MetricsCollector = NoOpMetricsCollector
     private var frozen: Boolean = false
+    private val activeLoggers: MutableMap<String, ColotokLogger> = mutableMapOf()
 
     fun freeze() { frozen = true }
     private fun ensureNotFrozen() {
@@ -101,10 +102,7 @@ class ColotokLoggerContext {
      * @return [ColotokLogger] logger
      */
     fun getLogger(): ColotokLogger {
-        return ColotokLogger(name = "Default Logger") {
-            this.defaultAttrs = this@ColotokLoggerContext.attrs
-            this.providers = this@ColotokLoggerContext.providers
-        }
+        return getLogger("Default Logger")
     }
 
     /**
@@ -113,14 +111,40 @@ class ColotokLoggerContext {
      * @return [ColotokLogger] logger
      */
     fun getLogger(name: String): ColotokLogger {
-        return ColotokLogger(name = name) {
-            this.defaultAttrs = this@ColotokLoggerContext.attrs
-            this.providers = this@ColotokLoggerContext.providers
+        return activeLoggers.getOrPut(name) {
+            ColotokLogger(
+                name = name,
+                providersProvider = { this.providers.toList() },
+                attrsProvider = { this.attrs.toMap() }
+            )
         }
+    }
+
+    /**
+     * Shutdown all loggers created in this context and wait for all providers to finish processing.
+     */
+    suspend fun shutdown() {
+        activeLoggers.values.forEach { it.shutdown() }
+        activeLoggers.clear()
+        providers.forEach { it.join() }
+    }
+
+    /**
+     * Shutdown all loggers created in this context immediately.
+     */
+    fun forceShutdown() {
+        activeLoggers.values.forEach { it.forceShutdown() }
+        activeLoggers.clear()
+        providers.forEach { it.close() }
     }
 
 
     companion object {
+        /**
+         * get default logger context
+         */
+        val default: ColotokLoggerContext get() = _default
+
         private var _default: ColotokLoggerContext = ColotokLoggerContext()
             .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
                 this.formatter = DetailTextFormatter
