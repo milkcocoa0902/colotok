@@ -207,13 +207,10 @@ suspend fun ColotokLogger.atErrorAsync(block: suspend LevelScopedColotokLogger.(
 }
 
 suspend fun ColotokLogger.atAsync(level: Level, block: suspend LevelScopedColotokLogger.() -> Unit) {
-    val scopedLogger = LevelScopedColotokLogger(
+    LevelScopedColotokLogger(
         name = name,
-        config = ColotokConfig().apply {
-            this.providers = this@atAsync.providers
-            this.defaultAttrs = this@atAsync.attrs
-        },
+        providers = providers,
+        attrs = attrs,
         level = level
-    )
-    scopedLogger.block()
+    ).block()
 }

@@ -120,7 +120,7 @@ class ColotokLogger(
      */
     fun forceShutdown() {
         providers.forEach {
-            it.close()
+            it.forceShutdown()
         }
     }
 

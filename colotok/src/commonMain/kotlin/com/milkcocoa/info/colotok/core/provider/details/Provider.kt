@@ -29,6 +29,7 @@ interface IProvider: AutoCloseable {
     suspend fun onFlush(){}
     suspend fun onMessage(record: LogRecord)
     fun onClosed(){}
+    fun forceShutdown(){}
 }
 
 abstract class Provider(
@@ -78,6 +79,12 @@ abstract class Provider(
 
     override fun close() {
         channel.close()
+    }
+
+    override fun forceShutdown() {
+        com.milkcocoa.info.colotok.util.runBlocking {
+            join()
+        }
     }
     /**
      * 現在キューにあるすべてのログが処理され、
