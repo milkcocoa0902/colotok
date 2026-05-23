@@ -54,47 +54,13 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         )
     }
 
-    override fun <T : LogStructure> format(
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level
-    ): String {
-        return format(msg.stringify(), level, mapOf())
-    }
-
-    override fun <T : LogStructure> format(
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attrs: Map<String, String>
-    ): String {
+    override fun format(record: LogRecord.Metrics): String {
         return format(
-            msg = msg.stringify(),
-            level = level,
-            attrs = attrs,
-            threadName = ThreadWrapper.getCurrentThreadName(),
-            mdc = MDC.getThreadLocalContext().data
-        )
-    }
-
-    override fun format(
-        msg: String,
-        level: Level
-    ): String {
-        return format(msg, level, mapOf())
-    }
-
-    override fun format(
-        msg: String,
-        level: Level,
-        attrs: Map<String, String>
-    ): String {
-        return format(
-            msg = msg,
-            level = level,
-            attrs = attrs,
-            threadName = ThreadWrapper.getCurrentThreadName(),
-            mdc = MDC.getThreadLocalContext().data
+            msg = record.msg,
+            level = record.level,
+            attrs = record.attr,
+            threadName = record.threadName,
+            mdc = record.mdcContextDataSnapshot.data
         )
     }
 

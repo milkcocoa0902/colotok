@@ -1,5 +1,6 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
@@ -33,7 +34,7 @@ object PlainTextFormatterTest {
     fun plainTextFormatterTest01() {
         val formatter = PlainTextFormatter
         Assertions.assertTrue {
-            formatter.format("message", LogLevel.ERROR).equals(
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
                 "message"
             )
         }
@@ -44,9 +45,12 @@ object PlainTextFormatterTest {
         val formatter = PlainTextFormatter
         Assertions.assertTrue {
             formatter.format(
-                "message",
-                LogLevel.ERROR,
-                mapOf("additional" to "additional parameter")
+                LogRecord.PlainText(
+                    name = "test",
+                    msg = "message",
+                    level = LogLevel.ERROR,
+                    attr = mapOf("additional" to "additional parameter")
+                )
             ).equals(
                 "message"
             )
