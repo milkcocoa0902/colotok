@@ -3,7 +3,6 @@ package com.milkcocoa.info.colotok.core.formatter.details
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
-import com.milkcocoa.info.colotok.core.logger.MDC
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -11,7 +10,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.serialization.KSerializer
+import kotlin.time.Instant
 
 /**
  * base class for log formatter which used for text log.
@@ -40,7 +39,8 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
             level = record.level,
             attrs = record.attr,
             threadName = record.threadName,
-            mdc = record.mdcContextDataSnapshot.data
+            mdc = record.mdcContextDataSnapshot.data,
+            timestamp = record.eventTimestamp
         )
     }
 
@@ -50,7 +50,8 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
             level = record.level,
             attrs = record.attr,
             threadName = record.threadName,
-            mdc = record.mdcContextDataSnapshot.data
+            mdc = record.mdcContextDataSnapshot.data,
+            timestamp = record.eventTimestamp
         )
     }
 
@@ -60,7 +61,8 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
             level = record.level,
             attrs = record.attr,
             threadName = record.threadName,
-            mdc = record.mdcContextDataSnapshot.data
+            mdc = record.mdcContextDataSnapshot.data,
+            timestamp = record.eventTimestamp
         )
     }
 
@@ -69,9 +71,10 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         level: Level,
         attrs: Map<String, String>,
         threadName: String,
-        mdc: Map<String, Any?>
+        mdc: Map<String, Any?>,
+        timestamp: Instant
     ): String {
-        val dt = kotlin.time.Clock.System.now()
+        val dt = timestamp
         return fmt
             .replace(Element.DATETIME.toString(), dt.toLocalDateTime(TimeZone.UTC).format(LocalDateTime.Formats.ISO))
             .replace(Element.DATE.toString(), dt.toLocalDateTime(TimeZone.UTC).date.format(LocalDate.Formats.ISO))

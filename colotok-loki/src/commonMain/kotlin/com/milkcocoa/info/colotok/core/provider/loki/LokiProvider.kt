@@ -1,15 +1,11 @@
 package com.milkcocoa.info.colotok.core.provider.loki
 
-import com.milkcocoa.info.colotok.core.coroutines.blocking
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * A log provider implementation for Grafana Loki.
@@ -37,43 +33,51 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider(config) {
     private val credential = config.credential
 
 
+    private fun eventTimestamp(record: LogRecord): Instant = when (record) {
+        is LogRecord.PlainText -> record.eventTimestamp
+        is LogRecord.StructuredText<*> -> record.eventTimestamp
+        is LogRecord.Metrics -> record.eventTimestamp
+        is LogRecord.Pin -> error("Pin records cannot be published")
+    }
+
+
     /**
      * Sends the buffered log entries to the Loki server.
      * 
      * This method creates a payload with all buffered log entries and sends it to Loki
      * using the configured HTTP client. After successful sending, the buffer is cleared.
      */
-    @OptIn(ExperimentalTime::class)
     override suspend fun onPublish(records: List<LogRecord>) {
-        runCatching {
-            httpClient.post(urlString = host){
-                // Apply authentication if configured
-                when(credential){
-                    is Credential.Basic ->{
-                        basicAuth(username =  credential.username, password = credential.password)
-                    }
-                    null -> Unit
+        val response = httpClient.post(urlString = host){
+            // Apply authentication if configured
+            when(credential){
+                is Credential.Basic ->{
+                    basicAuth(username =  credential.username, password = credential.password)
                 }
-                contentType(ContentType.Application.Json)
+                null -> Unit
+            }
+            contentType(ContentType.Application.Json)
 
-                // Create and serialize the payload
-                setBody(Json.encodeToString(
-                    LokiPushPayload.serializer(),
-                    LokiPushPayload(
-                        streams = listOf(
-                            LokiStream(
-                                stream = logStream,
-                                values = records.map {
-                                    LokiValue(
-                                        timestamp = Clock.System.now(),
-                                        value = it.format(config.formatter)
-                                    )
-                                }
-                            )
+            // Create and serialize the payload
+            setBody(Json.encodeToString(
+                LokiPushPayload.serializer(),
+                LokiPushPayload(
+                    streams = listOf(
+                        LokiStream(
+                            stream = logStream,
+                            values = records.map {
+                                LokiValue(
+                                    timestamp = eventTimestamp(it),
+                                    value = it.format(config.formatter)
+                                )
+                            }
                         )
                     )
-                ))
-            }
+                )
+            ))
+        }
+        if (response.status.value !in 200..299) {
+            error("Loki publish failed with HTTP ${response.status.value}")
         }
     }
 

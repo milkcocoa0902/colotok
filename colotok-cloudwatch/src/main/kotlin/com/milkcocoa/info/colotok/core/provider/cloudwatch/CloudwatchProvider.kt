@@ -11,8 +11,7 @@ import aws.sdk.kotlin.services.cloudwatchlogs.model.InputLogEvent
 import aws.sdk.kotlin.services.cloudwatchlogs.putLogEvents
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider(config) {
     constructor(config: CloudwatchProviderConfig.()->Unit): this(CloudwatchProviderConfig().apply(config))
@@ -59,30 +58,35 @@ class CloudwatchProvider(config: CloudwatchProviderConfig): AsyncProvider(config
         }
     }
 
+    private fun eventTimestamp(record: LogRecord): Instant = when (record) {
+        is LogRecord.PlainText -> record.eventTimestamp
+        is LogRecord.StructuredText<*> -> record.eventTimestamp
+        is LogRecord.Metrics -> record.eventTimestamp
+        is LogRecord.Pin -> error("Pin records cannot be published")
+    }
+
+
     /**
      * Sends the buffered logs to CloudWatch.
      * This method is synchronized with the mutex to prevent concurrent modifications to the buffer.
      */
-    @OptIn(ExperimentalTime::class)
     override suspend fun onPublish(records: List<LogRecord>) {
-        runCatching {
-            createGroupIfNotExists()
-            createStreamIfNotExists()
+        createGroupIfNotExists()
+        createStreamIfNotExists()
 
-            val response = client.putLogEvents {
-                this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
-                this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
-                this.sequenceToken = this@CloudwatchProvider.sequenceToken
-                this.logEvents = records.map {
-                    InputLogEvent {
-                        this.timestamp = Clock.System.now().toEpochMilliseconds()
-                        this.message = it.format(config.formatter)
-                    }
+        val response = client.putLogEvents {
+            this.logGroupName = this@CloudwatchProvider.cloudwatchLogGroup
+            this.logStreamName = this@CloudwatchProvider.cloudwatchLogStream
+            this.sequenceToken = this@CloudwatchProvider.sequenceToken
+            this.logEvents = records.map {
+                InputLogEvent {
+                    this.timestamp = eventTimestamp(it).toEpochMilliseconds()
+                    this.message = it.format(config.formatter)
                 }
             }
-
-            this@CloudwatchProvider.sequenceToken = response.nextSequenceToken
         }
+
+        this@CloudwatchProvider.sequenceToken = response.nextSequenceToken
     }
 
 

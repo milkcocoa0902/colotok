@@ -6,6 +6,7 @@ import com.milkcocoa.info.colotok.util.SinkUtil.write
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.Path
+import okio.use
 
 /**
  * builtin provider which used to write the log into file.
@@ -52,7 +53,10 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
                 getFileSystem().appendingSink(
                     file = filePath,
                     mustExist = false
-                ).write(record.format(config.formatter).plus("\n").encodeToByteArray())
+                ).use { sink ->
+                    sink.write(record.format(config.formatter).plus("\n").encodeToByteArray())
+                    sink.flush()
+                }
 
                 if(rotation?.isRotateNeeded(filePath) == true){
                     rotation.doRotate(filePath)

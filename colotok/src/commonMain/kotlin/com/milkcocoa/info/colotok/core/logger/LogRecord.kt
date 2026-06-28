@@ -6,6 +6,8 @@ import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.serialization.KSerializer
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 sealed interface LogRecord{
     val name: String
@@ -22,9 +24,10 @@ sealed interface LogRecord{
         val msg: String,
         override val level: Level,
         override val attr: Map<String, String>,
+        val eventTimestamp: Instant = Clock.System.now(),
     ): LogRecord{
         override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
-        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext()
+        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext().deepCopy()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -34,9 +37,10 @@ sealed interface LogRecord{
         override val level: Level,
         override val attr: Map<String, String>,
         val serializer: KSerializer<T>,
+        val eventTimestamp: Instant = Clock.System.now(),
     ): LogRecord{
         override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
-        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext()
+        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext().deepCopy()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -45,9 +49,10 @@ sealed interface LogRecord{
         val msg: String,
         override val level: Level,
         override val attr: Map<String, String>,
+        val eventTimestamp: Instant = Clock.System.now(),
     ): LogRecord {
         override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
-        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext()
+        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext().deepCopy()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 

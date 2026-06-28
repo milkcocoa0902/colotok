@@ -36,17 +36,29 @@ abstract class AsyncProvider(
             }
         }
 
-        batchToSend?.let { publishWithRetry(it) }
+        batchToSend?.let {
+            if (!publishWithRetry(it)) {
+                restoreFailedRecords(it)
+            }
+        }
     }
 
     abstract suspend fun onPublish(records: List<LogRecord>)
 
-    private suspend fun publishWithRetry(records: List<LogRecord>) {
-        runCatching { onPublish(records) }
+    private suspend fun publishWithRetry(records: List<LogRecord>): Boolean {
+        return runCatching { onPublish(records) }
             .onFailure {
                 effectiveMetricsCollector.incrementErrorCount(this::class.simpleName ?: "unknown", "publish_failed")
                 println("Failed to publish logs: ${it.message}")
             }
+            .isSuccess
+    }
+
+    private suspend fun restoreFailedRecords(records: List<LogRecord>) {
+        mutex.withLock {
+            buffer.addAll(0, records)
+            effectiveMetricsCollector.updateBufferSize(this::class.simpleName ?: "unknown", buffer.size)
+        }
     }
 
     override suspend fun onFlush() {
@@ -56,8 +68,8 @@ abstract class AsyncProvider(
             effectiveMetricsCollector.updateBufferSize(this::class.simpleName ?: "unknown", 0)
             copy
         }
-        if (remaining.isNotEmpty()) {
-            publishWithRetry(remaining)
+        if (remaining.isNotEmpty() && !publishWithRetry(remaining)) {
+            restoreFailedRecords(remaining)
         }
     }
 

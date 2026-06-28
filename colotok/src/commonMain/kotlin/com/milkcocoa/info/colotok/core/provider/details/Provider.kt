@@ -13,7 +13,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -61,8 +61,8 @@ abstract class Provider(
             }
         } finally {
             withContext(NonCancellable) {
-                onFlush()
-                onClosed()
+                runCatching { onFlush() }
+                runCatching { onClosed() }
             }
         }
     }
@@ -98,11 +98,22 @@ abstract class Provider(
      */
     override suspend fun flush(timeout: Duration) {
         val flushToken = CompletableDeferred<Unit>()
-        channel.send(LogRecord.Pin(flushToken))
-        withContext(Dispatchers.Default.limitedParallelism(1)){
-            withTimeout(timeout){
-                flushToken.await()
+        val flushPin = LogRecord.Pin(flushToken)
+
+        try {
+            withContext(Dispatchers.Default.limitedParallelism(1)){
+                withTimeout(timeout){
+                    val sendResult = channel.trySend(flushPin)
+                    when {
+                        sendResult.isSuccess -> Unit
+                        sendResult.isClosed -> return@withTimeout
+                        else -> channel.send(flushPin)
+                    }
+                    flushToken.await()
+                }
             }
+        } catch (_: ClosedSendChannelException) {
+            return
         }
     }
 
