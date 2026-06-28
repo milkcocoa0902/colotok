@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.core.provider.rotation
 
 import com.milkcocoa.info.colotok.core.provider.builtin.file.getFileSystem
 import okio.Path
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
@@ -17,19 +18,18 @@ import kotlin.time.Instant
  */
 class DateBaseRotation(private val period: Duration = 7.days) : Rotation {
     override fun isRotateNeeded(filePath: Path): Boolean {
-        val fileCreationTimeInstant =
-            getFileSystem().metadata(filePath).createdAtMillis?.let {
-                Instant.fromEpochMilliseconds(it)
-            }!!
-        val currentTime = kotlin.time.Clock.System.now()
-        return fileCreationTimeInstant.plus(period) > currentTime
+        val metadata = runCatching { getFileSystem().metadata(filePath) }.getOrNull() ?: return false
+        val baseTimestampMillis = metadata.createdAtMillis ?: metadata.lastModifiedAtMillis ?: return false
+        val baseTimestamp = Instant.fromEpochMilliseconds(baseTimestampMillis)
+
+        return baseTimestamp.plus(period) <= Clock.System.now()
     }
 
     override fun doRotate(filePath: Path) {
         val rotateIndex =
-            getFileSystem().list(filePath.parent!!).also { println(it) }
-                .filter { it.name.startsWith(filePath.name) }.also { println(it) }
-                .mapNotNull { it.name.removePrefix("${filePath.name}.").toIntOrNull() }.also { println(it) }
+            getFileSystem().list(filePath.parent!!)
+                .filter { it.name.startsWith(filePath.name) }
+                .mapNotNull { it.name.removePrefix("${filePath.name}.").toIntOrNull() }
                 .maxOrNull()?.plus(1) ?: 1
 
         getFileSystem().atomicMove(
