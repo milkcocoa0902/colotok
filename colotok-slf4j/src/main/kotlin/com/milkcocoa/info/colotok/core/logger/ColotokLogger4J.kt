@@ -84,15 +84,13 @@ class ColotokLogger4J(private val name: String) : Logger {
         log(LogLevel.INFO, msg.orEmpty(), t)
     }
 
-    override fun isInfoEnabled(marker: Marker?): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isInfoEnabled(marker: Marker?): Boolean = isInfoEnabled
 
     override fun info(
         marker: Marker?,
         msg: String?
     ) {
-        TODO("Not yet implemented")
+        info(msg)
     }
 
     override fun info(
@@ -100,7 +98,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         arg: Any?
     ) {
-        TODO("Not yet implemented")
+        info(format, arg)
     }
 
     override fun info(
@@ -109,7 +107,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         arg1: Any?,
         arg2: Any?
     ) {
-        TODO("Not yet implemented")
+        info(format, arg1, arg2)
     }
 
     override fun info(
@@ -117,7 +115,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         vararg arguments: Any?
     ) {
-        TODO("Not yet implemented")
+        info(format, *arguments)
     }
 
     override fun info(
@@ -125,12 +123,10 @@ class ColotokLogger4J(private val name: String) : Logger {
         msg: String?,
         t: Throwable?
     ) {
-        TODO("Not yet implemented")
+        info(msg, t)
     }
 
-    override fun isWarnEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isWarnEnabled(): Boolean = true
 
     override fun debug(msg: String?) {
         log(LogLevel.DEBUG, msg.orEmpty())
@@ -165,15 +161,13 @@ class ColotokLogger4J(private val name: String) : Logger {
         log(LogLevel.DEBUG, msg.orEmpty(), t)
     }
 
-    override fun isDebugEnabled(marker: Marker?): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isDebugEnabled(marker: Marker?): Boolean = isDebugEnabled
 
     override fun debug(
         marker: Marker?,
         msg: String?
     ) {
-        TODO("Not yet implemented")
+        debug(msg)
     }
 
     override fun debug(
@@ -181,7 +175,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         arg: Any?
     ) {
-        TODO("Not yet implemented")
+        debug(format, arg)
     }
 
     override fun debug(
@@ -190,7 +184,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         arg1: Any?,
         arg2: Any?
     ) {
-        TODO("Not yet implemented")
+        debug(format, arg1, arg2)
     }
 
     override fun debug(
@@ -198,7 +192,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         vararg arguments: Any?
     ) {
-        TODO("Not yet implemented")
+        debug(format, *arguments)
     }
 
     override fun debug(
@@ -206,12 +200,10 @@ class ColotokLogger4J(private val name: String) : Logger {
         msg: String?,
         t: Throwable?
     ) {
-        TODO("Not yet implemented")
+        debug(msg, t)
     }
 
-    override fun isInfoEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isInfoEnabled(): Boolean = true
 
     override fun warn(msg: String?) {
         log(LogLevel.WARN, msg.orEmpty())
@@ -246,15 +238,13 @@ class ColotokLogger4J(private val name: String) : Logger {
         log(LogLevel.WARN, msg.orEmpty(), t)
     }
 
-    override fun isWarnEnabled(marker: Marker?): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isWarnEnabled(marker: Marker?): Boolean = isWarnEnabled
 
     override fun warn(
         marker: Marker?,
         msg: String?
     ) {
-        TODO("Not yet implemented")
+        warn(msg)
     }
 
     override fun warn(
@@ -262,7 +252,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         arg: Any?
     ) {
-        TODO("Not yet implemented")
+        warn(format, arg)
     }
 
     override fun warn(
@@ -271,7 +261,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         arg1: Any?,
         arg2: Any?
     ) {
-        TODO("Not yet implemented")
+        warn(format, arg1, arg2)
     }
 
     override fun warn(
@@ -279,7 +269,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         vararg arguments: Any?
     ) {
-        TODO("Not yet implemented")
+        warn(format, *arguments)
     }
 
     override fun warn(
@@ -287,12 +277,10 @@ class ColotokLogger4J(private val name: String) : Logger {
         msg: String?,
         t: Throwable?
     ) {
-        TODO("Not yet implemented")
+        warn(msg, t)
     }
 
-    override fun isErrorEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isErrorEnabled(): Boolean = true
 
     override fun error(msg: String?) {
         log(LogLevel.ERROR, msg.orEmpty())
@@ -327,15 +315,13 @@ class ColotokLogger4J(private val name: String) : Logger {
         log(LogLevel.ERROR, msg.orEmpty(), t)
     }
 
-    override fun isErrorEnabled(marker: Marker?): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isErrorEnabled(marker: Marker?): Boolean = isErrorEnabled
 
     override fun error(
         marker: Marker?,
         msg: String?
     ) {
-        TODO("Not yet implemented")
+        error(msg)
     }
 
     override fun error(
@@ -343,7 +329,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         arg: Any?
     ) {
-        TODO("Not yet implemented")
+        error(format, arg)
     }
 
     override fun error(
@@ -352,7 +338,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         arg1: Any?,
         arg2: Any?
     ) {
-        TODO("Not yet implemented")
+        error(format, arg1, arg2)
     }
 
     override fun error(
@@ -360,7 +346,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         vararg arguments: Any?
     ) {
-        TODO("Not yet implemented")
+        error(format, *arguments)
     }
 
     override fun error(
@@ -368,14 +354,12 @@ class ColotokLogger4J(private val name: String) : Logger {
         msg: String?,
         t: Throwable?
     ) {
-        TODO("Not yet implemented")
+        error(msg, t)
     }
 
     override fun getName(): String = name
 
-    override fun isTraceEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isTraceEnabled(): Boolean = true
 
     override fun trace(msg: String?) {
         log(LogLevel.TRACE, msg.orEmpty())
@@ -410,15 +394,13 @@ class ColotokLogger4J(private val name: String) : Logger {
         log(LogLevel.TRACE, msg.orEmpty(), t)
     }
 
-    override fun isTraceEnabled(marker: Marker?): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isTraceEnabled(marker: Marker?): Boolean = isTraceEnabled
 
     override fun trace(
         marker: Marker?,
         msg: String?
     ) {
-        TODO("Not yet implemented")
+        trace(msg)
     }
 
     override fun trace(
@@ -426,7 +408,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         arg: Any?
     ) {
-        TODO("Not yet implemented")
+        trace(format, arg)
     }
 
     override fun trace(
@@ -435,7 +417,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         arg1: Any?,
         arg2: Any?
     ) {
-        TODO("Not yet implemented")
+        trace(format, arg1, arg2)
     }
 
     override fun trace(
@@ -443,7 +425,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         format: String?,
         vararg argArray: Any?
     ) {
-        TODO("Not yet implemented")
+        trace(format, *argArray)
     }
 
     override fun trace(
@@ -451,10 +433,8 @@ class ColotokLogger4J(private val name: String) : Logger {
         msg: String?,
         t: Throwable?
     ) {
-        TODO("Not yet implemented")
+        trace(msg, t)
     }
 
-    override fun isDebugEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isDebugEnabled(): Boolean = true
 }
