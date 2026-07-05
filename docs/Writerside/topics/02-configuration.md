@@ -17,6 +17,18 @@ you can get the logger instance by `ColotokLoggerContext#getLogger()`
 > if none of `addProvider()` is called, the logger will not print the log anywhere
 > {style="note"}
 
+On Android, `ConsoleProvider()` writes to Logcat by default. To disable Android console output explicitly from Android source code, set `isOutputEnabled = false`:
+
+```Kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider {
+        isOutputEnabled = false
+    })
+    .getLogger()
+```
+
+The Android provider keeps `isEnabledForRelease` and `detectDebugModeFn` as compatibility gates, but it does not infer debug builds from `BuildConfig.DEBUG`.
+
 ## Print log
 
 ### Text Logging

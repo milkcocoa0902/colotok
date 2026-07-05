@@ -32,6 +32,16 @@ ConsoleProvider write the log into console
 }))
 ```
 
+On Android, `ConsoleProvider()` writes to Logcat by default. Set `isOutputEnabled = false` from Android source code to explicitly disable Android console output:
+
+```Kotlin
+.addProvider(ConsoleProvider {
+    isOutputEnabled = false
+})
+```
+
+`isEnabledForRelease` and `detectDebugModeFn` remain available as compatibility gates, but Colotok does not infer debug builds from `BuildConfig.DEBUG`.
+
 ConsoleProvider can colorize with ANSI-Color
 
 

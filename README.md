@@ -98,6 +98,20 @@ val logger = ColotokLoggerContext()
 
 ```
 
+On Android, `ConsoleProvider()` writes to Logcat by default. To explicitly disable Android
+console output from Android source code, configure the provider with `isOutputEnabled = false`:
+
+```kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider {
+        isOutputEnabled = false
+    })
+    .getLogger()
+```
+
+The Android provider still accepts `isEnabledForRelease` and `detectDebugModeFn` as a
+compatibility gate, but Colotok does not infer debug builds from `BuildConfig.DEBUG`.
+
 more details config
 ```Kotlin
 val fileProvider: FileProvider

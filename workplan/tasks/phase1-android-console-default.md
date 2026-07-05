@@ -105,8 +105,8 @@ Safe automatic debug-build detection is desirable, but it is not a Phase1 depend
 
 ## Risks and Open Questions
 - Resolved: `ConsoleProvider()` should log by default on Android unless explicitly disabled.
+- Resolved for Phase1: Android explicit opt-out uses the Android-only `isOutputEnabled` flag.
 - Deferred: safe automatic debug-build detection remains a future enhancement.
-- Open: exact Android-only opt-out API name if the existing `isEnabledForRelease` / `detectDebugModeFn` pair is too confusing for the inverted default.
 - Risk: automatic debug detection without app context can be wrong; avoid implicit heuristics.
 
 ## Implementation Order

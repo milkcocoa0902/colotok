@@ -12,6 +12,7 @@ actual class ConsoleProviderConfig actual constructor() : ProviderConfig {
     actual override var formatter: Formatter = DetailTextFormatter
     actual override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
     actual override var enableInternalMetricsLogging: Boolean = false
-    var isEnabledForRelease: Boolean = false
+    var isOutputEnabled: Boolean = true
+    var isEnabledForRelease: Boolean = true
     var detectDebugModeFn: (() -> Boolean)? = { false }
 }
