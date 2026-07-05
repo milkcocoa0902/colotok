@@ -1,12 +1,9 @@
 package com.milkcocoa.info.colotok.core.logger
 
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
-import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
-import kotlinx.serialization.KSerializer
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 class ColotokLogger4J2Test {
-
     private class TestProvider : Provider(config = ConsoleProviderConfig()) {
         var lastName: String? = null
         var lastMsg: String? = null
@@ -27,7 +23,7 @@ class ColotokLogger4J2Test {
             lastName = record.name
             lastLevel = record.level
             lastAttr = record.attr
-            when(record){
+            when (record) {
                 is LogRecord.PlainText -> {
                     lastMsg = record.msg
                 }
@@ -49,9 +45,10 @@ class ColotokLogger4J2Test {
     fun setup() {
         originalDefault = ColotokLoggerContext.DEFAULT
         provider = TestProvider()
-        val ctx = ColotokLoggerContext()
-            .addProvider(provider)
-            .withAttrs(mapOf("base" to "attr"))
+        val ctx =
+            ColotokLoggerContext()
+                .addProvider(provider)
+                .withAttrs(mapOf("base" to "attr"))
         ColotokLoggerContext.setDefault(ctx)
     }
 
@@ -61,47 +58,70 @@ class ColotokLogger4J2Test {
     }
 
     @Test
-    fun info_logs_are_delegated_with_default_attrs_and_logger_name() = runBlocking {
-        val logger = LoggerFactory.getLogger("slf4j2-test")
+    fun info_logs_are_delegated_with_default_attrs_and_logger_name() {
+        runBlocking {
+            val logger = LoggerFactory.getLogger("slf4j2-test")
 
-        logger.info("hello world")
-        provider.flush()
+            logger.info("hello world")
+            provider.flush()
 
-        assertEquals("slf4j2-test", provider.lastName)
-        assertEquals("hello world", provider.lastMsg)
-        assertEquals(LogLevel.INFO, provider.lastLevel)
-        val attrs = provider.lastAttr ?: emptyMap()
-        assertEquals("attr", attrs["base"])
-        assertEquals("slf4j2-test", attrs["logger"])
+            assertEquals("slf4j2-test", provider.lastName)
+            assertEquals("hello world", provider.lastMsg)
+            assertEquals(LogLevel.INFO, provider.lastLevel)
+            val attrs = provider.lastAttr ?: emptyMap()
+            assertEquals("attr", attrs["base"])
+            assertEquals("slf4j2-test", attrs["logger"])
+        }
     }
 
     @Test
-    fun format_overloads_work_with_slf4j_placeholders() = runBlocking {
-        val logger = LoggerFactory.getLogger("format-test-2")
+    fun format_overloads_work_with_slf4j_placeholders() {
+        runBlocking {
+            val logger = LoggerFactory.getLogger("format-test-2")
 
-        // SLF4J は {} プレースホルダを使用する
-        logger.debug("value={}", "A")
-        provider.flush()
+            logger.debug("value={}", "A")
+            provider.flush()
 
-        assertEquals(LogLevel.DEBUG, provider.lastLevel)
-        assertEquals("value=A", provider.lastMsg)
-        assertEquals("format-test-2", provider.lastName)
-        assertEquals("format-test-2", provider.lastAttr?.get("logger"))
+            assertEquals(LogLevel.DEBUG, provider.lastLevel)
+            assertEquals("value=A", provider.lastMsg)
+            assertEquals("format-test-2", provider.lastName)
+            assertEquals("format-test-2", provider.lastAttr?.get("logger"))
+        }
     }
 
     @Test
-    fun throwable_is_added_as_attribute() = runBlocking {
-        val logger = LoggerFactory.getLogger("throwable-test-2")
-        val ex = IllegalArgumentException("boom")
+    fun trailing_throwable_argument_is_added_as_attribute() {
+        runBlocking {
+            val logger = LoggerFactory.getLogger("throwable-argument-test-2")
+            val ex = IllegalArgumentException("boom")
 
-        logger.error("oops", ex)
-        provider.flush()
+            logger.warn("failed {}", "save", ex)
+            provider.flush()
 
-        assertEquals(LogLevel.ERROR, provider.lastLevel)
-        assertEquals("oops", provider.lastMsg)
-        val attrs = provider.lastAttr ?: emptyMap()
-        assertTrue(attrs.containsKey("cause"))
-        assertTrue(attrs["cause"]!!.contains("IllegalArgumentException"))
-        assertEquals("throwable-test-2", attrs["logger"])
+            assertEquals(LogLevel.WARN, provider.lastLevel)
+            assertEquals("failed save", provider.lastMsg)
+            val attrs = provider.lastAttr ?: emptyMap()
+            assertTrue(attrs.containsKey("cause"))
+            assertTrue(attrs["cause"]!!.contains("IllegalArgumentException"))
+            assertEquals("throwable-argument-test-2", attrs["logger"])
+        }
+    }
+
+    @Test
+    fun throwable_is_added_as_attribute() {
+        runBlocking {
+            val logger = LoggerFactory.getLogger("throwable-test-2")
+            val ex = IllegalArgumentException("boom")
+
+            logger.error("oops", ex)
+            provider.flush()
+
+            assertEquals(LogLevel.ERROR, provider.lastLevel)
+            assertEquals("oops", provider.lastMsg)
+            val attrs = provider.lastAttr ?: emptyMap()
+            assertTrue(attrs.containsKey("cause"))
+            assertTrue(attrs["cause"]!!.contains("IllegalArgumentException"))
+            assertEquals("throwable-test-2", attrs["logger"])
+        }
     }
 }
