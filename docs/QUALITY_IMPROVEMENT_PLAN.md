@@ -1,5 +1,11 @@
 # Colotok quality improvement plan
 
+> Status after the 2026-07-10 reassessment: the planned P0/P1 code changes are
+> implementation-complete, but the P0/P1 quality gate remains open. Release-blocking lifecycle,
+> MDC, resource-ownership, SLF4J, Android compatibility, and verification gaps are tracked in
+> `workplan/post-p1/index.md`. Time-based flush is deferred until those gates
+> close because it is a feature addition, not a prerequisite for runtime correctness.
+
 This document fixes the direction for stabilizing Colotok before adding new runtime features.
 The goal is to remove correctness bugs and lifecycle risks first, then add behavior such as
 time-based flushing on top of a stable provider pipeline.
@@ -177,14 +183,13 @@ Native and Android validation should be added when a change touches `nativeMain`
 
 ## Suggested execution sequence
 
-1. P0 file sink lifecycle.
-2. P0 provider `flush`, `join`, `close`, and `forceShutdown` contract tests.
-3. P0 async publish failure retention.
-4. P0 MDC and event timestamp snapshots.
-5. P1 DateBaseRotation.
-6. P1 SLF4J 1.x completion and formatting alignment.
-7. P2 internal metrics recursion and diagnostic cleanup.
-8. Add time-based flush to `AsyncProvider`.
-9. Update public docs and README with the finalized lifecycle and buffering behavior.
+The original P0/P1 implementation sequence has been executed. The remaining order is revised to:
 
-This order keeps the buffering contract stable before the timer is introduced.
+1. Close provider lifecycle, failure signaling, bounded buffering, and resource-ownership gaps.
+2. Close event snapshot and multiplatform MDC correctness gaps.
+3. Close SLF4J, Android, rotation, and publication compatibility gaps.
+4. Establish repeatable multiplatform, ABI, consumer, and documentation quality gates.
+5. Complete the remaining P2 diagnostics cleanup only after the release-blocking gates pass.
+6. Move time-based flush to a separate feature roadmap and reconsider it after stabilization.
+
+The executable task split and evidence are in `workplan/post-p1/index.md`.
