@@ -1,0 +1,43 @@
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLogger4J2 : org/slf4j/helpers/AbstractLogger {
+	public fun <init> (Ljava/lang/String;Lorg/slf4j/IMarkerFactory;Lorg/slf4j/spi/MDCAdapter;)V
+	public fun getName ()Ljava/lang/String;
+	public fun isDebugEnabled ()Z
+	public fun isDebugEnabled (Lorg/slf4j/Marker;)Z
+	public fun isErrorEnabled ()Z
+	public fun isErrorEnabled (Lorg/slf4j/Marker;)Z
+	public fun isInfoEnabled ()Z
+	public fun isInfoEnabled (Lorg/slf4j/Marker;)Z
+	public fun isTraceEnabled ()Z
+	public fun isTraceEnabled (Lorg/slf4j/Marker;)Z
+	public fun isWarnEnabled ()Z
+	public fun isWarnEnabled (Lorg/slf4j/Marker;)Z
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerFactory4J2 : org/slf4j/ILoggerFactory {
+	public fun <init> (Lorg/slf4j/IMarkerFactory;Lorg/slf4j/spi/MDCAdapter;)V
+	public fun getLogger (Ljava/lang/String;)Lorg/slf4j/Logger;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokMDCAdapter : org/slf4j/spi/MDCAdapter {
+	public fun <init> ()V
+	public fun clear ()V
+	public fun clearDequeByKey (Ljava/lang/String;)V
+	public fun get (Ljava/lang/String;)Ljava/lang/String;
+	public fun getCopyOfContextMap ()Ljava/util/Map;
+	public fun getCopyOfDequeByKey (Ljava/lang/String;)Ljava/util/Deque;
+	public fun popByKey (Ljava/lang/String;)Ljava/lang/String;
+	public fun pushByKey (Ljava/lang/String;Ljava/lang/String;)V
+	public fun put (Ljava/lang/String;Ljava/lang/String;)V
+	public fun remove (Ljava/lang/String;)V
+	public fun setContextMap (Ljava/util/Map;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokSlf4j2ServiceProvider : org/slf4j/spi/SLF4JServiceProvider {
+	public fun <init> ()V
+	public fun getLoggerFactory ()Lorg/slf4j/ILoggerFactory;
+	public fun getMDCAdapter ()Lorg/slf4j/spi/MDCAdapter;
+	public fun getMarkerFactory ()Lorg/slf4j/IMarkerFactory;
+	public fun getRequestedApiVersion ()Ljava/lang/String;
+	public fun initialize ()V
+}
+

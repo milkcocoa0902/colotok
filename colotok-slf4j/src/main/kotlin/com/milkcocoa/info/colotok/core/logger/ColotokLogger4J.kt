@@ -38,9 +38,12 @@ class ColotokLogger4J(private val name: String) : Logger {
         if (throwable == null) {
             delegate.at(level, message)
         } else {
-            delegate.at(level, message, mapOf("cause" to throwable.toString()))
+            delegate.at(level, message, mapOf("cause" to throwable.stackTraceToString()))
         }
     }
+
+    private fun isEnabled(level: Level): Boolean =
+        delegate.providers.any { level.isEnabledFor(it.config.level) }
 
     private fun logFormatted(
         level: Level,
@@ -126,7 +129,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         info(msg, t)
     }
 
-    override fun isWarnEnabled(): Boolean = true
+    override fun isWarnEnabled(): Boolean = isEnabled(LogLevel.WARN)
 
     override fun debug(msg: String?) {
         log(LogLevel.DEBUG, msg.orEmpty())
@@ -203,7 +206,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         debug(msg, t)
     }
 
-    override fun isInfoEnabled(): Boolean = true
+    override fun isInfoEnabled(): Boolean = isEnabled(LogLevel.INFO)
 
     override fun warn(msg: String?) {
         log(LogLevel.WARN, msg.orEmpty())
@@ -280,7 +283,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         warn(msg, t)
     }
 
-    override fun isErrorEnabled(): Boolean = true
+    override fun isErrorEnabled(): Boolean = isEnabled(LogLevel.ERROR)
 
     override fun error(msg: String?) {
         log(LogLevel.ERROR, msg.orEmpty())
@@ -359,7 +362,7 @@ class ColotokLogger4J(private val name: String) : Logger {
 
     override fun getName(): String = name
 
-    override fun isTraceEnabled(): Boolean = true
+    override fun isTraceEnabled(): Boolean = isEnabled(LogLevel.TRACE)
 
     override fun trace(msg: String?) {
         log(LogLevel.TRACE, msg.orEmpty())
@@ -436,5 +439,5 @@ class ColotokLogger4J(private val name: String) : Logger {
         trace(msg, t)
     }
 
-    override fun isDebugEnabled(): Boolean = true
+    override fun isDebugEnabled(): Boolean = isEnabled(LogLevel.DEBUG)
 }

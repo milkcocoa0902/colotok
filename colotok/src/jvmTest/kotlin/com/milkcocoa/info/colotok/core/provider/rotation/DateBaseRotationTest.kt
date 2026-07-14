@@ -68,6 +68,47 @@ class DateBaseRotationTest {
     }
 
     @Test
+    fun uses_creation_time_when_available() {
+        val createdAt = Instant.parse("2024-01-02T00:00:00Z")
+        val lastModifiedAt = Instant.parse("2024-01-01T00:00:00Z")
+
+        assertFalse(
+            isRotationNeeded(
+                createdAtMillis = createdAt.toEpochMilliseconds(),
+                lastModifiedAtMillis = lastModifiedAt.toEpochMilliseconds(),
+                period = 7.days,
+                now = lastModifiedAt.plus(7.days),
+            )
+        )
+    }
+
+    @Test
+    fun falls_back_to_last_modified_time() {
+        val lastModifiedAt = Instant.parse("2024-01-01T00:00:00Z")
+
+        assertTrue(
+            isRotationNeeded(
+                createdAtMillis = null,
+                lastModifiedAtMillis = lastModifiedAt.toEpochMilliseconds(),
+                period = 7.days,
+                now = lastModifiedAt.plus(7.days),
+            )
+        )
+    }
+
+    @Test
+    fun returns_false_when_all_timestamps_are_missing() {
+        assertFalse(
+            isRotationNeeded(
+                createdAtMillis = null,
+                lastModifiedAtMillis = null,
+                period = 7.days,
+                now = Instant.parse("2024-01-08T00:00:00Z"),
+            )
+        )
+    }
+
+    @Test
     fun missing_file_does_not_throw_or_rotate() {
         val rotation = DateBaseRotation(period = 7.days)
         every { kotlin.time.Clock.System.now() } returns Instant.parse("2024-01-01T00:00:00Z")

@@ -12,6 +12,7 @@ slf4j2-api = "2.0.17"
 android-gradle-plugin = "8.13.2"
 maven-publish-plugin = "0.30.0"
 kover-plugin = "0.9.8"
+binary-compatibility-validator = "0.18.1"
 sonatype-central-upload-plugin = "1.0.3"
 ktlint = "1.8.0"
 
@@ -26,6 +27,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit-bom" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter"}
@@ -45,5 +47,6 @@ androidLibrary = { id = "com.android.library", version.ref = "android-gradle-plu
 sonatypeCentralUpload = { id = "cl.franciscosolis.sonatype-central-upload", version.ref = "sonatype-central-upload-plugin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish-plugin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover-plugin" }
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
 
 [bundles]

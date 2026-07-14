@@ -8,12 +8,25 @@ plugins {
     id("signing")
     alias(libs.plugins.mavenPublish) apply false
     alias(libs.plugins.kover) apply false
+    alias(libs.plugins.binaryCompatibilityValidator)
     jacoco
+}
+
+apiValidation {
+    ignoredProjects.add("sample")
 }
 // ルート build.gradle.kts
 subprojects {
     group = "io.github.milkcocoa0902"
     version = "0.4.2"
+
+    tasks.withType<Sign>().configureEach {
+        onlyIf("publication signing is enabled") {
+            !providers.gradleProperty("colotok.skipPublicationSigning")
+                .map(String::toBoolean)
+                .getOrElse(false)
+        }
+    }
 }
 
 

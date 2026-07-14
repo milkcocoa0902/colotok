@@ -3,9 +3,10 @@ package com.milkcocoa.info.colotok.core.provider.details
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.collectBestEffort
 import com.milkcocoa.info.colotok.util.runBlocking
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,11 +15,16 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+class ProviderClosedException(
+    message: String = "Provider is closed"
+) : IllegalStateException(message)
 
 interface IProvider: AutoCloseable {
     val config: ProviderConfig
@@ -40,11 +46,19 @@ abstract class Provider(
 ): IProvider {
     public var effectiveMetricsCollector: MetricsCollector = NoOpMetricsCollector
 
-    private val handler = CoroutineExceptionHandler { _, throwable ->
-        println("Failed to process async log: ${throwable.message}")
+    private enum class State {
+        OPEN,
+        CLOSING,
+        CLOSED,
+        CANCELLED,
+        FAILED,
     }
 
-    override val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + handler)
+    private val state = MutableStateFlow(State.OPEN)
+    private val failure = MutableStateFlow<Throwable?>(null)
+    private val closedHookInvoked = MutableStateFlow(false)
+
+    override val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     override val channel = Channel<LogRecord>(
         capacity = Channel.BUFFERED,
         onBufferOverflow = onBufferOverflow
@@ -53,72 +67,153 @@ abstract class Provider(
         try {
             for (record in channel) {
                 if (record is LogRecord.Pin) {
-                    runCatching{ onFlush() }
-                    record.deferred.complete(Unit)
+                    try {
+                        onFlush()
+                        record.deferred.complete(Unit)
+                    } catch (throwable: Throwable) {
+                        record.deferred.completeExceptionally(throwable)
+                        throw throwable
+                    }
                     continue
                 }
-                runCatching { onMessage(record) }
+                onMessage(record)
+            }
+        } catch (throwable: Throwable) {
+            if (throwable !is CancellationException || state.value != State.CANCELLED) {
+                fail(throwable)
             }
         } finally {
+            if (state.value == State.CLOSING) {
+                try {
+                    onFlush()
+                } catch (throwable: Throwable) {
+                    if (throwable !is CancellationException || state.value != State.CANCELLED) {
+                        fail(throwable)
+                    }
+                }
+            }
+
             withContext(NonCancellable) {
-                runCatching { onFlush() }
-                runCatching { onClosed() }
+                closeResources()
+
+                val terminalFailure = failure.value
+                while (true) {
+                    val pending = channel.tryReceive().getOrNull() ?: break
+                    if (pending is LogRecord.Pin) {
+                        pending.deferred.completeExceptionally(
+                            terminalFailure ?: ProviderClosedException()
+                        )
+                    }
+                }
+
+                when (state.value) {
+                    State.CLOSING -> state.value = State.CLOSED
+                    State.OPEN -> state.value = State.CLOSED
+                    else -> Unit
+                }
             }
         }
     }
 
+    private fun fail(throwable: Throwable) {
+        if (failure.compareAndSet(null, throwable)) {
+            state.value = State.FAILED
+            channel.close(throwable)
+        }
+    }
+
+    private fun closeResources() {
+        if (!closedHookInvoked.compareAndSet(expect = false, update = true)) return
+        try {
+            onClosed()
+        } catch (throwable: Throwable) {
+            fail(throwable)
+        }
+    }
+
+    private fun closedException(): ProviderClosedException =
+        ProviderClosedException("Provider is ${state.value.name.lowercase()}")
 
     override fun write(record: LogRecord) {
         if (record.level.isEnabledFor(config.level)) {
-            if (record !is LogRecord.Metrics) {
-                effectiveMetricsCollector.incrementLogCount(record.level, this::class.simpleName ?: "unknown")
+            val success = state.value == State.OPEN && channel.trySend(record).isSuccess
+            if (success && record !is LogRecord.Metrics) {
+                effectiveMetricsCollector.collectBestEffort {
+                    incrementLogCount(record.level, this@Provider::class.simpleName ?: "unknown")
+                }
             }
-            val success = channel.trySend(record).isSuccess
             if (!success && record !is LogRecord.Metrics) {
-                effectiveMetricsCollector.incrementErrorCount(this::class.simpleName ?: "unknown", "buffer_full")
+                effectiveMetricsCollector.collectBestEffort {
+                    incrementErrorCount(this@Provider::class.simpleName ?: "unknown", "buffer_full")
+                }
             }
         }
     }
 
-
     override fun close() {
-        channel.close()
+        if (state.compareAndSet(State.OPEN, State.CLOSING)) {
+            channel.close()
+        }
     }
 
     override fun forceShutdown() {
+        while (true) {
+            when (val current = state.value) {
+                State.CLOSED -> return
+                State.CANCELLED, State.FAILED -> break
+                else -> if (state.compareAndSet(current, State.CANCELLED)) break
+            }
+        }
         job.cancel()
         channel.close()
-        com.milkcocoa.info.colotok.util.runBlocking {
+        runBlocking {
             job.join()
         }
+        closeResources()
+        failure.value?.let { throw it }
     }
+
     /**
      * 現在キューにあるすべてのログが処理され、
      * かつ Provider 固有のバッファがフラッシュされるまで待機します。
      */
     override suspend fun flush(timeout: Duration) {
+        failure.value?.let { throw it }
+        if (state.value != State.OPEN) throw closedException()
+
         val flushToken = CompletableDeferred<Unit>()
         val flushPin = LogRecord.Pin(flushToken)
 
         try {
-            withContext(Dispatchers.Default.limitedParallelism(1)){
-                withTimeout(timeout){
+            withContext(Dispatchers.Default.limitedParallelism(1)) {
+                withTimeout(timeout) {
                     val sendResult = channel.trySend(flushPin)
                     when {
                         sendResult.isSuccess -> Unit
-                        sendResult.isClosed -> return@withTimeout
+                        sendResult.isClosed -> throw failure.value ?: closedException()
                         else -> channel.send(flushPin)
                     }
                     flushToken.await()
                 }
             }
         } catch (_: ClosedSendChannelException) {
-            return
+            throw failure.value ?: closedException()
+        } catch (throwable: Throwable) {
+            // Await may recover/copy an exception on JVM. Re-throw the provider's
+            // first recorded failure so every lifecycle entry point exposes the
+            // same original cause.
+            throw failure.value ?: throwable
         }
     }
 
     suspend fun join() {
-        channel.close()
+        when (state.value) {
+            State.OPEN -> close()
+            State.CANCELLED -> throw closedException()
+            else -> Unit
+        }
         job.join()
+        failure.value?.let { throw it }
+        if (state.value == State.CANCELLED) throw closedException()
     }
 }

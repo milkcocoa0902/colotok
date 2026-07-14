@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createFile
@@ -419,5 +420,36 @@ object FileProviderTest {
             """.trimMargin().replace("\n", ""),
             testLogFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
+    }
+
+    @Test
+    fun flush_exposes_file_write_failure() {
+        val missingParent = logFilesDir.resolve("missing").resolve("application.log")
+        val provider = FileProvider(missingParent.toOkioPath())
+
+        provider.write(
+            LogRecord.PlainText("default logger", "message", LogLevel.INFO, emptyMap())
+        )
+
+        Assertions.assertThrows(IOException::class.java) {
+            runBlocking { provider.flush() }
+        }
+    }
+
+    @Test
+    fun repeated_writes_close_sink_before_file_move() {
+        val provider = FileProvider(testLogFile.toOkioPath())
+        repeat(3) { index ->
+            provider.write(
+                LogRecord.PlainText("default logger", "message $index", LogLevel.INFO, emptyMap())
+            )
+        }
+        runBlocking { provider.flush() }
+        val moved = logFilesDir.resolve("moved.log")
+
+        Files.move(testLogFile, moved)
+
+        Assertions.assertEquals(3, moved.readLines(Charsets.UTF_8).size)
+        runBlocking { provider.join() }
     }
 }

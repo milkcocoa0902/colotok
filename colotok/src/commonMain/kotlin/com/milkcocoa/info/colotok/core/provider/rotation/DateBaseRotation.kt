@@ -19,10 +19,12 @@ import kotlin.time.Instant
 class DateBaseRotation(private val period: Duration = 7.days) : Rotation {
     override fun isRotateNeeded(filePath: Path): Boolean {
         val metadata = runCatching { getFileSystem().metadata(filePath) }.getOrNull() ?: return false
-        val baseTimestampMillis = metadata.createdAtMillis ?: metadata.lastModifiedAtMillis ?: return false
-        val baseTimestamp = Instant.fromEpochMilliseconds(baseTimestampMillis)
-
-        return baseTimestamp.plus(period) <= Clock.System.now()
+        return isRotationNeeded(
+            createdAtMillis = metadata.createdAtMillis,
+            lastModifiedAtMillis = metadata.lastModifiedAtMillis,
+            period = period,
+            now = Clock.System.now(),
+        )
     }
 
     override fun doRotate(filePath: Path) {
@@ -37,4 +39,15 @@ class DateBaseRotation(private val period: Duration = 7.days) : Rotation {
             filePath.parent!!.resolve("${filePath.name}.$rotateIndex")
         )
     }
+}
+
+internal fun isRotationNeeded(
+    createdAtMillis: Long?,
+    lastModifiedAtMillis: Long?,
+    period: Duration,
+    now: Instant,
+): Boolean {
+    val baseTimestampMillis = createdAtMillis ?: lastModifiedAtMillis ?: return false
+    val baseTimestamp = Instant.fromEpochMilliseconds(baseTimestampMillis)
+    return baseTimestamp.plus(period) <= now
 }

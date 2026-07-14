@@ -131,17 +131,32 @@ class ColotokLoggerContext {
      * Shutdown all loggers created in this context and wait for all providers to finish processing.
      */
     suspend fun shutdown() {
-        activeLoggers.values.forEach { it.shutdown() }
         activeLoggers.clear()
-        providers.forEach { it.join() }
+        var firstFailure: Throwable? = null
+        providers.forEach { provider ->
+            try {
+                provider.join()
+            } catch (throwable: Throwable) {
+                if (firstFailure == null) firstFailure = throwable
+            }
+        }
+        firstFailure?.let { throw it }
     }
 
     /**
      * Shutdown all loggers created in this context immediately.
      */
     fun forceShutdown() {
-        activeLoggers.values.forEach { it.forceShutdown() }
         activeLoggers.clear()
+        var firstFailure: Throwable? = null
+        providers.forEach { provider ->
+            try {
+                provider.forceShutdown()
+            } catch (throwable: Throwable) {
+                if (firstFailure == null) firstFailure = throwable
+            }
+        }
+        firstFailure?.let { throw it }
     }
 
 

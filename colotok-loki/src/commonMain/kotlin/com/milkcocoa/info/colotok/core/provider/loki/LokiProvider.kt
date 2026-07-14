@@ -3,6 +3,7 @@ package com.milkcocoa.info.colotok.core.provider.loki
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
 import kotlin.time.Instant
@@ -13,7 +14,7 @@ import kotlin.time.Instant
  * This provider sends log entries to a Loki server using its HTTP API.
  * It supports buffering log entries and sending them in batches for better performance.
  */
-class LokiProvider(config: LokiProviderConfig): AsyncProvider(config) {
+class LokiProvider(config: LokiProviderConfig): AsyncProvider(validateLokiProviderConfig(config)) {
     /**
      * Convenience constructor that accepts a configuration lambda.
      * 
@@ -27,9 +28,11 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider(config) {
     constructor(): this(LokiProviderConfig())
 
     // Configuration properties
-    private val host = config.host?.trimEnd('/')?.plus("/loki/api/v1/push") ?: error("Loki host URL must be provided")
-    private val logStream =  config.logStream ?: error("Log stream labels must be provided")
-    private val httpClient = config.httpClient
+    private val host = config.host!!.trimEnd('/').plus("/loki/api/v1/push")
+    private val logStream = config.logStream!!
+    private val httpClientDelegate = lazy { config.acquireHttpClient() }
+    private val httpClient: io.ktor.client.HttpClient
+        get() = httpClientDelegate.value.client
     private val credential = config.credential
 
 
@@ -76,11 +79,29 @@ class LokiProvider(config: LokiProviderConfig): AsyncProvider(config) {
                 )
             ))
         }
+        response.bodyAsText()
         if (response.status.value !in 200..299) {
             error("Loki publish failed with HTTP ${response.status.value}")
         }
     }
 
 
-    override fun onClosed() {}
+    override fun onClosed() {
+        if (!httpClientDelegate.isInitialized()) return
+        httpClientDelegate.value.takeIf { it.providerOwned }?.let { lease ->
+            lease.close(lease.client)
+        }
+    }
+}
+
+private fun validateLokiProviderConfig(config: LokiProviderConfig): LokiProviderConfig = config.apply {
+    val configuredHost = checkNotNull(host) { "Loki host URL must be provided" }
+    check(configuredHost.isNotBlank()) { "Loki host URL must not be blank" }
+    val configuredStream = checkNotNull(logStream) { "Log stream labels must be provided" }
+    check(configuredStream.isNotEmpty()) { "Log stream labels must not be empty" }
+    check(configuredStream.keys.none { it.isBlank() }) { "Log stream label names must not be blank" }
+    val configuredCredential = credential
+    if (configuredCredential is Credential.Basic) {
+        check(configuredCredential.username.isNotBlank()) { "Loki basic-auth username must not be blank" }
+    }
 }

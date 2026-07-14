@@ -71,6 +71,9 @@ Colotok provides several plugins to extend its functionality:
 | colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.4.2` |   send logs to AWS CloudWatch   |      JVM       |
 |    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.4.2`    |    send logs to Grafana Loki    | Multi Platform |
 
+Each SLF4J binding publishes the matching `slf4j-api` major as a transitive compile dependency.
+Applications only need the selected Colotok binding unless they intentionally manage the SLF4J API version themselves.
+
 # Dependencies
 
 If you want to use **Structured Logging** or **Internal Metrics Logging**, you need to enable the Kotlin Serialization plugin in your project. 
@@ -98,19 +101,27 @@ val logger = ColotokLoggerContext()
 
 ```
 
-On Android, `ConsoleProvider()` writes to Logcat by default. To explicitly disable Android
-console output from Android source code, configure the provider with `isOutputEnabled = false`:
+On Android, a default `ConsoleProvider()` does not write to Logcat. Android output is enabled
+only when `isOutputEnabled` is `true` and either release output is allowed or the supplied debug
+detector returns `true`:
 
 ```kotlin
 val logger = ColotokLoggerContext()
     .addProvider(ConsoleProvider {
-        isOutputEnabled = false
+        detectDebugModeFn = { BuildConfig.DEBUG }
     })
     .getLogger()
 ```
 
-The Android provider still accepts `isEnabledForRelease` and `detectDebugModeFn` as a
-compatibility gate, but Colotok does not infer debug builds from `BuildConfig.DEBUG`.
+| `isOutputEnabled` | `isEnabledForRelease` | `detectDebugModeFn()` | Output |
+| :---: | :---: | :---: | :---: |
+| `false` | any | any | disabled |
+| `true` | `true` | any | enabled |
+| `true` | `false` | `true` | enabled |
+| `true` | `false` | `false` | disabled (default) |
+
+Colotok deliberately does not infer `BuildConfig.DEBUG`. Set `isOutputEnabled = false` when
+output must remain disabled regardless of the other gates.
 
 more details config
 ```Kotlin
@@ -265,90 +276,10 @@ this provider output log into file without ansi-color.
 this provider output log into stream where you specified.  
 
 ### 4. Customize
-you can also output to remote or sql or others by create own provider.  
-example
 
-#### define custom provider
-if you want to write log into slack, you create a SlackProvider like this
-
-```kotlin
-@Serializable
-data class SlackWebhookPayload(
-    val text: String,
-)
-
-class SlackProvider(config: SlackProviderConfig): Provider {
-    constructor(config: SlackProviderConfig.() -> Unit): this(SlackProviderConfig().apply(config))
-
-    class SlackProviderConfig() : ProviderConfig {
-        var webhook_url: String = ""
-
-        override var level: level = LogLevel.DEBUG
-
-        override var formatter: Formatter = DetailTextFormatter
-    }
-
-    private val webhookUrl = config.webhook_url
-    private val logLevel = config.level
-    private val formatter = config.formatter
-
-    override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
-        if(level.isEnabledFor(logLevel).not()){
-            return
-        }
-        kotlin.runCatching {
-            webhookUrl.httpPost()
-                .appendHeader("Content-Type" to "application/json")
-                .body(Json.encodeToString(text = formatter.format(msg, level, attr)))
-                .response()
-        }.getOrElse { println(it) }
-    }
-
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: LogLevel,
-        attr: Map<String, String>
-    ) {
-        if(level.isEnabledFor(logLevel).not()){
-            return
-        }
-        kotlin.runCatching {
-            webhookUrl.httpPost()
-                .appendHeader("Content-Type" to "application/json")
-                .body(Json.encodeToString(text = formatter.format(msg, serializer, level, attr)))
-                .response()
-        }.getOrElse { println(it) }
-    }
-}
-```
-
-#### use your provider
-now you can use SlackProvider to write the log into slack.
-
-```kotlin
-val logger = ColotokLoggerContext()
-        .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
-            formatter = DetailTextFormatter
-            level = LogLevel.DEBUG
-        }))
-        .addProvider(SlackProvider{
-            webhook_url = "your slack webhook url"
-            formatter = SimpleTextFormatter
-            level = LogLevel.WARN
-        })
-        .getLogger()
-```
-
-#### print the log
-```kotlin
-logger.info("info level log")
-// written the log only console
-
-logger.error("error level log")
-// written the log both of console and slack
-```
+You can create a `Provider` for a local destination or an `AsyncProvider` for a batched remote
+destination. Prefer the provided lifecycle and buffering implementation instead of maintaining a
+second queue inside a custom provider. See the [custom provider guide](https://milkcocoa0902.github.io/colotok/Create-Plugin.html).
 
 
 
@@ -390,7 +321,7 @@ suspend fun processRequest() {
     }
 }
 
-// On JS platform
+// On JS/Node (native async-chain scope)
 fun processRequest() {
     MDC.withContext {
         MDC.put("requestId", "12345")
@@ -408,6 +339,14 @@ fun processRequest() {
     }
 }
 ```
+
+On JS/Node, MDC follows Node `AsyncLocalStorage` resources. Root operations, nested scope restoration,
+and values across a native async chain are supported. Kotlin coroutine siblings are not distinct Node
+async resources in every resume path, so sibling-local MDC mutation is not guaranteed to be isolated.
+Each `LogRecord` still takes a deep MDC snapshot when the logging call is made.
+
+On Kotlin/Native, MDC is thread-local. Basic operations and log-call snapshots are supported on the
+current thread, but automatic propagation or isolation across coroutine thread switches is not guaranteed.
 
 ## Metrics Configuration
 
@@ -431,7 +370,7 @@ val logger = ColotokLoggerContext()
 
 ## Logger Shutdown
 
-Since version 0.4.2, Colotok supports explicit shutdown to ensure all logs are flushed and resources are released.
+Use graceful shutdown when queued records must be processed before application exit.
 
 ```kotlin
 val context = ColotokLoggerContext()
@@ -441,12 +380,32 @@ val logger = context.getLogger()
 
 // ... logging ...
 
-// Shutdown the context
+// Stops acceptance and suspends until providers flush and close.
 context.shutdown()
 
-// Or force shutdown if you want to close immediately
+// Cancels immediately. Queued records may be lost.
 context.forceShutdown()
 ```
+
+Calling `Provider.close()` only starts graceful closure; call `Provider.join()` to wait for it.
+`Provider.flush()` waits for records accepted before its flush marker while the provider remains
+open. Calling `flush()` after graceful or forced closure has started throws
+`ProviderClosedException`.
+
+The event timestamp, thread, caller where supported, attributes, and MDC are captured when the logging call creates
+the record. Delayed formatting or remote delivery therefore keeps the original event time, and later
+attribute/MDC mutation does not change output. All providers for one log call receive the same event instance.
+JavaScript currently leaves caller empty because no portable JS call-site implementation is provided.
+
+`AsyncProvider.bufferSize` is the publish threshold (`1..4096`). After a publish failure, records
+are retained up to four times that threshold, with an absolute cap of 4096. Once full, the newest
+record is dropped so older retained records remain available for retry. A failed publish retains the
+submitted records; a destination that accepted only part of a batch may therefore receive
+duplicates on retry. Remote consumers should tolerate at-least-once delivery.
+
+Automatic publish failures are recorded and retained for a later attempt. A failure during an
+explicit `flush()` is returned to the caller and makes the provider fail; `join()` then reports the
+same original failure.
 
 # Document
 https://milkcocoa0902.github.io/colotok/01-colotok-introduce.html

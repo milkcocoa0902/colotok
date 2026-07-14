@@ -13,6 +13,7 @@ dependencies {
     implementation(platform(awssdk.bom))
     implementation(awssdk.services.cloudwatchlogs)
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlin.serialization.core)
 }
 

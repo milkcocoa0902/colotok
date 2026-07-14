@@ -3,7 +3,8 @@ package com.milkcocoa.info.colotok.core.formatter.details
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
-import com.milkcocoa.info.colotok.util.ThreadWrapper
+import com.milkcocoa.info.colotok.core.logger.eventAttrSnapshot
+import com.milkcocoa.info.colotok.core.logger.eventCallerSnapshot
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.datetime.LocalDate
@@ -44,9 +45,10 @@ abstract class StructuredFormatter(
         return format(
             msg = record.msg,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
             mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
             timestamp = record.eventTimestamp
         )
     }
@@ -57,9 +59,10 @@ abstract class StructuredFormatter(
             msg = record.msg,
             serializer = record.serializer,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
             mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
             timestamp = record.eventTimestamp
         )
     }
@@ -68,9 +71,10 @@ abstract class StructuredFormatter(
         return format(
             msg = record.msg,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
             mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
             timestamp = record.eventTimestamp
         )
     }
@@ -81,6 +85,7 @@ abstract class StructuredFormatter(
         attrs: Map<String, String>,
         threadName: String,
         mdc: Map<String, Any?>,
+        caller: String,
         timestamp: Instant
     ): String {
         return buildJsonObject {
@@ -91,7 +96,7 @@ abstract class StructuredFormatter(
                     is Element.THREAD -> put("thread", JsonPrimitive(threadName))
                     is Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
-                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
+                    is Element.CALLER -> put("caller", JsonPrimitive(caller))
                     else -> {}
                 }
             }
@@ -142,6 +147,7 @@ abstract class StructuredFormatter(
         attrs: Map<String, String>,
         threadName: String,
         mdc: Map<String, Any?>,
+        caller: String,
         timestamp: Instant
     ): String {
         val s =
@@ -171,7 +177,7 @@ abstract class StructuredFormatter(
                     is Element.THREAD -> put("thread", JsonPrimitive(threadName))
                     is Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
-                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
+                    is Element.CALLER -> put("caller", JsonPrimitive(caller))
                     else -> {}
                 }
             }

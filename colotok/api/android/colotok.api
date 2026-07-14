@@ -1,0 +1,684 @@
+public abstract class com/milkcocoa/info/colotok/core/formatter/Element {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$ATTR : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$ATTR;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$CALLER : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$CALLER;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$CUSTOM : com/milkcocoa/info/colotok/core/formatter/Element {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getRaw ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$DATE : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$DATE;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$DATETIME : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$DATETIME;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$LEVEL : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$LEVEL;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$MESSAGE : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$MESSAGE;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$NAME : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$NAME;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$THREAD : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$THREAD;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/Element$TIME : com/milkcocoa/info/colotok/core/formatter/Element {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/Element$TIME;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/builtin/structure/DetailStructureFormatter : com/milkcocoa/info/colotok/core/formatter/details/StructuredFormatter {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/builtin/structure/DetailStructureFormatter;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/builtin/structure/SimpleStructureFormatter : com/milkcocoa/info/colotok/core/formatter/details/StructuredFormatter {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/builtin/structure/SimpleStructureFormatter;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/builtin/text/DetailTextFormatter : com/milkcocoa/info/colotok/core/formatter/details/TextFormatter {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/builtin/text/DetailTextFormatter;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/builtin/text/PlainTextFormatter : com/milkcocoa/info/colotok/core/formatter/details/TextFormatter {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/builtin/text/PlainTextFormatter;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/builtin/text/SimpleTextFormatter : com/milkcocoa/info/colotok/core/formatter/details/TextFormatter {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/formatter/builtin/text/SimpleTextFormatter;
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/formatter/details/Formatter {
+	public abstract fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;)Ljava/lang/String;
+	public abstract fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;)Ljava/lang/String;
+	public abstract fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/details/Formatter$DefaultImpls {
+	public static fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;)Ljava/lang/String;
+	public static fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)Ljava/lang/String;
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/formatter/details/LogStructure {
+	public fun stringify ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/details/LogStructure$DefaultImpls {
+	public static fun stringify (Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;)Ljava/lang/String;
+}
+
+public abstract class com/milkcocoa/info/colotok/core/formatter/details/StructuredFormatter : com/milkcocoa/info/colotok/core/formatter/details/Formatter {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)Ljava/lang/String;
+}
+
+public abstract class com/milkcocoa/info/colotok/core/formatter/details/TextFormatter : com/milkcocoa/info/colotok/core/formatter/details/Formatter {
+	public fun <init> (Ljava/lang/String;)V
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;)Ljava/lang/String;
+	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)Ljava/lang/String;
+}
+
+public abstract class com/milkcocoa/info/colotok/core/level/Level {
+	public fun <init> (ILjava/lang/String;Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)V
+	public final fun getColor ()Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public final fun getLevelInt ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun isEnabledFor (Lcom/milkcocoa/info/colotok/core/level/Level;)Z
+	public final fun toInt ()I
+	public final fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LevelInt {
+	public static final field DEBUG_INT I
+	public static final field ERROR_INT I
+	public static final field INFO_INT I
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LevelInt;
+	public static final field OFF_INT I
+	public static final field TRACE_INT I
+	public static final field WARN_INT I
+	public final fun intToLevel (I)Lcom/milkcocoa/info/colotok/core/level/Level;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LevelKt {
+	public static final fun isEnabledForDebug (Lcom/milkcocoa/info/colotok/core/level/Level;)Z
+	public static final fun isEnabledForError (Lcom/milkcocoa/info/colotok/core/level/Level;)Z
+	public static final fun isEnabledForInfo (Lcom/milkcocoa/info/colotok/core/level/Level;)Z
+	public static final fun isEnabledForTrace (Lcom/milkcocoa/info/colotok/core/level/Level;)Z
+	public static final fun isEnabledForWarn (Lcom/milkcocoa/info/colotok/core/level/Level;)Z
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel$DEBUG : com/milkcocoa/info/colotok/core/level/Level {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel$DEBUG;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel$ERROR : com/milkcocoa/info/colotok/core/level/Level {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel$ERROR;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel$INFO : com/milkcocoa/info/colotok/core/level/Level {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel$INFO;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel$OFF : com/milkcocoa/info/colotok/core/level/Level {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel$OFF;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel$TRACE : com/milkcocoa/info/colotok/core/level/Level {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel$TRACE;
+}
+
+public final class com/milkcocoa/info/colotok/core/level/LogLevel$WARN : com/milkcocoa/info/colotok/core/level/Level {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/level/LogLevel$WARN;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokConfig {
+	public fun <init> ()V
+	public final fun getDefaultAttrs ()Ljava/util/Map;
+	public final fun getProviders ()Ljava/util/List;
+	public final fun setDefaultAttrs (Ljava/util/Map;)V
+	public final fun setProviders (Ljava/util/List;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLogger {
+	public fun <init> (Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/logger/ColotokConfig;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun at (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;)V
+	public final fun at (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;Ljava/util/Map;)V
+	public final fun at (Lcom/milkcocoa/info/colotok/core/level/Level;Lkotlin/jvm/functions/Function1;)V
+	public final fun atDebug (Lkotlin/jvm/functions/Function1;)V
+	public final fun atError (Lkotlin/jvm/functions/Function1;)V
+	public final fun atInfo (Lkotlin/jvm/functions/Function1;)V
+	public final fun atTrace (Lkotlin/jvm/functions/Function1;)V
+	public final fun atWarn (Lkotlin/jvm/functions/Function1;)V
+	public final fun debug (Ljava/lang/String;)V
+	public final fun debug (Ljava/lang/String;Ljava/util/Map;)V
+	public final fun error (Ljava/lang/String;)V
+	public final fun error (Ljava/lang/String;Ljava/util/Map;)V
+	public final fun forceShutdown ()V
+	public final fun getAttrs ()Ljava/util/Map;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProviders ()Ljava/util/List;
+	public final fun info (Ljava/lang/String;)V
+	public final fun info (Ljava/lang/String;Ljava/util/Map;)V
+	public final fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun trace (Ljava/lang/String;)V
+	public final fun trace (Ljava/lang/String;Ljava/util/Map;)V
+	public final fun warn (Ljava/lang/String;)V
+	public final fun warn (Ljava/lang/String;Ljava/util/Map;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerContext {
+	public static final field Companion Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext$Companion;
+	public fun <init> ()V
+	public final fun addProvider (Lcom/milkcocoa/info/colotok/core/provider/details/Provider;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+	public final fun forceShutdown ()V
+	public final fun freeze ()V
+	public final fun getLogger ()Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;
+	public final fun getLogger (Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;
+	public final fun putAttrs (Ljava/util/Map;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+	public final fun shallowCopy ()Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+	public final fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun withAttrs (Ljava/util/Map;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+	public final fun withMetrics (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerContext$Companion {
+	public final fun getDEFAULT ()Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+	public final fun getDefault ()Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
+	public final fun setDefault (Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerContext$FrozenContextException : java/lang/IllegalStateException {
+	public fun <init> ()V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerKt {
+	public static final fun getColotok ()Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/LevelScopedColotokLogger {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public final fun getAttrs ()Ljava/util/Map;
+	public final fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProviders ()Ljava/util/List;
+	public final fun print (Ljava/lang/String;)V
+	public final fun print (Ljava/lang/String;Ljava/util/Map;)V
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/logger/LogRecord {
+	public abstract fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)Ljava/lang/String;
+	public abstract fun getAttr ()Ljava/util/Map;
+	public abstract fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public abstract fun getMdcContextDataSnapshot ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getThreadName ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/LogRecord$Metrics : com/milkcocoa/info/colotok/core/logger/LogRecord {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun component5 ()Lkotlin/time/Instant;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)Ljava/lang/String;
+	public fun getAttr ()Ljava/util/Map;
+	public final fun getEventTimestamp ()Lkotlin/time/Instant;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMdcContextDataSnapshot ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public final fun getMsg ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getThreadName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/LogRecord$Pin : com/milkcocoa/info/colotok/core/logger/LogRecord {
+	public fun <init> (Lkotlinx/coroutines/CompletableDeferred;)V
+	public final fun component1 ()Lkotlinx/coroutines/CompletableDeferred;
+	public final fun copy (Lkotlinx/coroutines/CompletableDeferred;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;Lkotlinx/coroutines/CompletableDeferred;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)Ljava/lang/String;
+	public fun getAttr ()Ljava/util/Map;
+	public final fun getDeferred ()Lkotlinx/coroutines/CompletableDeferred;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMdcContextDataSnapshot ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public fun getName ()Ljava/lang/String;
+	public fun getThreadName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/LogRecord$PlainText : com/milkcocoa/info/colotok/core/logger/LogRecord {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun component5 ()Lkotlin/time/Instant;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;Ljava/lang/String;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlin/time/Instant;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)Ljava/lang/String;
+	public fun getAttr ()Ljava/util/Map;
+	public final fun getEventTimestamp ()Lkotlin/time/Instant;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMdcContextDataSnapshot ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public final fun getMsg ()Ljava/lang/String;
+	public fun getName ()Ljava/lang/String;
+	public fun getThreadName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText : com/milkcocoa/info/colotok/core/logger/LogRecord {
+	public fun <init> (Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlinx/serialization/KSerializer;Lkotlin/time/Instant;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlinx/serialization/KSerializer;Lkotlin/time/Instant;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;
+	public final fun component3 ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun component5 ()Lkotlinx/serialization/KSerializer;
+	public final fun component6 ()Lkotlin/time/Instant;
+	public final fun copy (Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlinx/serialization/KSerializer;Lkotlin/time/Instant;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/util/Map;Lkotlinx/serialization/KSerializer;Lkotlin/time/Instant;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun format (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)Ljava/lang/String;
+	public fun getAttr ()Ljava/util/Map;
+	public final fun getEventTimestamp ()Lkotlin/time/Instant;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMdcContextDataSnapshot ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public final fun getMsg ()Lcom/milkcocoa/info/colotok/core/formatter/details/LogStructure;
+	public fun getName ()Ljava/lang/String;
+	public final fun getSerializer ()Lkotlinx/serialization/KSerializer;
+	public fun getThreadName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/MDC {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/logger/MDC;
+	public final fun asCoroutineContext ()Lcom/milkcocoa/info/colotok/core/logger/MDCContext;
+	public final fun clear ()V
+	public final fun get (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getThreadLocalContext ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public final fun put (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun remove (Ljava/lang/String;)Ljava/lang/String;
+	public final fun setThreadLocalContext (Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/MDCContext : kotlinx/coroutines/CopyableThreadContextElement {
+	public static final field Key Lcom/milkcocoa/info/colotok/core/logger/MDCContext$Key;
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;)V
+	public fun copyForChild ()Lcom/milkcocoa/info/colotok/core/logger/MDCContext;
+	public synthetic fun copyForChild ()Lkotlinx/coroutines/CopyableThreadContextElement;
+	public fun fold (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public fun get (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext$Element;
+	public fun getKey ()Lkotlin/coroutines/CoroutineContext$Key;
+	public fun mergeForChild (Lkotlin/coroutines/CoroutineContext$Element;)Lkotlin/coroutines/CoroutineContext;
+	public fun minusKey (Lkotlin/coroutines/CoroutineContext$Key;)Lkotlin/coroutines/CoroutineContext;
+	public fun plus (Lkotlin/coroutines/CoroutineContext;)Lkotlin/coroutines/CoroutineContext;
+	public fun restoreThreadContext (Lkotlin/coroutines/CoroutineContext;Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;)V
+	public synthetic fun restoreThreadContext (Lkotlin/coroutines/CoroutineContext;Ljava/lang/Object;)V
+	public fun updateThreadContext (Lkotlin/coroutines/CoroutineContext;)Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public synthetic fun updateThreadContext (Lkotlin/coroutines/CoroutineContext;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/MDCContext$Key : kotlin/coroutines/CoroutineContext$Key {
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/MDCContextData {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public final fun deepCopy ()Lcom/milkcocoa/info/colotok/core/logger/MDCContextData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/util/Map;
+	public final fun getDequeData ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/metrics/CompositeMetricsCollector : com/milkcocoa/info/colotok/core/metrics/MetricsCollector {
+	public fun <init> (Ljava/util/List;)V
+	public fun incrementErrorCount (Ljava/lang/String;Ljava/lang/String;)V
+	public fun incrementLogCount (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;)V
+	public fun recordWriteDuration (Ljava/lang/String;J)V
+	public fun updateBufferSize (Ljava/lang/String;I)V
+}
+
+public final class com/milkcocoa/info/colotok/core/metrics/InternalLoggingMetricsCollector : com/milkcocoa/info/colotok/core/metrics/MetricsCollector {
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/details/Provider;)V
+	public fun incrementErrorCount (Ljava/lang/String;Ljava/lang/String;)V
+	public fun incrementLogCount (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;)V
+	public fun recordWriteDuration (Ljava/lang/String;J)V
+	public fun updateBufferSize (Ljava/lang/String;I)V
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/metrics/MetricsCollector {
+	public abstract fun incrementErrorCount (Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun incrementLogCount (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;)V
+	public abstract fun recordWriteDuration (Ljava/lang/String;J)V
+	public abstract fun updateBufferSize (Ljava/lang/String;I)V
+}
+
+public abstract class com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec {
+}
+
+public final class com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$Explicit : com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec {
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;Z)V
+	public synthetic fun <init> (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;
+	public final fun component2 ()Z
+	public final fun copy (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;Z)Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$Explicit;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$Explicit;Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;ZILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$Explicit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCollector ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;
+	public final fun getInheritParent ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$Inherit : com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$Inherit;
+}
+
+public final class com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$NoOp : com/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec$NoOp;
+}
+
+public final class com/milkcocoa/info/colotok/core/metrics/NoOpMetricsCollector : com/milkcocoa/info/colotok/core/metrics/MetricsCollector {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/metrics/NoOpMetricsCollector;
+	public fun incrementErrorCount (Ljava/lang/String;Ljava/lang/String;)V
+	public fun incrementLogCount (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;)V
+	public fun recordWriteDuration (Ljava/lang/String;J)V
+	public fun updateBufferSize (Ljava/lang/String;I)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProvider : com/milkcocoa/info/colotok/core/provider/details/Provider {
+	public fun <init> ()V
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig;)V
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun onMessage (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
+	public fun <init> ()V
+	public final fun getDetectDebugModeFn ()Lkotlin/jvm/functions/Function0;
+	public fun getEnableInternalMetricsLogging ()Z
+	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public final fun isEnabledForRelease ()Z
+	public final fun isOutputEnabled ()Z
+	public final fun setDetectDebugModeFn (Lkotlin/jvm/functions/Function0;)V
+	public fun setEnableInternalMetricsLogging (Z)V
+	public final fun setEnabledForRelease (Z)V
+	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
+	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+	public final fun setOutputEnabled (Z)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/file/FileProvider : com/milkcocoa/info/colotok/core/provider/details/Provider {
+	public fun <init> (Lokio/Path;)V
+	public fun <init> (Lokio/Path;Lcom/milkcocoa/info/colotok/core/provider/builtin/file/FileProviderConfig;)V
+	public fun <init> (Lokio/Path;Lkotlin/jvm/functions/Function1;)V
+	public fun onFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onMessage (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/file/FileProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
+	public fun <init> ()V
+	public fun getEnableInternalMetricsLogging ()Z
+	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public final fun getRotation ()Lcom/milkcocoa/info/colotok/core/provider/rotation/Rotation;
+	public fun setEnableInternalMetricsLogging (Z)V
+	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
+	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+	public final fun setRotation (Lcom/milkcocoa/info/colotok/core/provider/rotation/Rotation;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/file/FileSystem_androidKt {
+	public static final fun getFileSystem ()Lokio/FileSystem;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/stream/StreamProvider : com/milkcocoa/info/colotok/core/provider/details/Provider {
+	public fun <init> ()V
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/builtin/stream/StreamProviderConfig;)V
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun onFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onMessage (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/builtin/stream/StreamProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
+	public fun <init> ()V
+	public fun getEnableInternalMetricsLogging ()Z
+	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public final fun getOutputStreamBuilder ()Lkotlin/jvm/functions/Function0;
+	public fun setEnableInternalMetricsLogging (Z)V
+	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
+	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+	public final fun setOutputStreamBuilder (Lkotlin/jvm/functions/Function0;)V
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/provider/details/IProvider : java/lang/AutoCloseable {
+	public abstract fun flush-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun flush-VtjQ1oo$default (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun forceShutdown ()V
+	public abstract fun getChannel ()Lkotlinx/coroutines/channels/Channel;
+	public abstract fun getConfig ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig;
+	public abstract fun getCoroutineScope ()Lkotlinx/coroutines/CoroutineScope;
+	public abstract fun getJob ()Lkotlinx/coroutines/Job;
+	public fun onClosed ()V
+	public fun onFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onMessage (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun write (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/details/IProvider$DefaultImpls {
+	public static synthetic fun flush-VtjQ1oo$default (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun forceShutdown (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;)V
+	public static fun onClosed (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;)V
+	public static fun onFlush (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/milkcocoa/info/colotok/core/provider/details/Provider : com/milkcocoa/info/colotok/core/provider/details/IProvider {
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig;Lkotlinx/coroutines/channels/BufferOverflow;)V
+	public synthetic fun <init> (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig;Lkotlinx/coroutines/channels/BufferOverflow;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close ()V
+	public fun flush-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun forceShutdown ()V
+	public fun getChannel ()Lkotlinx/coroutines/channels/Channel;
+	public fun getConfig ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig;
+	public fun getCoroutineScope ()Lkotlinx/coroutines/CoroutineScope;
+	public final fun getEffectiveMetricsCollector ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;
+	public fun getJob ()Lkotlinx/coroutines/Job;
+	public final fun join (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onClosed ()V
+	public fun onFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setEffectiveMetricsCollector (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollector;)V
+	public fun write (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/details/ProviderClosedException : java/lang/IllegalStateException {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/provider/details/ProviderColorConfig {
+	public fun getColorForLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public abstract fun getColorize ()Z
+	public abstract fun getDebugLevelColor ()Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public abstract fun getErrorLevelColor ()Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public abstract fun getInfoLevelColor ()Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public abstract fun getTraceLevelColor ()Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public abstract fun getWarnLevelColor ()Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public abstract fun setColorize (Z)V
+	public abstract fun setDebugLevelColor (Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)V
+	public abstract fun setErrorLevelColor (Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)V
+	public abstract fun setInfoLevelColor (Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)V
+	public abstract fun setTraceLevelColor (Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)V
+	public abstract fun setWarnLevelColor (Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/details/ProviderColorConfig$DefaultImpls {
+	public static fun getColorForLevel (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderColorConfig;Lcom/milkcocoa/info/colotok/core/level/Level;)Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
+	public abstract fun getEnableInternalMetricsLogging ()Z
+	public abstract fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
+	public abstract fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public abstract fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public abstract fun setEnableInternalMetricsLogging (Z)V
+	public abstract fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
+	public abstract fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public abstract fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/rotation/DateBaseRotation : com/milkcocoa/info/colotok/core/provider/rotation/Rotation {
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun doRotate (Lokio/Path;)V
+	public fun isRotateNeeded (Lokio/Path;)Z
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/provider/rotation/Rotation {
+	public abstract fun doRotate (Lokio/Path;)V
+	public abstract fun isRotateNeeded (Lokio/Path;)Z
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/rotation/SizeBaseRotation : com/milkcocoa/info/colotok/core/provider/rotation/Rotation {
+	public fun <init> ()V
+	public fun <init> (J)V
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun doRotate (Lokio/Path;)V
+	public final fun getSize ()J
+	public fun isRotateNeeded (Lokio/Path;)Z
+}
+
+public final class com/milkcocoa/info/colotok/util/RunBlocking_androidKt {
+	public static final fun runBlocking (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public static synthetic fun runBlocking$default (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/util/SinkUtil {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/util/SinkUtil;
+	public final fun write (Lokio/Sink;[B)V
+}
+
+public final class com/milkcocoa/info/colotok/util/ThreadSafeMap_androidKt {
+	public static final fun createThreadSafeMap ()Ljava/util/Map;
+}
+
+public final class com/milkcocoa/info/colotok/util/ThreadWrapper {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/util/ThreadWrapper;
+	public final fun getCurrentThreadName ()Ljava/lang/String;
+	public final fun traceCallPoint ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/util/color/AnsiColor : java/lang/Enum {
+	public static final field BLACK Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field BLUE Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field CYAN Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field GREEN Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field MAGENTA Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field RED Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field WHITE Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static final field YELLOW Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public final fun getCode ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+	public static fun values ()[Lcom/milkcocoa/info/colotok/util/color/AnsiColor;
+}
+
+public final class com/milkcocoa/info/colotok/util/color/Color {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/util/color/Color;
+	public final fun foreground (Ljava/lang/String;Lcom/milkcocoa/info/colotok/util/color/AnsiColor;)Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/util/color/ColorExtension {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/util/color/ColorExtension;
+	public final fun black (Ljava/lang/String;)Ljava/lang/String;
+	public final fun blue (Ljava/lang/String;)Ljava/lang/String;
+	public final fun cyan (Ljava/lang/String;)Ljava/lang/String;
+	public final fun green (Ljava/lang/String;)Ljava/lang/String;
+	public final fun magenta (Ljava/lang/String;)Ljava/lang/String;
+	public final fun red (Ljava/lang/String;)Ljava/lang/String;
+	public final fun white (Ljava/lang/String;)Ljava/lang/String;
+	public final fun yellow (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/util/unit/Size {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/util/unit/Size;
+	public final fun GB (D)D
+	public final fun GB (I)I
+	public final fun GB (J)J
+	public final fun GiB (D)D
+	public final fun GiB (I)I
+	public final fun GiB (J)J
+	public final fun KB (D)D
+	public final fun KB (I)I
+	public final fun KB (J)J
+	public final fun KiB (D)D
+	public final fun KiB (I)I
+	public final fun KiB (J)J
+	public final fun MB (D)D
+	public final fun MB (I)I
+	public final fun MB (J)J
+	public final fun MiB (D)D
+	public final fun MiB (I)I
+	public final fun MiB (J)J
+}
+

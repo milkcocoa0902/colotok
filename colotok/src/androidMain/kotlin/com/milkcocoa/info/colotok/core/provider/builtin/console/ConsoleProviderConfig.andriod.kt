@@ -13,6 +13,6 @@ actual class ConsoleProviderConfig actual constructor() : ProviderConfig {
     actual override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
     actual override var enableInternalMetricsLogging: Boolean = false
     var isOutputEnabled: Boolean = true
-    var isEnabledForRelease: Boolean = true
+    var isEnabledForRelease: Boolean = false
     var detectDebugModeFn: (() -> Boolean)? = { false }
 }

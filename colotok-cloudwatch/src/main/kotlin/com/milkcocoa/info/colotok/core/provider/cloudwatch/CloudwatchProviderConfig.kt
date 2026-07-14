@@ -30,6 +30,8 @@ sealed interface CloudwatchCredential{
 }
 
 class CloudwatchProviderConfig: AsyncProviderConfig {
+    internal var clientFactory: CloudwatchClientFactory = AwsCloudwatchClientFactory
+
     override var level: Level = LogLevel.DEBUG
     override var formatter: Formatter = SimpleStructureFormatter
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit

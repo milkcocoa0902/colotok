@@ -18,18 +18,25 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
     private val detectDebugModeFn: (() -> Boolean) = config.detectDebugModeFn ?: { false }
 
     actual override suspend fun onMessage(record: LogRecord) {
-        if (!isOutputEnabled) return
-        if (!isEnabledForRelease && !detectDebugModeFn.invoke()) return
+        if (!isConsoleOutputEnabled(isOutputEnabled, isEnabledForRelease, detectDebugModeFn)) return
 
-        runCatching {
-            when (record.level) {
-                LogLevel.TRACE -> android.util.Log.v(record.name, record.format(config.formatter))
-                LogLevel.DEBUG -> android.util.Log.d(record.name, record.format(config.formatter))
-                LogLevel.INFO -> android.util.Log.i(record.name, record.format(config.formatter))
-                LogLevel.WARN -> android.util.Log.w(record.name, record.format(config.formatter))
-                LogLevel.ERROR -> android.util.Log.e(record.name, record.format(config.formatter))
-                else -> android.util.Log.d(record.name, record.format(config.formatter))
-            }
+        val tag = normalizeLogTag(record.name, android.os.Build.VERSION.SDK_INT)
+        when (record.level) {
+            LogLevel.TRACE -> android.util.Log.v(tag, record.format(config.formatter))
+            LogLevel.DEBUG -> android.util.Log.d(tag, record.format(config.formatter))
+            LogLevel.INFO -> android.util.Log.i(tag, record.format(config.formatter))
+            LogLevel.WARN -> android.util.Log.w(tag, record.format(config.formatter))
+            LogLevel.ERROR -> android.util.Log.e(tag, record.format(config.formatter))
+            else -> android.util.Log.d(tag, record.format(config.formatter))
         }
     }
 }
+
+internal fun isConsoleOutputEnabled(
+    isOutputEnabled: Boolean,
+    isEnabledForRelease: Boolean,
+    detectDebugModeFn: () -> Boolean,
+): Boolean = isOutputEnabled && (isEnabledForRelease || detectDebugModeFn())
+
+internal fun normalizeLogTag(name: String, sdkInt: Int): String =
+    if (sdkInt <= 25) name.take(23) else name

@@ -17,12 +17,20 @@ actual object MDC {
 
     actual fun remove(key: String): String? = contextData.data.remove(key)
 
-    actual fun clear() = contextData.data.clear()
+    actual fun clear() {
+        contextData.data.clear()
+        contextData.dequeData.clear()
+    }
 
     actual fun getThreadLocalContext(): MDCContextData = contextData
 
     actual fun setThreadLocalContext(data: MDCContextData) {
+        val replacement = data.deepCopy()
         contextData.data.clear()
-        contextData.data.putAll(data.data)
+        contextData.data.putAll(replacement.data)
+        contextData.dequeData.clear()
+        replacement.dequeData.forEach { (key, deque) ->
+            contextData.dequeData[key] = ArrayDeque(deque)
+        }
     }
 }

@@ -35,6 +35,13 @@ class MetricsIntegrationTest {
         override suspend fun onMessage(record: LogRecord) {}
     }
 
+    private object ThrowingMetricsCollector : MetricsCollector {
+        override fun incrementLogCount(level: Level, providerName: String) = error("metrics failed")
+        override fun incrementErrorCount(providerName: String, errorType: String) = error("metrics failed")
+        override fun updateBufferSize(providerName: String, size: Int) = error("metrics failed")
+        override fun recordWriteDuration(providerName: String, durationMs: Long) = error("metrics failed")
+    }
+
     @Test
     fun testMetricsInheritance() {
         val collector = TestMetricsCollector()
@@ -176,5 +183,32 @@ class MetricsIntegrationTest {
 
         // Should also have the metrics log record
         assertTrue(receivedRecords.any { it is LogRecord.Metrics && it.msg.contains("LogCount increased") }, "Internal logging should be performed")
+    }
+
+    @Test
+    fun collector_failure_does_not_fail_write_flush_or_join() = runBlocking {
+        val provider = StubProvider(ConsoleProviderConfig()).apply {
+            effectiveMetricsCollector = ThrowingMetricsCollector
+        }
+        val record = LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap())
+
+        provider.write(record)
+        provider.flush()
+        provider.join()
+    }
+
+    @Test
+    fun failing_composite_collector_does_not_skip_remaining_collectors() {
+        val recordingCollector = TestMetricsCollector()
+        val provider = StubProvider(ConsoleProviderConfig()).apply {
+            effectiveMetricsCollector = CompositeMetricsCollector(
+                listOf(ThrowingMetricsCollector, recordingCollector)
+            )
+        }
+
+        provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
+
+        assertEquals(1, recordingCollector.logCounts.values.sum())
+        provider.forceShutdown()
     }
 }

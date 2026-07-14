@@ -3,7 +3,8 @@ package com.milkcocoa.info.colotok.core.formatter.details
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
-import com.milkcocoa.info.colotok.util.ThreadWrapper
+import com.milkcocoa.info.colotok.core.logger.eventAttrSnapshot
+import com.milkcocoa.info.colotok.core.logger.eventCallerSnapshot
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -37,9 +38,10 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         return format(
             msg = record.msg,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
             mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
             timestamp = record.eventTimestamp
         )
     }
@@ -48,9 +50,10 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         return format(
             msg = record.msg.stringify(),
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
             mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
             timestamp = record.eventTimestamp
         )
     }
@@ -59,9 +62,10 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         return format(
             msg = record.msg,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
             mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
             timestamp = record.eventTimestamp
         )
     }
@@ -72,6 +76,7 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         attrs: Map<String, String>,
         threadName: String,
         mdc: Map<String, Any?>,
+        caller: String,
         timestamp: Instant
     ): String {
         val dt = timestamp
@@ -83,7 +88,7 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
             .replace(Element.LEVEL.toString(), level.toString())
             .replace(Element.THREAD.toString(), threadName)
             .replace(Element.ATTR.toString(), attrs.toString())
-            .replace(Element.CALLER.toString(), ThreadWrapper.traceCallPoint())
+            .replace(Element.CALLER.toString(), caller)
             .let {
                 mdc.keys.fold(it) { acc, k -> acc.replace(Element.CUSTOM(k).toString(), mdc.get(k).toString()) }
             }

@@ -47,9 +47,44 @@ class LokiProviderConfig: AsyncProviderConfig {
     /** Number of log entries to buffer before sending to Loki */
     override var bufferSize: Int = 50
 
-    /** HTTP client used for API requests */
-    var httpClient: HttpClient = HttpClient(CIO)
+    private var currentHttpClient: HttpClient? = null
+    private var providerOwnsHttpClient: Boolean = false
+
+    internal var httpClientFactory: () -> HttpClient = { HttpClient(CIO) }
+    internal var httpClientCloser: (HttpClient) -> Unit = { it.close() }
+
+    /**
+     * HTTP client used for API requests.
+     *
+     * The default client is created lazily and is owned by the provider. A client assigned by
+     * the caller remains caller-owned and is never closed by [LokiProvider].
+     */
+    var httpClient: HttpClient
+        get() = currentHttpClient ?: httpClientFactory().also {
+            currentHttpClient = it
+            providerOwnsHttpClient = true
+        }
+        set(value) {
+            val previous = currentHttpClient
+            if (previous !== value && providerOwnsHttpClient) {
+                previous?.let(httpClientCloser)
+            }
+            currentHttpClient = value
+            providerOwnsHttpClient = previous === value && providerOwnsHttpClient
+        }
+
+    internal fun acquireHttpClient(): LokiHttpClientLease = LokiHttpClientLease(
+        client = httpClient,
+        providerOwned = providerOwnsHttpClient,
+        close = httpClientCloser,
+    )
 
     /** Authentication credentials for Loki API */
     var credential: Credential? = null
 }
+
+internal data class LokiHttpClientLease(
+    val client: HttpClient,
+    val providerOwned: Boolean,
+    val close: (HttpClient) -> Unit,
+)

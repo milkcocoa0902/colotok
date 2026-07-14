@@ -4,10 +4,29 @@ import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.util.ThreadWrapper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.serialization.KSerializer
 import kotlin.time.Clock
 import kotlin.time.Instant
+
+internal class LogEventMetadata private constructor(
+    val attr: Map<String, String>,
+    val threadName: String,
+    val caller: String,
+    private val mdcContextData: MDCContextData
+) {
+    fun mdcContextDataCopy(): MDCContextData = mdcContextData.deepCopy()
+
+    companion object {
+        fun capture(attr: Map<String, String>) = LogEventMetadata(
+            attr = attr.toMap(),
+            threadName = ThreadWrapper.getCurrentThreadName(),
+            caller = ThreadWrapper.traceCallPoint(),
+            mdcContextData = MDC.getThreadLocalContext().deepCopy()
+        )
+    }
+}
 
 sealed interface LogRecord{
     val name: String
@@ -26,8 +45,9 @@ sealed interface LogRecord{
         override val attr: Map<String, String>,
         val eventTimestamp: Instant = Clock.System.now(),
     ): LogRecord{
-        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
-        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext().deepCopy()
+        internal val eventMetadata = LogEventMetadata.capture(attr)
+        override val threadName: String get() = eventMetadata.threadName
+        override val mdcContextDataSnapshot: MDCContextData get() = eventMetadata.mdcContextDataCopy()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -39,8 +59,9 @@ sealed interface LogRecord{
         val serializer: KSerializer<T>,
         val eventTimestamp: Instant = Clock.System.now(),
     ): LogRecord{
-        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
-        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext().deepCopy()
+        internal val eventMetadata = LogEventMetadata.capture(attr)
+        override val threadName: String get() = eventMetadata.threadName
+        override val mdcContextDataSnapshot: MDCContextData get() = eventMetadata.mdcContextDataCopy()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -51,8 +72,9 @@ sealed interface LogRecord{
         override val attr: Map<String, String>,
         val eventTimestamp: Instant = Clock.System.now(),
     ): LogRecord {
-        override val threadName: String = com.milkcocoa.info.colotok.util.ThreadWrapper.getCurrentThreadName()
-        override val mdcContextDataSnapshot: MDCContextData = MDC.getThreadLocalContext().deepCopy()
+        internal val eventMetadata = LogEventMetadata.capture(attr)
+        override val threadName: String get() = eventMetadata.threadName
+        override val mdcContextDataSnapshot: MDCContextData get() = eventMetadata.mdcContextDataCopy()
         override fun format(formatter: Formatter): String = formatter.format(this)
     }
 
@@ -68,3 +90,19 @@ sealed interface LogRecord{
         override fun format(formatter: Formatter): String = formatter.format(LogRecord.PlainText(name, "Pin", level, attr))
     }
 }
+
+internal val LogRecord.eventAttrSnapshot: Map<String, String>
+    get() = when (this) {
+        is LogRecord.PlainText -> eventMetadata.attr
+        is LogRecord.StructuredText<*> -> eventMetadata.attr
+        is LogRecord.Metrics -> eventMetadata.attr
+        is LogRecord.Pin -> attr
+    }
+
+internal val LogRecord.eventCallerSnapshot: String
+    get() = when (this) {
+        is LogRecord.PlainText -> eventMetadata.caller
+        is LogRecord.StructuredText<*> -> eventMetadata.caller
+        is LogRecord.Metrics -> eventMetadata.caller
+        is LogRecord.Pin -> ""
+    }

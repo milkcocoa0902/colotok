@@ -1,5 +1,7 @@
 package com.milkcocoa.info.colotok.core.logger
 
+import com.milkcocoa.info.colotok.core.formatter.Element
+import com.milkcocoa.info.colotok.core.formatter.details.TextFormatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
@@ -12,24 +14,27 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ColotokLogger4JTest {
-    private class TestProvider : Provider(
+    private class TestProvider(level: Level = LogLevel.TRACE) : Provider(
         config =
             ConsoleProviderConfig().apply {
-                level = LogLevel.TRACE
+                this.level = level
             }
     ) {
         var lastName: String? = null
         var lastMsg: String? = null
         var lastLevel: Level? = null
         var lastAttr: Map<String, String>? = null
+        var lastCaller: String? = null
 
         override suspend fun onMessage(record: LogRecord) {
             lastName = record.name
             lastLevel = record.level
             lastAttr = record.attr
+            lastCaller = record.format(object : TextFormatter("${Element.CALLER}") {})
             when (record) {
                 is LogRecord.PlainText -> {
                     lastMsg = record.msg
@@ -77,6 +82,16 @@ class ColotokLogger4JTest {
                 expectedLevel = LogLevel.INFO
             )
         }
+    }
+
+    @Test
+    fun caller_points_to_the_slf4j_user_call_site() = runBlocking {
+        val logger = LoggerFactory.getLogger("caller-test")
+
+        logger.info("message")
+        provider.flush()
+
+        assertTrue(provider.lastCaller!!.contains("caller_points_to_the_slf4j_user_call_site"), provider.lastCaller)
     }
 
     @Test
@@ -165,6 +180,89 @@ class ColotokLogger4JTest {
     }
 
     @Test
+    fun enabled_reflects_any_provider_threshold() {
+        val infoProvider = TestProvider(LogLevel.INFO)
+        val errorProvider = TestProvider(LogLevel.ERROR)
+        ColotokLoggerContext.setDefault(
+            ColotokLoggerContext()
+                .addProvider(infoProvider)
+                .addProvider(errorProvider)
+        )
+        val logger = LoggerFactory.getLogger("enabled-threshold-test")
+        val marker = marker()
+
+        assertFalse(logger.isTraceEnabled)
+        assertFalse(logger.isDebugEnabled)
+        assertTrue(logger.isInfoEnabled)
+        assertTrue(logger.isWarnEnabled)
+        assertTrue(logger.isErrorEnabled)
+        assertFalse(logger.isTraceEnabled(marker))
+        assertFalse(logger.isDebugEnabled(marker))
+        assertTrue(logger.isInfoEnabled(marker))
+        assertTrue(logger.isWarnEnabled(marker))
+        assertTrue(logger.isErrorEnabled(marker))
+    }
+
+    @Test
+    fun enabled_is_false_without_eligible_providers() {
+        ColotokLoggerContext.setDefault(ColotokLoggerContext())
+        val noProviders = LoggerFactory.getLogger("enabled-empty-test")
+
+        assertFalse(noProviders.isErrorEnabled)
+
+        ColotokLoggerContext.setDefault(
+            ColotokLoggerContext().addProvider(TestProvider(LogLevel.OFF))
+        )
+        val offProvider = LoggerFactory.getLogger("enabled-off-test")
+
+        assertFalse(offProvider.isTraceEnabled)
+        assertFalse(offProvider.isDebugEnabled)
+        assertFalse(offProvider.isInfoEnabled)
+        assertFalse(offProvider.isWarnEnabled)
+        assertFalse(offProvider.isErrorEnabled)
+    }
+
+    @Test
+    fun all_levels_support_slf4j_placeholder_overloads() {
+        runBlocking {
+            val logger = LoggerFactory.getLogger("overload-contract-test")
+            val marker = marker()
+
+            BridgeLevel.entries.forEach { level ->
+                logPlain(logger, level, "plain")
+                assertLastLog("overload-contract-test", "plain", level.colotok)
+
+                logOne(logger, level, "one={}", "A")
+                assertLastLog("overload-contract-test", "one=A", level.colotok)
+
+                logTwo(logger, level, "two={} {}", "A", "B")
+                assertLastLog("overload-contract-test", "two=A B", level.colotok)
+
+                logVararg(logger, level, "many={} {} {}", arrayOf("A", "B", "C"))
+                assertLastLog("overload-contract-test", "many=A B C", level.colotok)
+
+                val explicit = IllegalArgumentException("explicit", IllegalStateException("root"))
+                logThrowable(logger, level, "explicit failure", explicit)
+                assertLastLog("overload-contract-test", "explicit failure", level.colotok) {
+                    assertFullStackTrace(it.getValue("cause"), explicit)
+                }
+
+                val trailing = IllegalArgumentException("trailing", IllegalStateException("root"))
+                logVararg(logger, level, "trailing {}", arrayOf("failure", trailing))
+                assertLastLog("overload-contract-test", "trailing failure", level.colotok) {
+                    assertFullStackTrace(it.getValue("cause"), trailing)
+                }
+
+                logMarker(logger, level, marker, "marker")
+                assertLastLog("overload-contract-test", "marker", level.colotok)
+
+                logOne(logger, level, "escaped=\\{}", "ignored")
+                assertLastLog("overload-contract-test", "escaped={}", level.colotok)
+            }
+        }
+    }
+
+    @Test
     fun marker_message_overloads_delegate_to_normal_logging() {
         runBlocking {
             val logger = LoggerFactory.getLogger("marker-message-test")
@@ -235,6 +333,111 @@ class ColotokLogger4JTest {
     }
 
     private fun marker(): Marker = BasicMarkerFactory().getMarker("ignored")
+
+    private enum class BridgeLevel(val colotok: Level) {
+        TRACE(LogLevel.TRACE),
+        DEBUG(LogLevel.DEBUG),
+        INFO(LogLevel.INFO),
+        WARN(LogLevel.WARN),
+        ERROR(LogLevel.ERROR),
+    }
+
+    private fun logPlain(
+        logger: org.slf4j.Logger,
+        level: BridgeLevel,
+        message: String?
+    ) {
+        when (level) {
+            BridgeLevel.TRACE -> logger.trace(message)
+            BridgeLevel.DEBUG -> logger.debug(message)
+            BridgeLevel.INFO -> logger.info(message)
+            BridgeLevel.WARN -> logger.warn(message)
+            BridgeLevel.ERROR -> logger.error(message)
+        }
+    }
+
+    private fun logOne(
+        logger: org.slf4j.Logger,
+        level: BridgeLevel,
+        pattern: String?,
+        argument: Any?
+    ) {
+        when (level) {
+            BridgeLevel.TRACE -> logger.trace(pattern, argument)
+            BridgeLevel.DEBUG -> logger.debug(pattern, argument)
+            BridgeLevel.INFO -> logger.info(pattern, argument)
+            BridgeLevel.WARN -> logger.warn(pattern, argument)
+            BridgeLevel.ERROR -> logger.error(pattern, argument)
+        }
+    }
+
+    private fun logTwo(
+        logger: org.slf4j.Logger,
+        level: BridgeLevel,
+        pattern: String?,
+        first: Any?,
+        second: Any?
+    ) {
+        when (level) {
+            BridgeLevel.TRACE -> logger.trace(pattern, first, second)
+            BridgeLevel.DEBUG -> logger.debug(pattern, first, second)
+            BridgeLevel.INFO -> logger.info(pattern, first, second)
+            BridgeLevel.WARN -> logger.warn(pattern, first, second)
+            BridgeLevel.ERROR -> logger.error(pattern, first, second)
+        }
+    }
+
+    private fun logVararg(
+        logger: org.slf4j.Logger,
+        level: BridgeLevel,
+        pattern: String?,
+        arguments: Array<out Any?>
+    ) {
+        when (level) {
+            BridgeLevel.TRACE -> logger.trace(pattern, *arguments)
+            BridgeLevel.DEBUG -> logger.debug(pattern, *arguments)
+            BridgeLevel.INFO -> logger.info(pattern, *arguments)
+            BridgeLevel.WARN -> logger.warn(pattern, *arguments)
+            BridgeLevel.ERROR -> logger.error(pattern, *arguments)
+        }
+    }
+
+    private fun logThrowable(
+        logger: org.slf4j.Logger,
+        level: BridgeLevel,
+        message: String?,
+        throwable: Throwable
+    ) {
+        when (level) {
+            BridgeLevel.TRACE -> logger.trace(message, throwable)
+            BridgeLevel.DEBUG -> logger.debug(message, throwable)
+            BridgeLevel.INFO -> logger.info(message, throwable)
+            BridgeLevel.WARN -> logger.warn(message, throwable)
+            BridgeLevel.ERROR -> logger.error(message, throwable)
+        }
+    }
+
+    private fun logMarker(
+        logger: org.slf4j.Logger,
+        level: BridgeLevel,
+        marker: Marker,
+        message: String?
+    ) {
+        when (level) {
+            BridgeLevel.TRACE -> logger.trace(marker, message)
+            BridgeLevel.DEBUG -> logger.debug(marker, message)
+            BridgeLevel.INFO -> logger.info(marker, message)
+            BridgeLevel.WARN -> logger.warn(marker, message)
+            BridgeLevel.ERROR -> logger.error(marker, message)
+        }
+    }
+
+    private fun assertFullStackTrace(actual: String, throwable: Throwable) {
+        assertTrue(actual.contains(throwable::class.simpleName!!))
+        assertTrue(actual.contains("at "))
+        assertTrue(actual.contains("Caused by:"))
+        assertTrue(actual.contains("IllegalStateException: root"))
+    }
 
     private suspend fun assertLastLog(
         expectedName: String,
