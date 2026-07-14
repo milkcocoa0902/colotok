@@ -4,6 +4,8 @@ import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicBoolean
@@ -25,6 +27,22 @@ class ForceShutdownTest {
             isFinished.set(true)
         }
     }
+
+    private class HangingFlushProvider : Provider(
+        config = ConsoleProviderConfig()
+    ) {
+        val isClosed = AtomicBoolean(false)
+
+        override suspend fun onMessage(record: LogRecord) = Unit
+
+        override suspend fun onFlush() {
+            delay(Long.MAX_VALUE)
+        }
+
+        override fun onClosed() {
+            isClosed.set(true)
+        }
+    }
     
     @Test
     fun testForceShutdownBlocksUntilFinished() {
@@ -40,13 +58,50 @@ class ForceShutdownTest {
         logger.forceShutdown()
         val endTime = System.currentTimeMillis()
         
-        // 処理が終わっていることを確認
+        // close hook should run, but forceShutdown is allowed to drop queued records.
         Assertions.assertTrue(slowProvider.isFinished.get())
-        Assertions.assertTrue(slowProvider.messageReceived.get())
         
         // delay(500) していたが、forceShutdownによってキャンセルされるため、500ms待たずに終了するはず
         val duration = endTime - startTime
         println("Duration: $duration ms")
         Assertions.assertTrue(duration < 500, "forceShutdown should be immediate and not wait for slow provider to finish")
+    }
+
+    @Test
+    fun force_does_not_start_or_wait_for_hanging_flush() {
+        val provider = HangingFlushProvider()
+
+        val startTime = System.currentTimeMillis()
+        provider.forceShutdown()
+        val duration = System.currentTimeMillis() - startTime
+
+        Assertions.assertTrue(provider.isClosed.get())
+        Assertions.assertTrue(duration < 500, "forceShutdown must not run the graceful flush hook")
+        Assertions.assertThrows(
+            com.milkcocoa.info.colotok.core.provider.details.ProviderClosedException::class.java
+        ) {
+            runBlocking { provider.flush() }
+        }
+    }
+
+    @Test
+    fun force_cancels_hanging_graceful_final_flush() = runBlocking {
+        val flushStarted = CompletableDeferred<Unit>()
+        val provider = object : Provider(ConsoleProviderConfig()) {
+            override suspend fun onMessage(record: LogRecord) = Unit
+
+            override suspend fun onFlush() {
+                flushStarted.complete(Unit)
+                delay(Long.MAX_VALUE)
+            }
+        }
+        provider.close()
+        flushStarted.await()
+
+        val startTime = System.currentTimeMillis()
+        provider.forceShutdown()
+        val duration = System.currentTimeMillis() - startTime
+
+        Assertions.assertTrue(duration < 500, "forceShutdown must cancel a final flush already in progress")
     }
 }

@@ -1,0 +1,44 @@
+public final class com/milkcocoa/info/colotok/core/coroutines/Blocking_jvmKt {
+	public static final fun blocking (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun blocking$default (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+}
+
+public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerExtensionKt {
+	public static final fun atAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lcom/milkcocoa/info/colotok/core/level/Level;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atDebugAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atErrorAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atInfoAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atTraceAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun atWarnAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun debugAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun debugAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun errorAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun errorAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun infoAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun infoAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun traceAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun traceAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun warnAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun warnAsync (Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/milkcocoa/info/colotok/core/provider/details/AsyncProvider : com/milkcocoa/info/colotok/core/provider/details/Provider {
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig;Lkotlinx/coroutines/channels/BufferOverflow;)V
+	public synthetic fun <init> (Lcom/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig;Lkotlinx/coroutines/channels/BufferOverflow;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun onFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun onMessage (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onPublish (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun writeAsync (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
+	public abstract fun getBufferSize ()I
+	public abstract fun setBufferSize (I)V
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/details/ProviderExtensionKt {
+	public static final fun writeAsync (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

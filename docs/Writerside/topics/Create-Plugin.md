@@ -1,468 +1,146 @@
 # Create Plugin
 
-This page explains how to create custom plugins for Colotok. Plugins allow you to extend Colotok's functionality in various ways, such as adding support for new logging destinations, implementing new formatting options, or integrating with other libraries and frameworks.
+A custom provider connects Colotok to a destination that is not built in. Use `Provider` for a destination that handles one record at a time, or subclass `AsyncProvider` when a remote service benefits from batches.
 
-## Plugin Architecture
+`AsyncProvider` is the preferred base for remote delivery because it already owns the channel, batching threshold, retention policy, flush behavior, and lifecycle. Do not add another queue unless the destination protocol requires a distinct durable store.
 
-Colotok has a flexible plugin architecture based on interfaces that define the contract between the core library and plugins. The main interfaces are:
+## Dependencies
 
-- **Provider**: The core interface that all logging providers must implement
-- **ProviderConfig**: The interface for provider configuration
-- **AsyncProvider**: An extension of Provider that adds support for asynchronous logging
-
-### Provider Interface
-
-The `Provider` interface is the foundation of Colotok's plugin system. It defines methods for writing logs to various destinations:
+Add the core and coroutine artifacts to the custom provider module:
 
 ```kotlin
-interface Provider {
-    // Write plain text logs
-    fun write(name: String, msg: String, level: Level)
-
-    // Write plain text logs with attributes
-    fun write(name: String, msg: String, level: Level, attr: Map<String, String>)
-
-    // Write structured logs
-    fun <T : LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: Level)
-
-    // Write structured logs with attributes
-    fun <T : LogStructure> write(name: String, msg: T, serializer: KSerializer<T>, level: Level, attr: Map<String, String>)
+dependencies {
+    implementation("io.github.milkcocoa0902:colotok:<version>")
+    implementation("io.github.milkcocoa0902:colotok-coroutines:<version>")
 }
 ```
 
-At minimum, a provider needs to implement the second and fourth methods, as the first and third methods have default implementations that call the second and fourth methods respectively with an empty map.
+## Define a transport boundary
 
-### ProviderConfig Interface
-
-The `ProviderConfig` interface defines the basic configuration options that all providers must support:
+Keep the network library outside the provider's buffering logic. A small interface makes ownership explicit and lets tests use a deterministic fake.
 
 ```kotlin
-interface ProviderConfig {
-    // Minimum log level that the provider will process
-    var level: Level
-
-    // Formatter used to format log messages
-    var formatter: Formatter
+interface WebhookSender {
+    /** Returns only after the destination accepts the complete batch. */
+    suspend fun send(endpoint: String, messages: List<String>)
 }
 ```
 
-Specific providers can extend this interface to add their own configuration options.
+The application can implement this interface with Ktor, OkHttp, or another client. Treat non-success responses as failures by throwing from `send`; silently swallowing them would make `AsyncProvider` discard records as if publication succeeded.
 
-### AsyncProvider Interface
-
-The `AsyncProvider` interface extends the `Provider` interface to add support for asynchronous logging:
+## Define the configuration
 
 ```kotlin
-interface AsyncProvider: Provider {
-    // Async versions of the Provider methods
-    suspend fun writeAsync(name: String, msg: String, level: Level)
+import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
+import com.milkcocoa.info.colotok.core.formatter.details.Formatter
+import com.milkcocoa.info.colotok.core.level.Level
+import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
+import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
 
-    suspend fun writeAsync(name: String, msg: String, level: Level, attr: Map<String, String>)
+class WebhookProviderConfig : AsyncProviderConfig {
+    override var level: Level = LogLevel.INFO
+    override var formatter: Formatter = SimpleTextFormatter
+    override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
+    override var enableInternalMetricsLogging: Boolean = false
+    override var bufferSize: Int = 50
 
-    suspend fun <T : LogStructure> writeAsync(name: String, msg: T, serializer: KSerializer<T>, level: Level)
-
-    suspend fun <T : LogStructure> writeAsync(name: String, msg: T, serializer: KSerializer<T>, level: Level, attr: Map<String, String>)
+    var endpoint: String? = null
+    var sender: WebhookSender? = null
 }
 ```
 
-Similar to the `Provider` interface, at minimum, an `AsyncProvider` needs to implement the second and fourth methods.
+`bufferSize` is the threshold at which Colotok attempts a batch publish. Its valid range is `1..4096`.
 
-## Creating a Custom Provider
-
-Let's walk through the process of creating a custom provider for Colotok. We'll create a provider that sends logs to Slack using webhooks.
-
-### Step 1: Define the Provider Configuration
-
-First, define a configuration class for your provider by implementing the `ProviderConfig` interface:
+## Implement the provider
 
 ```kotlin
-class SlackProviderConfig : ProviderConfig {
-    // Required by ProviderConfig
-    override var level: Level = LogLevel.DEBUG
-    override var formatter: Formatter = DetailTextFormatter
+import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.provider.details.AsyncProvider
 
-    // Custom configuration options
-    var webhookUrl: String = ""
-}
-```
+class WebhookProvider(
+    config: WebhookProviderConfig,
+) : AsyncProvider(validateWebhookConfig(config)) {
+    constructor(configure: WebhookProviderConfig.() -> Unit) :
+        this(WebhookProviderConfig().apply(configure))
 
-### Step 2: Implement the Provider
-
-Next, implement the `Provider` interface:
-
-```kotlin
-class SlackProvider(config: SlackProviderConfig) : Provider {
-    // Convenience constructor that accepts a configuration lambda
-    constructor(config: SlackProviderConfig.() -> Unit): this(SlackProviderConfig().apply(config))
-
-    private val webhookUrl = config.webhookUrl
-    private val logLevel = config.level
+    private val endpoint = requireNotNull(config.endpoint)
+    private val sender = requireNotNull(config.sender)
     private val formatter = config.formatter
 
-    // HTTP client for sending requests to Slack
-    private val client = HttpClient()
-
-    override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        // Skip if the log level is not enabled
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        // Format the log message
-        val formattedMessage = formatter.format(msg, level, attr)
-
-        // Send the log to Slack
-        runBlocking {
-            client.post(webhookUrl) {
-                contentType(ContentType.Application.Json)
-                setBody("""{"text": "${formattedMessage.escapeJson()}"}""")
-            }
-        }
+    override suspend fun onPublish(records: List<LogRecord>) {
+        // AsyncProvider calls this outside its buffer lock.
+        // Let failures escape so the records remain retained for retry.
+        sender.send(
+            endpoint = endpoint,
+            messages = records.map { it.format(formatter) },
+        )
     }
+}
 
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        // Skip if the log level is not enabled
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        // Format the structured log message
-        val formattedMessage = formatter.format(msg, serializer, level, attr)
-
-        // Send the log to Slack
-        runBlocking {
-            client.post(webhookUrl) {
-                contentType(ContentType.Application.Json)
-                setBody("""{"text": "${formattedMessage.escapeJson()}"}""")
-            }
-        }
-    }
-
-    // Helper function to escape JSON strings
-    private fun String.escapeJson(): String {
-        return this.replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-    }
+private fun validateWebhookConfig(
+    config: WebhookProviderConfig,
+): WebhookProviderConfig = config.apply {
+    require(!endpoint.isNullOrBlank()) { "endpoint is required" }
+    requireNotNull(sender) { "sender is required" }
 }
 ```
 
-### Step 3: Add Asynchronous Support (Optional)
+Validate required values in the expression passed to `AsyncProvider`. This ensures invalid configuration fails before the base class starts its worker.
 
-If you want to support asynchronous logging, implement the `AsyncProvider` interface:
+The example has no custom mutable buffer, does not block a coroutine with `runBlocking`, and does not perform network I/O while holding a provider-owned lock. Publication errors propagate to the base class instead of being printed or ignored.
+
+## Use the provider
 
 ```kotlin
-class SlackProvider(config: SlackProviderConfig) : AsyncProvider {
-    // ... same as before ...
-
-    override suspend fun writeAsync(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        // Skip if the log level is not enabled
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        // Format the log message
-        val formattedMessage = formatter.format(msg, level, attr)
-
-        // Send the log to Slack asynchronously
-        client.post(webhookUrl) {
-            contentType(ContentType.Application.Json)
-            setBody("""{"text": "${formattedMessage.escapeJson()}"}""")
-        }
-    }
-
-    override suspend fun <T : LogStructure> writeAsync(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        // Skip if the log level is not enabled
-        if (level.isEnabledFor(logLevel).not()) {
-            return
-        }
-
-        // Format the structured log message
-        val formattedMessage = formatter.format(msg, serializer, level, attr)
-
-        // Send the log to Slack asynchronously
-        client.post(webhookUrl) {
-            contentType(ContentType.Application.Json)
-            setBody("""{"text": "${formattedMessage.escapeJson()}"}""")
-        }
-    }
-
-    // For synchronous methods, delegate to async methods
-    override fun write(
-        name: String,
-        msg: String,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        runBlocking {
-            writeAsync(name, msg, level, attr)
-        }
-    }
-
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attr: Map<String, String>
-    ) {
-        runBlocking {
-            writeAsync(name, msg, serializer, level, attr)
-        }
-    }
+val provider = WebhookProvider {
+    endpoint = "https://example.invalid/logs"
+    sender = applicationWebhookSender
+    level = LogLevel.WARN
+    bufferSize = 50
 }
+
+val context = ColotokLoggerContext()
+    .addProvider(provider)
+
+val logger = context.getLogger("application")
+logger.warn("delivery is delayed")
+
+// At application shutdown; this suspends until graceful completion.
+context.shutdown()
 ```
 
-### Step 4: Use Your Custom Provider
+## Delivery and lifecycle contract
 
-Now you can use your custom provider with Colotok:
+- `write` accepts records only while the provider is open. Logger attributes and MDC have already been snapshotted when the provider receives a record.
+- `flush()` waits for records accepted before its marker and publishes the provider-specific buffer. It is valid only while the provider is open.
+- `close()` starts graceful closure without waiting. `join()` closes when necessary and waits for the worker, final flush, and close hook.
+- `forceShutdown()` cancels immediately. Queued records may be lost, but the close hook is still invoked.
+- After graceful or forced closure starts, `flush()` throws `ProviderClosedException`.
 
-```kotlin
-val logger = ColotokLoggerContext()
-    .addProvider(SlackProvider {
-        webhookUrl = "https://hooks.slack.com/services/your/webhook/url"
-        level = LogLevel.WARN  // Only send WARN and ERROR logs to Slack
-        formatter = SimpleTextFormatter
-    })
-    .getLogger()
+On automatic publish failure, `AsyncProvider` retains records up to `min(bufferSize * 4, 4096)` and can retry them on a later publish attempt. At the retention limit it drops the newest incoming record, preserving the older failed batch. A failure during an explicit `flush()` is propagated to the caller and puts the provider in its failed terminal state; `join()` reports the same original failure.
 
-// Use the logger as normal
-logger.info("This won't be sent to Slack")
-logger.warn("This will be sent to Slack")
-logger.error("This will also be sent to Slack")
-```
+Delivery is at least once, not exactly once. If a transport accepts part of a batch and then throws, the complete retained batch can be retried and accepted messages may appear again. Prefer an idempotency key or destination-side deduplication when duplicates matter.
 
-## Best Practices
+## Resource ownership
 
-Here are some best practices to follow when creating custom plugins for Colotok:
+Decide whether the provider or caller owns its network client:
 
-### 1. Respect Log Levels
+- A client constructed internally should be closed exactly once from `onClosed()`.
+- An injected client is usually caller-owned and should not be closed by the provider.
+- Lazy initialization prevents an unused provider from opening resources merely because it is closed.
 
-Always check the log level before processing a log message:
+Document the chosen ownership rule in the configuration API. Avoid guessing ownership from the client type.
 
-```kotlin
-if (level.isEnabledFor(logLevel).not()) {
-    return
-}
-```
+## Testing
 
-This ensures that your provider only processes logs that meet the configured minimum level.
+Test the provider through a fake `WebhookSender` rather than a live network endpoint. At minimum, verify:
 
-### 2. Handle Errors Gracefully
+1. formatting and record order in a successful batch;
+2. failure propagation from `onPublish` and retention until a later retry;
+3. graceful `join()` performs the final publish;
+4. forced shutdown may drop queued records but closes owned resources;
+5. injected resources remain caller-owned;
+6. invalid configuration fails before creating a worker or network client.
 
-Logging should never cause your application to crash. Always wrap external calls in try-catch blocks:
-
-```kotlin
-runCatching {
-    // External call that might fail
-}.getOrElse { exception ->
-    // Handle the exception, maybe log it to a fallback destination
-    println("Failed to send log: ${exception.message}")
-}
-```
-
-### 3. Buffer Logs When Appropriate
-
-If your provider sends logs to an external service, consider buffering logs to reduce the number of network requests:
-
-```kotlin
-private val buffer = mutableListOf<LogEntry>()
-private val bufferSize = 50
-private val mutex = Mutex()
-
-override suspend fun writeAsync(
-    name: String,
-    msg: String,
-    level: Level,
-    attr: Map<String, String>
-) {
-    if (level.isEnabledFor(logLevel).not()) {
-        return
-    }
-
-    val shouldSendLogs = mutex.withLock {
-        buffer.add(LogEntry(name, formatter.format(msg, level, attr), System.currentTimeMillis()))
-        buffer.size >= bufferSize
-    }
-
-    if (shouldSendLogs) {
-        sendLogsToExternalService()
-    }
-}
-
-private suspend fun sendLogsToExternalService() {
-    mutex.withLock {
-        if (buffer.isEmpty()) return
-
-        // Send the buffered logs
-        client.post(serviceUrl) {
-            contentType(ContentType.Application.Json)
-            setBody(buffer)
-        }
-
-        // Clear the buffer
-        buffer.clear()
-    }
-}
-
-// Add a flush method to send any buffered logs
-suspend fun flush() {
-    sendLogsToExternalService()
-}
-```
-
-### 4. Make Configuration Flexible
-
-Provide sensible defaults but allow users to customize your provider:
-
-```kotlin
-class MyProviderConfig : ProviderConfig {
-    override var level: Level = LogLevel.INFO  // Sensible default
-    override var formatter: Formatter = SimpleTextFormatter  // Sensible default
-
-    var bufferSize: Int = 50  // Sensible default
-    var retryCount: Int = 3  // Sensible default
-    var timeout: Long = 5000  // Sensible default
-}
-```
-
-### 5. Document Your Provider
-
-Add KDoc comments to your provider and configuration classes to help users understand how to use them:
-
-```kotlin
-/**
- * A provider that sends logs to MyService.
- *
- * This provider buffers logs and sends them in batches to reduce network traffic.
- * It also supports retrying failed requests.
- *
- * @property config The configuration for this provider
- */
-class MyProvider(config: MyProviderConfig) : Provider {
-    // ...
-}
-```
-
-## Testing Your Provider
-
-It's important to test your provider to ensure it works correctly. Here's a simple test for our SlackProvider:
-
-```kotlin
-class SlackProviderTest {
-    @Test
-    fun `test slack provider sends logs`() {
-        // Create a mock HTTP client
-        val mockClient = MockHttpClient { request ->
-            // Verify the request
-            assertEquals("https://hooks.slack.com/services/test", request.url.toString())
-            assertEquals(ContentType.Application.Json, request.contentType())
-
-            // Return a success response
-            MockHttpResponse(HttpStatusCode.OK, "ok")
-        }
-
-        // Create the provider with the mock client
-        val provider = SlackProvider {
-            webhookUrl = "https://hooks.slack.com/services/test"
-            level = LogLevel.INFO
-        }.apply {
-            client = mockClient
-        }
-
-        // Test the provider
-        provider.write("test", "Test message", LogLevel.INFO, mapOf())
-
-        // Verify that the mock client was called
-        assertEquals(1, mockClient.requestCount)
-    }
-}
-```
-
-## Packaging Your Plugin
-
-If you want to share your plugin with others, you should package it as a separate library. Here's a basic structure for a Colotok plugin project:
-
-```
-my-colotok-plugin/
-├── build.gradle.kts
-├── src/
-│   ├── main/
-│   │   └── kotlin/
-│   │       └── com/
-│   │           └── example/
-│   │               └── colotok/
-│   │                   └── plugin/
-│   │                       ├── MyProvider.kt
-│   │                       └── MyProviderConfig.kt
-│   └── test/
-│       └── kotlin/
-│           └── com/
-│               └── example/
-│                   └── colotok/
-│                       └── plugin/
-│                           └── MyProviderTest.kt
-└── README.md
-```
-
-Your `build.gradle.kts` file should include Colotok as a dependency:
-
-```kotlin
-plugins {
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
-    `maven-publish`
-}
-
-group = "com.example"
-version = "0.1.0"
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation("io.github.milkcocoa0902:colotok:0.4.2")
-
-    // Add any other dependencies your plugin needs
-
-    testImplementation(kotlin("test"))
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
-}
-```
-
-## Conclusion
-
-Creating custom plugins for Colotok is a powerful way to extend its functionality to meet your specific needs. By implementing the `Provider` interface and following the best practices outlined in this guide, you can create robust and flexible plugins that integrate Colotok with any logging destination or service.
-
-Remember to check the [Official Plugin](Official-Plugin.md) page for examples of plugins that are officially supported by Colotok.
+Also test the transport adapter separately for request encoding, authentication, non-success responses, timeouts, and client closure.

@@ -14,13 +14,14 @@ final class LevelScopedColotokLogger(
 ) {
 
     fun print(msg: String) {
+        val record = LogRecord.PlainText(
+            name = name,
+            msg = msg,
+            level = level,
+            attr = attrs.toMap()
+        )
         providers.forEach {
-            it.write(LogRecord.PlainText(
-                name = name,
-                msg = msg,
-                level = level,
-                attr = attrs
-            ))
+            it.write(record)
         }
     }
 
@@ -28,26 +29,28 @@ final class LevelScopedColotokLogger(
         msg: String,
         attr: Map<String, String>
     ) {
+        val record = LogRecord.PlainText(
+            name = name,
+            msg = msg,
+            level = level,
+            attr = attrs.plus(attr).toMap()
+        )
         providers.forEach {
-            it.write(LogRecord.PlainText(
-                name = name,
-                msg = msg,
-                level = level,
-                attr = attrs.plus(attr)
-            ))
+            it.write(record)
         }
     }
 
     @OptIn(InternalSerializationApi::class)
     inline fun <reified T : LogStructure> print(msg: T) {
+        val record = LogRecord.StructuredText(
+            name = name,
+            msg = msg,
+            level = level,
+            serializer = T::class.serializer(),
+            attr = attrs.toMap()
+        )
         providers.forEach {
-            it.write(LogRecord.StructuredText(
-                name = name,
-                msg = msg,
-                level = level,
-                serializer = T::class.serializer(),
-                attr = attrs
-            ))
+            it.write(record)
         }
     }
 
@@ -56,14 +59,15 @@ final class LevelScopedColotokLogger(
         msg: T,
         attr: Map<String, String>
     ) {
+        val record = LogRecord.StructuredText(
+            name = name,
+            msg = msg,
+            level = level,
+            serializer = T::class.serializer(),
+            attr = attrs.plus(attr).toMap()
+        )
         providers.forEach {
-            it.write(LogRecord.StructuredText(
-                name = name,
-                msg = msg,
-                level = level,
-                serializer = T::class.serializer(),
-                attr = attrs.plus(attr)
-            ))
+            it.write(record)
         }
     }
 }

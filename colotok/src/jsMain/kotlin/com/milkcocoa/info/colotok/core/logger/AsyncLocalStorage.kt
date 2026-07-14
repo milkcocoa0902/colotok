@@ -4,6 +4,8 @@
 package com.milkcocoa.info.colotok.core.logger
 
 external class AsyncLocalStorage<T> {
+    fun enterWith(store: T)
+
     fun <R> run(
         store: T,
         callback: () -> R

@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import java.util.concurrent.atomic.AtomicInteger
 
 class ColotokLoggerContextTest {
 
@@ -134,5 +135,55 @@ class ColotokLoggerContextTest {
         // Ensure providers exist and logging does not crash
         assertTrue(logger.providers.isNotEmpty())
         logger.info("ping")
+    }
+
+    @Test
+    fun context_shutdown_closes_all_providers_before_rethrowing_first_failure() = runBlocking {
+        val expected = IllegalStateException("first close failed")
+        val secondClosed = AtomicInteger(0)
+        val first = object : Provider(ConsoleProviderConfig()) {
+            override suspend fun onMessage(record: LogRecord) = Unit
+            override fun onClosed() = throw expected
+        }
+        val second = object : Provider(ConsoleProviderConfig()) {
+            override suspend fun onMessage(record: LogRecord) = Unit
+            override fun onClosed() { secondClosed.incrementAndGet() }
+        }
+        val context = ColotokLoggerContext().addProvider(first).addProvider(second)
+
+        assertSame(expected, assertFailsWith<IllegalStateException> { context.shutdown() })
+        assertEquals(1, secondClosed.get())
+    }
+
+    @Test
+    fun context_force_shutdown_closes_registered_providers_without_active_logger() {
+        val closed = AtomicInteger(0)
+        val provider = object : Provider(ConsoleProviderConfig()) {
+            override suspend fun onMessage(record: LogRecord) = Unit
+            override fun onClosed() { closed.incrementAndGet() }
+        }
+        val context = ColotokLoggerContext().addProvider(provider)
+
+        context.forceShutdown()
+
+        assertEquals(1, closed.get())
+    }
+
+    @Test
+    fun logger_force_shutdown_closes_later_provider_after_first_failure() {
+        val expected = IllegalArgumentException("first force close failed")
+        val secondClosed = AtomicInteger(0)
+        val first = object : Provider(ConsoleProviderConfig()) {
+            override suspend fun onMessage(record: LogRecord) = Unit
+            override fun onClosed() = throw expected
+        }
+        val second = object : Provider(ConsoleProviderConfig()) {
+            override suspend fun onMessage(record: LogRecord) = Unit
+            override fun onClosed() { secondClosed.incrementAndGet() }
+        }
+        val logger = ColotokLogger("test") { providers = listOf(first, second) }
+
+        assertSame(expected, assertFailsWith<IllegalArgumentException> { logger.forceShutdown() })
+        assertEquals(1, secondClosed.get())
     }
 }

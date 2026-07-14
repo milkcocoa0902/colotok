@@ -2,20 +2,23 @@
 
 package com.milkcocoa.info.colotok.core.logger
 
-import kotlinx.coroutines.ThreadContextElement
+import kotlinx.coroutines.CopyableThreadContextElement
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.concurrent.getOrSet
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MDCContext(
-    private val contextData: MDCContextData
-) : ThreadContextElement<MDCContextData> {
+    contextData: MDCContextData
+) : CopyableThreadContextElement<MDCContextData> {
+    private var contextData = contextData.deepCopy()
     companion object Key : CoroutineContext.Key<MDCContext>
 
     override val key: CoroutineContext.Key<*> get() = Key
 
     override fun updateThreadContext(context: CoroutineContext): MDCContextData {
-        val oldContext = MDC.getThreadLocalContext()
-        MDC.setThreadLocalContext(contextData)
+        val oldContext = MDC.getThreadLocalContext().deepCopy()
+        MDC.installThreadLocalContext(contextData)
         return oldContext
     }
 
@@ -23,8 +26,14 @@ class MDCContext(
         context: CoroutineContext,
         oldState: MDCContextData
     ) {
-        MDC.setThreadLocalContext(oldState)
+        contextData = MDC.getThreadLocalContext().deepCopy()
+        MDC.installThreadLocalContext(oldState)
     }
+
+    override fun copyForChild(): MDCContext = MDCContext(contextData)
+
+    override fun mergeForChild(overwritingElement: CoroutineContext.Element): CoroutineContext =
+        overwritingElement
 }
 
 actual object MDC {
@@ -42,13 +51,23 @@ actual object MDC {
 
     actual fun remove(key: String) = threadLocalContext.getOrSet { MDCContextData() }.data.remove(key)
 
-    actual fun clear() = threadLocalContext.remove()
-
-    actual fun getThreadLocalContext() = threadLocalContext.get() ?: MDCContextData()
-
-    actual fun setThreadLocalContext(data: MDCContextData) {
-        threadLocalContext.set(data)
+    actual fun clear() {
+        getThreadLocalContext().data.clear()
+        getThreadLocalContext().dequeData.clear()
     }
 
-    fun asCoroutineContext() = MDCContext(threadLocalContext.get() ?: MDCContextData())
+    actual fun getThreadLocalContext() = threadLocalContext.getOrSet { MDCContextData() }
+
+    actual fun setThreadLocalContext(data: MDCContextData) {
+        val replacement = data.deepCopy()
+        val current = getThreadLocalContext()
+        current.data.clear()
+        current.data.putAll(replacement.data)
+        current.dequeData.clear()
+        current.dequeData.putAll(replacement.dequeData)
+    }
+
+    internal fun installThreadLocalContext(data: MDCContextData) = threadLocalContext.set(data)
+
+    fun asCoroutineContext() = MDCContext(getThreadLocalContext())
 }

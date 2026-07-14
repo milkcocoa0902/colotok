@@ -3,8 +3,8 @@ package com.milkcocoa.info.colotok.core.formatter.details
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
-import com.milkcocoa.info.colotok.core.logger.MDC
-import com.milkcocoa.info.colotok.util.ThreadWrapper
+import com.milkcocoa.info.colotok.core.logger.eventAttrSnapshot
+import com.milkcocoa.info.colotok.core.logger.eventCallerSnapshot
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.datetime.LocalDate
@@ -24,6 +24,7 @@ import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlin.time.Instant
 
 /**
  * base class for log formatter which used for structure log.
@@ -44,9 +45,11 @@ abstract class StructuredFormatter(
         return format(
             msg = record.msg,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
-            mdc = record.mdcContextDataSnapshot.data
+            mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
+            timestamp = record.eventTimestamp
         )
     }
 
@@ -56,9 +59,11 @@ abstract class StructuredFormatter(
             msg = record.msg,
             serializer = record.serializer,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
-            mdc = record.mdcContextDataSnapshot.data
+            mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
+            timestamp = record.eventTimestamp
         )
     }
 
@@ -66,9 +71,11 @@ abstract class StructuredFormatter(
         return format(
             msg = record.msg,
             level = record.level,
-            attrs = record.attr,
+            attrs = record.eventAttrSnapshot,
             threadName = record.threadName,
-            mdc = record.mdcContextDataSnapshot.data
+            mdc = record.mdcContextDataSnapshot.data,
+            caller = record.eventCallerSnapshot,
+            timestamp = record.eventTimestamp
         )
     }
 
@@ -77,7 +84,9 @@ abstract class StructuredFormatter(
         level: Level,
         attrs: Map<String, String>,
         threadName: String,
-        mdc: Map<String, Any?>
+        mdc: Map<String, Any?>,
+        caller: String,
+        timestamp: Instant
     ): String {
         return buildJsonObject {
             field.forEach { f ->
@@ -87,36 +96,18 @@ abstract class StructuredFormatter(
                     is Element.THREAD -> put("thread", JsonPrimitive(threadName))
                     is Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
-                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
+                    is Element.CALLER -> put("caller", JsonPrimitive(caller))
                     else -> {}
                 }
             }
 
-            currentTimeJsonField?.let {
+            currentTimeJsonField(timestamp)?.let {
                 put("date", it)
             }
         }.toString()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    private fun <T : LogStructure> format(
-        msg: T,
-        serializer: KSerializer<T>,
-        level: Level,
-        attrs: Map<String, String>
-    ): String {
-        return format(
-            msg = msg,
-            serializer = serializer,
-            level = level,
-            attrs = attrs,
-            threadName = ThreadWrapper.getCurrentThreadName(),
-            mdc = MDC.getThreadLocalContext().data
-        )
-    }
-
-    private val currentTimeJsonField: JsonPrimitive? get() {
-        val instant = kotlin.time.Clock.System.now()
+    private fun currentTimeJsonField(instant: Instant): JsonPrimitive? {
         val d = this.field.find { it == Element.DATE }
         val t = this.field.find { it == Element.TIME }
         val dt =
@@ -155,7 +146,9 @@ abstract class StructuredFormatter(
         level: Level,
         attrs: Map<String, String>,
         threadName: String,
-        mdc: Map<String, Any?>
+        mdc: Map<String, Any?>,
+        caller: String,
+        timestamp: Instant
     ): String {
         val s =
             object : JsonTransformingSerializer<T>(serializer) {
@@ -184,12 +177,12 @@ abstract class StructuredFormatter(
                     is Element.THREAD -> put("thread", JsonPrimitive(threadName))
                     is Element.ATTR -> attrs.forEach { (t, u) -> put(t, JsonPrimitive(u)) }
                     is Element.CUSTOM -> put(f.raw, JsonPrimitive(mdc.get(f.raw)?.toString() ?: ""))
-                    is Element.CALLER -> put("caller", JsonPrimitive(ThreadWrapper.traceCallPoint()))
+                    is Element.CALLER -> put("caller", JsonPrimitive(caller))
                     else -> {}
                 }
             }
 
-            currentTimeJsonField?.let {
+            currentTimeJsonField(timestamp)?.let {
                 put("date", it)
             }
         }.toString()

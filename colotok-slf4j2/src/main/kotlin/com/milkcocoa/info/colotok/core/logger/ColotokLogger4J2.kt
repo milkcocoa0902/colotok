@@ -1,6 +1,7 @@
 package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.level.Level as ColotokLevel
 import org.slf4j.IMarkerFactory
 import org.slf4j.MDC
 import org.slf4j.Marker
@@ -10,18 +11,20 @@ import org.slf4j.helpers.MessageFormatter
 import org.slf4j.spi.MDCAdapter
 
 class ColotokLogger4J2(
-    private val name: String,
+    private val loggerName: String,
     private val markerFactory: IMarkerFactory,
     private val mdcAdapter: MDCAdapter
 ): AbstractLogger() {
     private val delegate: ColotokLogger by lazy {
         ColotokLoggerContext.DEFAULT
             .shallowCopy()
-            .putAttrs(mapOf("logger" to name))
-            .getLogger(name)
+            .putAttrs(mapOf("logger" to loggerName))
+            .getLogger(loggerName)
     }
 
-    override fun getFullyQualifiedCallerName(): String = name
+    override fun getName(): String = loggerName
+
+    override fun getFullyQualifiedCallerName(): String = loggerName
 
     override fun handleNormalizedLoggingCall(
         level: Level?,
@@ -50,29 +53,32 @@ class ColotokLogger4J2(
         }
 
         if(throwable != null){
-            delegate.at(colotokLevel, formatted, mapOf("cause" to throwable.toString()))
+            delegate.at(colotokLevel, formatted, mapOf("cause" to throwable.stackTraceToString()))
         }else{
             delegate.at(colotokLevel, formatted)
         }
     }
 
-    override fun isTraceEnabled() = true
+    private fun isEnabled(level: ColotokLevel): Boolean =
+        delegate.providers.any { level.isEnabledFor(it.config.level) }
 
-    override fun isTraceEnabled(marker: Marker?) = true
+    override fun isTraceEnabled() = isEnabled(LogLevel.TRACE)
 
-    override fun isDebugEnabled() = true
+    override fun isTraceEnabled(marker: Marker?) = isTraceEnabled
 
-    override fun isDebugEnabled(marker: Marker?) = true
+    override fun isDebugEnabled() = isEnabled(LogLevel.DEBUG)
 
-    override fun isInfoEnabled() = true
+    override fun isDebugEnabled(marker: Marker?) = isDebugEnabled
 
-    override fun isInfoEnabled(marker: Marker?) = true
+    override fun isInfoEnabled() = isEnabled(LogLevel.INFO)
 
-    override fun isWarnEnabled() = true
+    override fun isInfoEnabled(marker: Marker?) = isInfoEnabled
 
-    override fun isWarnEnabled(marker: Marker?) = true
+    override fun isWarnEnabled() = isEnabled(LogLevel.WARN)
 
-    override fun isErrorEnabled(): Boolean = true
+    override fun isWarnEnabled(marker: Marker?) = isWarnEnabled
 
-    override fun isErrorEnabled(marker: Marker?) = true
+    override fun isErrorEnabled(): Boolean = isEnabled(LogLevel.ERROR)
+
+    override fun isErrorEnabled(marker: Marker?) = isErrorEnabled
 }

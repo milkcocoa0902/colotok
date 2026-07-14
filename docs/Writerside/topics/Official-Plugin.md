@@ -75,7 +75,7 @@ implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.4.2")
 | `logGroup` | CloudWatch log group name | `null` |
 | `logStream` | CloudWatch log stream name | `null` |
 | `credential` | CloudWatch credentials | `null` |
-| `bufferSize` | Batch size for sending logs | `50` |
+| `bufferSize` | Publish threshold; retained failures may grow to `min(bufferSize * 4, 4096)` | `50` |
 
 
 ```kotlin
@@ -151,6 +151,10 @@ implementation("io.github.milkcocoa0902:colotok-slf4j:0.4.2")
 implementation("io.github.milkcocoa0902:colotok-slf4j2:0.4.2")
 ```
 
+Each binding exposes its matching `slf4j-api` major as a transitive compile dependency. Do not add
+another API dependency unless you intentionally control the SLF4J version. Keep only one SLF4J
+provider/binding on the runtime classpath.
+
 You'll also need to configure SLF4J to use Colotok as its implementation. This typically involves ensuring that the Colotok SLF4J binding is the only SLF4J implementation on the classpath.
 
 **Usage**: Once configured, you can use SLF4J as normal, and the logs will be processed by Colotok:
@@ -206,8 +210,8 @@ implementation("io.github.milkcocoa0902:colotok-loki:0.4.2")
 | `host` | Loki host URL | `null` |
 | `logStream` | Labels for Loki stream | `null` |
 | `credential` | Loki credentials | `null` |
-| `bufferSize` | Batch size for sending logs | `50` |
-| `httpClient` | Ktor HTTP client | `HttpClient(CIO)` |
+| `bufferSize` | Publish threshold; retained failures may grow to `min(bufferSize * 4, 4096)` | `50` |
+| `httpClient` | Ktor HTTP client. The lazy default is provider-owned; an injected client is caller-owned | lazy `HttpClient(CIO)` |
 
 ```kotlin
 val logger = ColotokLoggerContext()
@@ -239,6 +243,9 @@ val logger = ColotokLoggerContext()
 // Use the logger as normal
 logger.info("This log will be sent to Loki")
 ```
+
+Loki and CloudWatch use the timestamp captured by the original logging call, not the later publish time.
+Injected Loki clients are not closed by the provider; the caller must close them after provider shutdown.
 
 **Buffering and Flushing**: The Loki provider buffers logs to improve performance. Logs are sent to Loki when:
 1. The buffer reaches the configured size (`bufferSize`)
