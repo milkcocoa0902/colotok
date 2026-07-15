@@ -5,6 +5,7 @@ on:
 
 jobs:
     review:
+        if: github.actor != 'dependabot[bot]'
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -20,3 +21,9 @@ jobs:
                   junie_api_key: ${{ secrets.JUNIE_API_KEY }}
                   use_single_comment: true
                   prompt: "code-review"
+
+            - name: Auto Approve
+              if: github.actor == github.repository_owner
+              uses: hmarr/auto-approve-action@v4
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
