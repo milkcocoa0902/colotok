@@ -7,9 +7,10 @@ ktor = "3.5.1"
 mockk = "1.14.9"
 junit-bom = "5.14.4"
 okio = "3.17.0"
+#noinspection NewerVersionAvailable
 slf4j-api = "1.7.36"
 slf4j2-api = "2.0.17"
-android-gradle-plugin = "8.13.2"
+android-gradle-plugin = "9.0.1"
 maven-publish-plugin = "0.30.0"
 kover-plugin = "0.9.8"
 binary-compatibility-validator = "0.18.1"
@@ -33,6 +34,7 @@ junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit-bom"
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter"}
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-nodefilesystem = { module = "com.squareup.okio:okio-nodefilesystem", version.ref = "okio" }
+#noinspection SimilarGradleDependency
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 #noinspection SimilarGradleDependency
 slf4j2-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j2-api" }
@@ -43,7 +45,7 @@ ktlint = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-androidLibrary = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+androidMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
 sonatypeCentralUpload = { id = "cl.franciscosolis.sonatype-central-upload", version.ref = "sonatype-central-upload-plugin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish-plugin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover-plugin" }

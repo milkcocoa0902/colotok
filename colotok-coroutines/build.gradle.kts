@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
     id("maven-publish")
     id("signing")
@@ -29,15 +29,14 @@ kotlin {
         }
     }
 
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-        publishLibraryVariants(
-            "release",
-//            "debug"
-        )
+
+    android {
+        compileSdk = 36
+        namespace = "com.milkcocoa.info.colotok"
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
+        withHostTest {}
     }
+
 
     iosX64()
     iosArm64()
@@ -60,16 +59,10 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
     }
-}
 
-
-android {
-    compileSdk = 34
-    namespace = "com.milkcocoa.info.colotok"
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        enabled.set(true)
     }
 }
 

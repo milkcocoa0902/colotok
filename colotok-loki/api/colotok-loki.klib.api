@@ -1,0 +1,66 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.milkcocoa0902:colotok-loki>
+final class com.milkcocoa.info.colotok.core.provider.loki/LokiProvider : com.milkcocoa.info.colotok.core.provider.details/AsyncProvider { // com.milkcocoa.info.colotok.core.provider.loki/LokiProvider|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.loki/LokiProvider.<init>|<init>(){}[0]
+    constructor <init>(com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig) // com.milkcocoa.info.colotok.core.provider.loki/LokiProvider.<init>|<init>(com.milkcocoa.info.colotok.core.provider.loki.LokiProviderConfig){}[0]
+    constructor <init>(kotlin/Function1<com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.loki/LokiProvider.<init>|<init>(kotlin.Function1<com.milkcocoa.info.colotok.core.provider.loki.LokiProviderConfig,kotlin.Unit>){}[0]
+
+    final fun onClosed() // com.milkcocoa.info.colotok.core.provider.loki/LokiProvider.onClosed|onClosed(){}[0]
+    final suspend fun onPublish(kotlin.collections/List<com.milkcocoa.info.colotok.core.logger/LogRecord>) // com.milkcocoa.info.colotok.core.provider.loki/LokiProvider.onPublish|onPublish(kotlin.collections.List<com.milkcocoa.info.colotok.core.logger.LogRecord>){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig : com.milkcocoa.info.colotok.core.provider.details/AsyncProviderConfig { // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.<init>|<init>(){}[0]
+
+    final var bufferSize // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.bufferSize|{}bufferSize[0]
+        final fun <get-bufferSize>(): kotlin/Int // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.bufferSize.<get-bufferSize>|<get-bufferSize>(){}[0]
+        final fun <set-bufferSize>(kotlin/Int) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.bufferSize.<set-bufferSize>|<set-bufferSize>(kotlin.Int){}[0]
+    final var credential // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.credential|{}credential[0]
+        final fun <get-credential>(): com.milkcocoa.info.colotok.core.provider.loki/Credential? // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.credential.<get-credential>|<get-credential>(){}[0]
+        final fun <set-credential>(com.milkcocoa.info.colotok.core.provider.loki/Credential?) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.credential.<set-credential>|<set-credential>(com.milkcocoa.info.colotok.core.provider.loki.Credential?){}[0]
+    final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
+        final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
+        final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
+    final var formatter // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.formatter|{}formatter[0]
+        final fun <get-formatter>(): com.milkcocoa.info.colotok.core.formatter.details/Formatter // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.formatter.<get-formatter>|<get-formatter>(){}[0]
+        final fun <set-formatter>(com.milkcocoa.info.colotok.core.formatter.details/Formatter) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.formatter.<set-formatter>|<set-formatter>(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+    final var host // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.host|{}host[0]
+        final fun <get-host>(): kotlin/String? // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.host.<get-host>|<get-host>(){}[0]
+        final fun <set-host>(kotlin/String?) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.host.<set-host>|<set-host>(kotlin.String?){}[0]
+    final var httpClient // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.httpClient|{}httpClient[0]
+        final fun <get-httpClient>(): io.ktor.client/HttpClient // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.httpClient.<get-httpClient>|<get-httpClient>(){}[0]
+        final fun <set-httpClient>(io.ktor.client/HttpClient) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.httpClient.<set-httpClient>|<set-httpClient>(io.ktor.client.HttpClient){}[0]
+    final var level // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.level|{}level[0]
+        final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.level.<get-level>|<get-level>(){}[0]
+        final fun <set-level>(com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.level.<set-level>|<set-level>(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    final var logStream // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.logStream|{}logStream[0]
+        final fun <get-logStream>(): kotlin.collections/Map<kotlin/String, kotlin/String>? // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.logStream.<get-logStream>|<get-logStream>(){}[0]
+        final fun <set-logStream>(kotlin.collections/Map<kotlin/String, kotlin/String>?) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.logStream.<set-logStream>|<set-logStream>(kotlin.collections.Map<kotlin.String,kotlin.String>?){}[0]
+    final var metricsSpec // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.metricsSpec|{}metricsSpec[0]
+        final fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
+        final fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+}
+
+sealed class com.milkcocoa.info.colotok.core.provider.loki/Credential { // com.milkcocoa.info.colotok.core.provider.loki/Credential|null[0]
+    final class Basic : com.milkcocoa.info.colotok.core.provider.loki/Credential { // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic|null[0]
+        constructor <init>(kotlin/String, kotlin/String) // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+        final val password // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.password|{}password[0]
+            final fun <get-password>(): kotlin/String // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.password.<get-password>|<get-password>(){}[0]
+        final val username // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.username|{}username[0]
+            final fun <get-username>(): kotlin/String // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.username.<get-username>|<get-username>(){}[0]
+
+        final fun component1(): kotlin/String // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.component1|component1(){}[0]
+        final fun component2(): kotlin/String // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.component2|component2(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/String = ...): com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.copy|copy(kotlin.String;kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.provider.loki/Credential.Basic.toString|toString(){}[0]
+    }
+}

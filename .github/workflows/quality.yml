@@ -99,9 +99,9 @@ jobs:
             - name: Run Android unit tests
               run: >-
                   ./gradlew
-                  :colotok:testReleaseUnitTest
-                  :colotok-coroutines:testReleaseUnitTest
-                  :colotok-loki:testReleaseUnitTest
+                  :colotok:testAndroidHostTest
+                  :colotok-coroutines:testAndroidHostTest
+                  :colotok-loki:testAndroidHostTest
                   --no-configuration-cache
                   --max-workers=1
 
@@ -120,7 +120,7 @@ jobs:
             - name: Set up Gradle
               uses: gradle/actions/setup-gradle@v4
             - name: Check public API dumps
-              run: ./gradlew apiCheck --no-configuration-cache --max-workers=1
+              run: ./gradlew apiCheck checkKotlinAbi --no-configuration-cache --max-workers=1
 
     consumers:
         name: Published consumer smoke tests
