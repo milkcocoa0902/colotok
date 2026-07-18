@@ -108,6 +108,11 @@ val streamProvider: StreamProvider
 
 ## AsyncProvider buffering
 
+`Provider.write()` はnon-blockingのenqueue試行です。default `SUSPEND` policyでもcapacityを
+待たず、channelが満杯なら既存のFIFO prefixを残してnewest recordをrejectします。
+`AsyncProvider.writeAsync()`はcapacityが空くまでsuspendします。通常の`Provider`に対する
+coroutine `*Async` APIは、同じnon-blocking `write()` pathへdelegateします。
+
 `bufferSize` は送信を試みる閾値で、有効範囲は `1..4096` です。送信失敗時は `min(bufferSize * 4, 4096)` 件まで既存レコードを保持します。上限到達後は、古い未送信レコードを残すため新しいレコードを破棄します。
 
 送信先がバッチの一部だけを受理してから失敗した場合、保持したバッチの再送で重複が発生し得ます。リモート Provider は at-least-once delivery として扱い、受信側を重複許容にしてください。

@@ -24,7 +24,8 @@ COLOTOK; Code-Base Logging Runtime  for Kotlin
 ✅ Structure Logging  
 ✅ MDC (Mapped Diagnostic Context)  
 ✅ Metrics Collection
-　🌟 Built-in metrics (Log count, Error count, Buffer size, Write duration)
+　🌟 Built-in metrics (Accepted enqueue count, Error count, AsyncProvider buffer size)
+　🌟 Write-duration extension point (Not emitted automatically by the runtime)
 　🌟 Multiple collection strategies (Inherit, Explicit, Internal Logging)
 　🌟 Composite metrics (Collect to multiple destinations simultaneously)
 
@@ -193,7 +194,7 @@ logger.info("message what happen")
 this formatter shows as below style's log
 
 ```Kotlin
-logger.ingo("message what happen", mapOf("param1" to "a custom attribute"))
+logger.info("message what happen", mapOf("param1" to "a custom attribute"))
 
 // 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - message what happen, additional = {param1=a custom attribute}
 ```
@@ -231,7 +232,7 @@ logger.info(
 
 logger.info("message what happen")
 
-// {"msg":"message what happen","level":"INFO","date":"2023-12-29"}
+// {"message":"message what happen","level":"INFO","date":"2023-12-29"}
 ```
 ### 2. DetailStructureFormatter
 this formatter shows bellow style's log
@@ -257,6 +258,10 @@ logger.info("message what happen")
 // {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908"}
 ```
 
+`StructuredFormatter` emits at most one JSON `date` field. `Element.DATETIME` takes precedence
+over `Element.DATE` and `Element.TIME`; `DATE` plus `TIME` is treated as `DATETIME`. A single
+`DATE` or `TIME` emits only that component. These choices are normalized silently.
+
 
 
 ## Provider
@@ -280,6 +285,12 @@ this provider output log into stream where you specified.
 You can create a `Provider` for a local destination or an `AsyncProvider` for a batched remote
 destination. Prefer the provided lifecycle and buffering implementation instead of maintaining a
 second queue inside a custom provider. See the [custom provider guide](https://milkcocoa0902.github.io/colotok/Create-Plugin.html).
+
+`Provider.write()` performs a non-blocking enqueue attempt. With the default `SUSPEND` overflow
+policy it does not wait for capacity; when the channel is full, the newest record is rejected and
+the already accepted FIFO prefix is preserved. `AsyncProvider.writeAsync()` suspends until channel
+capacity is available. Coroutine `*Async` calls targeting a regular `Provider` still delegate to
+the same non-blocking `write()` path.
 
 
 
@@ -367,6 +378,36 @@ val logger = ColotokLoggerContext()
     })
     .getLogger()
 ```
+
+Runtime metrics describe enqueue and buffering behavior; they do not by themselves confirm that a
+destination accepted a record.
+
+| Event | Log count | Error | Buffer size | Write duration |
+|---|---:|---|---|---:|
+| Accepted normal record | incremented after enqueue acceptance | none | updated by `AsyncProvider` | not emitted |
+| Record filtered by level | none | none | none | not emitted |
+| Full rejection from default synchronous `write()` | none | `buffer_full` | none | not emitted |
+| Rejection after normal close or force shutdown | none | `provider_closed` | none | not emitted |
+| Rejection after provider failure | none | `provider_failed` | none | not emitted |
+| Async publish failure | no additional count | `publish_failed` | failed batch retained | not emitted |
+| Newest record dropped at the retention limit | no additional count | `retention_limit_reached` | remains at the limit | not emitted |
+| `LogRecord.Metrics` | no self-count | no self-error | no self-update | not emitted |
+| Collector throws | best-effort metric is lost | no recursive error | no recursive update | not emitted |
+
+The default synchronous `write()` is best-effort and reports `buffer_full` instead of waiting.
+`AsyncProvider.writeAsync()` waits for capacity, so channel pressure alone does not produce a full
+rejection. Terminal failure is still reported, and a provider failure is rethrown to the async
+caller.
+
+`recordWriteDuration()` remains part of `MetricsCollector` for custom instrumentation, but Colotok
+does not currently call it automatically. A future built-in duration metric must first define
+whether it measures queue wait, handler time, publish time, or end-to-end time.
+
+Internal metrics logging writes `LogRecord.Metrics` back to the same provider. It shares the same
+level filter and channel capacity and, for `AsyncProvider`, the same retention buffer. Internal
+metrics can therefore be rejected under pressure. Metrics records do not emit metrics about
+themselves, which prevents recursive growth. `MetricsCollectorSpec.NoOp` disables the base
+collector; internal metrics logging can still be enabled separately.
 
 ## Logger Shutdown
 

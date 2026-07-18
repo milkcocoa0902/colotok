@@ -1,6 +1,8 @@
 # Metrics
 
-Colotok can collect metrics about its operation, such as the number of logs output, the number of errors, and the time taken to write logs.
+Colotok reports accepted enqueue attempts, provider rejection and publish failures, and
+`AsyncProvider` retention-buffer size. These metrics do not by themselves confirm destination
+delivery.
 
 ## MetricsCollector
 
@@ -37,6 +39,39 @@ interface MetricsCollector {
     fun recordWriteDuration(providerName: String, durationMs: Long)
 }
 ```
+
+`recordWriteDuration()` is available for custom instrumentation, but Colotok has no built-in
+production invocation. A future built-in duration metric must first define whether it measures
+queue wait, handler time, publish time, or end-to-end time.
+
+## Runtime Emission Matrix
+
+| Event | Log count | Error | Buffer size | Write duration |
+|---|---:|---|---|---:|
+| Accepted normal record | incremented after enqueue acceptance | none | updated by `AsyncProvider` | not emitted |
+| Record filtered by level | none | none | none | not emitted |
+| Full rejection from default synchronous `write()` | none | `buffer_full` | none | not emitted |
+| Rejection after normal close or force shutdown | none | `provider_closed` | none | not emitted |
+| Rejection after provider failure | none | `provider_failed` | none | not emitted |
+| Async publish failure | no additional count | `publish_failed` | failed batch retained | not emitted |
+| Newest record dropped at the retention limit | no additional count | `retention_limit_reached` | remains at the limit | not emitted |
+| `LogRecord.Metrics` | no self-count | no self-error | no self-update | not emitted |
+| Collector throws | best-effort metric is lost | no recursive error | no recursive update | not emitted |
+
+The log count is recorded when the provider channel accepts a record, not after destination
+delivery. Filtered records and `LogRecord.Metrics` do not produce runtime metrics.
+
+## Writing Paths and Backpressure
+
+`Provider.write()` performs a non-blocking enqueue attempt. With the default `SUSPEND` overflow
+policy it does not wait for capacity; when the channel is full, the newest record is rejected and
+the accepted FIFO prefix remains queued.
+
+`AsyncProvider.writeAsync()` waits until channel capacity is available, so channel pressure alone
+does not produce a full rejection. Coroutine `*Async` calls targeting a regular `Provider` still
+delegate to its non-blocking `write()` path. Rejection after normal close is reported as
+`provider_closed`; a failed provider reports `provider_failed` and rethrows the failure to the async
+caller.
 
 ## Metrics Selection Strategy
 
@@ -75,7 +110,8 @@ val logger = ColotokLoggerContext()
 
 ### NoOp
 
-Metrics collection is disabled for the provider.
+The base or external metrics collector is disabled for the provider. Internal metrics logging can
+still be enabled separately.
 
 ```kotlin
 .addProvider(ConsoleProvider {
@@ -95,3 +131,7 @@ This is useful for debugging or monitoring without external infrastructure.
 ```
 
 Internal metrics logging can be used alongside `MetricsCollectorSpec`. For example, you can report to a global Prometheus collector while also logging metrics events to a local file.
+
+Internal metrics use the same provider level filter and channel. For `AsyncProvider`, they also use
+the same retention buffer. They can be rejected under capacity pressure, but `LogRecord.Metrics`
+does not emit further metrics, preventing recursive growth.
