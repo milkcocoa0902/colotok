@@ -32,6 +32,14 @@ interface IProvider: AutoCloseable {
     val channel: Channel<LogRecord>
     val job: Job
 
+    /**
+     * Attempts to enqueue [record] without blocking the caller.
+     *
+     * Records below the configured level are ignored. The default `SUSPEND`
+     * overflow policy does not suspend this synchronous API: a full bounded queue
+     * rejects the newest record. Configured drop policies retain channel semantics,
+     * and every policy rejects records after this provider stops being open.
+     */
     fun write(record: LogRecord)
     suspend fun flush(timeout: Duration = 1000.milliseconds)
     suspend fun onFlush(){}
@@ -135,17 +143,27 @@ abstract class Provider(
         ProviderClosedException("Provider is ${state.value.name.lowercase()}")
 
     override fun write(record: LogRecord) {
-        if (record.level.isEnabledFor(config.level)) {
-            val success = state.value == State.OPEN && channel.trySend(record).isSuccess
-            if (success && record !is LogRecord.Metrics) {
+        if (!record.level.isEnabledFor(config.level)) return
+
+        val observedState = state.value
+        val sendResult = if (observedState == State.OPEN) channel.trySend(record) else null
+        if (sendResult?.isSuccess == true) {
+            if (record !is LogRecord.Metrics) {
                 effectiveMetricsCollector.collectBestEffort {
                     incrementLogCount(record.level, this@Provider::class.simpleName ?: "unknown")
                 }
             }
-            if (!success && record !is LogRecord.Metrics) {
-                effectiveMetricsCollector.collectBestEffort {
-                    incrementErrorCount(this@Provider::class.simpleName ?: "unknown", "buffer_full")
-                }
+            return
+        }
+
+        if (record !is LogRecord.Metrics) {
+            val errorType = when {
+                failure.value != null || sendResult?.exceptionOrNull() != null -> "provider_failed"
+                observedState != State.OPEN || sendResult?.isClosed == true -> "provider_closed"
+                else -> "buffer_full"
+            }
+            effectiveMetricsCollector.collectBestEffort {
+                incrementErrorCount(this@Provider::class.simpleName ?: "unknown", errorType)
             }
         }
     }

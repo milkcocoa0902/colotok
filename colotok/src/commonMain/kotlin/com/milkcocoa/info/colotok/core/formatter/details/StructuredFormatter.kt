@@ -5,8 +5,6 @@ import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.logger.eventAttrSnapshot
 import com.milkcocoa.info.colotok.core.logger.eventCallerSnapshot
-import com.milkcocoa.info.colotok.util.color.AnsiColor
-import com.milkcocoa.info.colotok.util.color.Color
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -118,15 +116,8 @@ abstract class StructuredFormatter(
                 return@run null
             }
 
-        return dt?.let checkFormat@{
-            if (d != null) {
-                println(Color.foreground("[StructuredFormatter]: ${Element.DATE} is ignored.", AnsiColor.YELLOW))
-            }
-            if (t != null) {
-                println(Color.foreground("[StructuredFormatter]: ${Element.TIME} is ignored.", AnsiColor.YELLOW))
-            }
-
-            return@checkFormat JsonPrimitive(LocalDateTime.Formats.ISO.format(instant.toLocalDateTime(TimeZone.UTC)))
+        return dt?.let {
+            JsonPrimitive(LocalDateTime.Formats.ISO.format(instant.toLocalDateTime(TimeZone.UTC)))
         } ?: kotlin.run checkFormat@{
             d?.let {
                 @Suppress("ktlint:standard:max-line-length")

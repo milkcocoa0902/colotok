@@ -18,7 +18,7 @@ import kotlin.time.Instant
  */
 class DateBaseRotation(private val period: Duration = 7.days) : Rotation {
     override fun isRotateNeeded(filePath: Path): Boolean {
-        val metadata = runCatching { getFileSystem().metadata(filePath) }.getOrNull() ?: return false
+        val metadata = getFileSystem().metadataOrNull(filePath) ?: return false
         return isRotationNeeded(
             createdAtMillis = metadata.createdAtMillis,
             lastModifiedAtMillis = metadata.lastModifiedAtMillis,

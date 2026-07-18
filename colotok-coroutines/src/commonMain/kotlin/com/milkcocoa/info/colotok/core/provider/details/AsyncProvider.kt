@@ -9,13 +9,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * An interface for providers that support both synchronous and asynchronous logging operations.
- * 
- * This interface extends Provider and implements the synchronous `write` methods by calling
- * the corresponding asynchronous `writeAsync` methods wrapped in the `blocking` function.
- * 
- * Note that on Kotlin/JS platform, the synchronous methods will not actually block due to
- * platform limitations, and will return immediately while the logging happens asynchronously.
+ * A provider that retains accepted records in a bounded buffer and publishes them in batches.
+ *
+ * [Provider.write] keeps its non-blocking enqueue semantics. [writeAsync] is the suspending
+ * alternative for callers that need to wait until the provider channel accepts a record.
+ * Publishing is attempted at threshold multiples and at the retention limit; failed batches
+ * remain buffered for a later trigger or the final flush performed by graceful shutdown.
  */
 abstract class AsyncProvider(
     config: AsyncProviderConfig,
@@ -73,7 +72,7 @@ abstract class AsyncProvider(
 
     private suspend fun removePublishedPrefix(records: List<LogRecord>, reportMetrics: Boolean) {
         mutex.withLock {
-            repeat(records.size) { buffer.removeAt(0) }
+            buffer.subList(0, records.size).clear()
             if (reportMetrics) updateBufferSizeBestEffort(buffer.size)
         }
     }

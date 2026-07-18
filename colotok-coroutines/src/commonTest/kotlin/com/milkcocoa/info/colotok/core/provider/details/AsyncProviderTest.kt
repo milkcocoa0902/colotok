@@ -7,11 +7,14 @@ import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class AsyncProviderTest {
@@ -19,8 +22,11 @@ class AsyncProviderTest {
     private val providersToClose = mutableListOf<AsyncProvider>()
 
     @AfterTest
-    fun closeProviders() {
-        providersToClose.forEach { runCatching { it.forceShutdown() } }
+    fun closeProviders() = runTest {
+        providersToClose.forEach {
+            runCatching { it.forceShutdown() }
+            it.job.join()
+        }
         providersToClose.clear()
     }
 
@@ -74,6 +80,25 @@ class AsyncProviderTest {
         }
     }
 
+    class LifecycleAsyncProvider(
+        config: TestAsyncProviderConfig,
+        private val publishFailure: Throwable? = null,
+    ) : AsyncProvider(config) {
+        val publishAttempts = mutableListOf<List<LogRecord>>()
+        val processedRecords = mutableListOf<LogRecord>()
+        var closeCount = 0
+
+        override suspend fun onPublish(records: List<LogRecord>) {
+            publishAttempts.add(records)
+            publishFailure?.let { throw it }
+            processedRecords.addAll(records)
+        }
+
+        override fun onClosed() {
+            closeCount++
+        }
+    }
+
     class RecordingMetricsCollector : MetricsCollector {
         val errors = mutableListOf<String>()
         val bufferSizes = mutableListOf<Int>()
@@ -104,8 +129,91 @@ class AsyncProviderTest {
         override fun recordWriteDuration(providerName: String, durationMs: Long) = error("metrics failed")
     }
 
+    private class BufferSizeSignalMetricsCollector(
+        private val targetSize: Int,
+    ) : MetricsCollector {
+        val targetReached = CompletableDeferred<Unit>()
+
+        override fun incrementLogCount(level: Level, providerName: String) = Unit
+        override fun incrementErrorCount(providerName: String, errorType: String) = Unit
+
+        override fun updateBufferSize(providerName: String, size: Int) {
+            if (size == targetSize) targetReached.complete(Unit)
+        }
+
+        override fun recordWriteDuration(providerName: String, durationMs: Long) = Unit
+    }
+
+    private class FinalPublishException : IllegalStateException("final publish failed")
+
     private fun record(index: Int): LogRecord =
         LogRecord.PlainText("test", "message $index", LogLevel.INFO, emptyMap())
+
+    @Test
+    fun graceful_close_publishes_sub_threshold_buffer_fifo_exactly_once_and_clears_it() = runTest {
+        val metrics = RecordingMetricsCollector()
+        val provider = LifecycleAsyncProvider(
+            TestAsyncProviderConfig().apply { bufferSize = 3 },
+        ).apply {
+            effectiveMetricsCollector = metrics
+        }.track()
+        val records = listOf(record(1), record(2))
+
+        records.forEach(provider::write)
+        provider.close()
+        provider.join()
+
+        assertEquals(listOf(records), provider.publishAttempts)
+        assertEquals(records, provider.processedRecords)
+        assertEquals(0, metrics.bufferSizes.last())
+        assertEquals(1, provider.closeCount)
+    }
+
+    @Test
+    fun final_publish_failure_is_rethrown_by_join_and_retains_the_attempted_batch() = runTest {
+        val expected = FinalPublishException()
+        val metrics = RecordingMetricsCollector()
+        val provider = LifecycleAsyncProvider(
+            config = TestAsyncProviderConfig().apply { bufferSize = 3 },
+            publishFailure = expected,
+        ).apply {
+            effectiveMetricsCollector = metrics
+        }.track()
+        val records = listOf(record(1), record(2))
+
+        records.forEach(provider::write)
+        provider.close()
+        val actual = assertFailsWith<FinalPublishException> { provider.join() }
+
+        assertSame(expected, actual)
+        assertEquals(listOf(records), provider.publishAttempts)
+        assertEquals(emptyList(), provider.processedRecords)
+        assertEquals(2, metrics.bufferSizes.last())
+        assertEquals(1, provider.closeCount)
+    }
+
+    @Test
+    fun force_shutdown_does_not_publish_remaining_buffer_and_closes_once() = runTest {
+        val metrics = BufferSizeSignalMetricsCollector(targetSize = 2)
+        val provider = LifecycleAsyncProvider(
+            TestAsyncProviderConfig().apply { bufferSize = 3 },
+        ).apply {
+            effectiveMetricsCollector = metrics
+        }.track()
+
+        provider.write(record(1))
+        provider.write(record(2))
+        withTimeout(5_000) { metrics.targetReached.await() }
+
+        provider.forceShutdown()
+        provider.job.join()
+        provider.forceShutdown()
+        provider.job.join()
+
+        assertEquals(emptyList(), provider.publishAttempts)
+        assertEquals(emptyList(), provider.processedRecords)
+        assertEquals(1, provider.closeCount)
+    }
 
     @Test
     fun testAsyncLogging() = runTest {

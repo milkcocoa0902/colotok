@@ -6,6 +6,7 @@ import com.milkcocoa.info.colotok.core.logger.ColotokLoggerContext
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -13,6 +14,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class MetricsIntegrationTest {
+    private companion object {
+        const val SATURATION_ATTEMPT_LIMIT = 10_000
+    }
+
     private val providersToClose = mutableListOf<Provider>()
 
     private fun <T : Provider> T.track(): T = also(providersToClose::add)
@@ -200,6 +205,55 @@ class MetricsIntegrationTest {
 
         // Should also have the metrics log record
         assertTrue(receivedRecords.any { it is LogRecord.Metrics && it.msg.contains("LogCount increased") }, "Internal logging should be performed")
+    }
+
+    @Test
+    fun internal_logging_of_buffer_rejection_is_finite_and_non_recursive() = runBlocking {
+        val collector = TestMetricsCollector()
+        val firstEntered = CompletableDeferred<Unit>()
+        val releaseFirst = CompletableDeferred<Unit>()
+        val receivedRecords = mutableListOf<LogRecord>()
+        val provider = object : Provider(ConsoleProviderConfig().apply {
+            enableInternalMetricsLogging = true
+        }) {
+            override suspend fun onMessage(record: LogRecord) {
+                if (record is LogRecord.PlainText && record.msg == "blocking") {
+                    firstEntered.complete(Unit)
+                    releaseFirst.await()
+                }
+                receivedRecords += record
+            }
+        }.track()
+        val logger = ColotokLoggerContext()
+            .withMetrics(collector)
+            .addProvider(provider)
+            .getLogger()
+
+        try {
+            logger.info("blocking")
+            firstEntered.await()
+
+            var nextIndex = 0
+            while (
+                collector.errorCounts.values.sum() == 0 &&
+                nextIndex < SATURATION_ATTEMPT_LIMIT
+            ) {
+                logger.info("queued-${nextIndex++}")
+            }
+
+            assertTrue(collector.errorCounts.isNotEmpty(), "queue did not reject within the finite attempt limit")
+            assertEquals(1, collector.errorCounts.values.sum())
+            assertTrue(collector.errorCounts.keys.any { it.second == "buffer_full" })
+
+            releaseFirst.complete(Unit)
+            provider.join()
+
+            assertEquals(1, collector.errorCounts.values.sum())
+            assertTrue(receivedRecords.isNotEmpty())
+        } finally {
+            releaseFirst.complete(Unit)
+            runCatching { provider.forceShutdown() }
+        }
     }
 
     @Test

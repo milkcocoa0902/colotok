@@ -2,8 +2,11 @@ package com.milkcocoa.info.colotok.core.provider.rotation
 
 import com.milkcocoa.info.colotok.core.provider.builtin.file.getFileSystem
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +19,9 @@ import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.io.path.notExists
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
@@ -114,6 +119,21 @@ class DateBaseRotationTest {
         every { kotlin.time.Clock.System.now() } returns Instant.parse("2024-01-01T00:00:00Z")
 
         assertFalse(rotation.isRotateNeeded(tempDir.resolve("missing.log").toOkioPath()))
+    }
+
+    @Test
+    fun unexpected_metadata_failure_is_propagated_unchanged() {
+        val fileSystem = mockk<FileSystem>()
+        val failure = java.io.IOException("metadata access denied")
+        mockkStatic(::getFileSystem)
+        every { getFileSystem() } returns fileSystem
+        every { fileSystem.metadataOrNull(logFile.toOkioPath()) } throws failure
+
+        val thrown = assertFailsWith<java.io.IOException> {
+            DateBaseRotation(period = 7.days).isRotateNeeded(logFile.toOkioPath())
+        }
+
+        assertSame(failure, thrown)
     }
 
     @Test
