@@ -52,11 +52,12 @@ class ColotokLogger4JTest {
 
     private lateinit var provider: TestProvider
     private lateinit var originalDefault: ColotokLoggerContext
+    private val providersToClose = mutableListOf<TestProvider>()
 
     @BeforeTest
     fun setup() {
         originalDefault = ColotokLoggerContext.DEFAULT
-        provider = TestProvider()
+        provider = testProvider()
         val ctx =
             ColotokLoggerContext()
                 .addProvider(provider)
@@ -67,6 +68,8 @@ class ColotokLogger4JTest {
     @AfterTest
     fun tearDown() {
         ColotokLoggerContext.setDefault(originalDefault)
+        providersToClose.forEach(TestProvider::forceShutdown)
+        providersToClose.clear()
     }
 
     @Test
@@ -181,8 +184,8 @@ class ColotokLogger4JTest {
 
     @Test
     fun enabled_reflects_any_provider_threshold() {
-        val infoProvider = TestProvider(LogLevel.INFO)
-        val errorProvider = TestProvider(LogLevel.ERROR)
+        val infoProvider = testProvider(LogLevel.INFO)
+        val errorProvider = testProvider(LogLevel.ERROR)
         ColotokLoggerContext.setDefault(
             ColotokLoggerContext()
                 .addProvider(infoProvider)
@@ -211,7 +214,7 @@ class ColotokLogger4JTest {
         assertFalse(noProviders.isErrorEnabled)
 
         ColotokLoggerContext.setDefault(
-            ColotokLoggerContext().addProvider(TestProvider(LogLevel.OFF))
+            ColotokLoggerContext().addProvider(testProvider(LogLevel.OFF))
         )
         val offProvider = LoggerFactory.getLogger("enabled-off-test")
 
@@ -333,6 +336,9 @@ class ColotokLogger4JTest {
     }
 
     private fun marker(): Marker = BasicMarkerFactory().getMarker("ignored")
+
+    private fun testProvider(level: Level = LogLevel.TRACE): TestProvider =
+        TestProvider(level).also(providersToClose::add)
 
     private enum class BridgeLevel(val colotok: Level) {
         TRACE(LogLevel.TRACE),

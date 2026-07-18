@@ -63,7 +63,6 @@ class ForceShutdownTest {
         
         // delay(500) していたが、forceShutdownによってキャンセルされるため、500ms待たずに終了するはず
         val duration = endTime - startTime
-        println("Duration: $duration ms")
         Assertions.assertTrue(duration < 500, "forceShutdown should be immediate and not wait for slow provider to finish")
     }
 

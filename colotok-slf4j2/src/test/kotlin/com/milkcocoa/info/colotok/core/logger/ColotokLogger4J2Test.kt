@@ -50,11 +50,12 @@ class ColotokLogger4J2Test {
 
     private lateinit var provider: TestProvider
     private lateinit var originalDefault: ColotokLoggerContext
+    private val providersToClose = mutableListOf<TestProvider>()
 
     @BeforeEach
     fun setup() {
         originalDefault = ColotokLoggerContext.DEFAULT
-        provider = TestProvider()
+        provider = testProvider()
         val ctx =
             ColotokLoggerContext()
                 .addProvider(provider)
@@ -65,6 +66,8 @@ class ColotokLogger4J2Test {
     @AfterEach
     fun tearDown() {
         ColotokLoggerContext.setDefault(originalDefault)
+        providersToClose.forEach(TestProvider::forceShutdown)
+        providersToClose.clear()
     }
 
     @Test
@@ -156,8 +159,8 @@ class ColotokLogger4J2Test {
     fun enabled_reflects_any_provider_threshold() {
         ColotokLoggerContext.setDefault(
             ColotokLoggerContext()
-                .addProvider(TestProvider(LogLevel.INFO))
-                .addProvider(TestProvider(LogLevel.ERROR))
+                .addProvider(testProvider(LogLevel.INFO))
+                .addProvider(testProvider(LogLevel.ERROR))
         )
         val logger = LoggerFactory.getLogger("enabled-threshold-test-2")
         val marker = marker()
@@ -182,7 +185,7 @@ class ColotokLogger4J2Test {
         assertFalse(noProviders.isErrorEnabled)
 
         ColotokLoggerContext.setDefault(
-            ColotokLoggerContext().addProvider(TestProvider(LogLevel.OFF))
+            ColotokLoggerContext().addProvider(testProvider(LogLevel.OFF))
         )
         val offProvider = LoggerFactory.getLogger("enabled-off-test-2")
 
@@ -256,6 +259,9 @@ class ColotokLogger4J2Test {
     }
 
     private fun marker(): Marker = BasicMarkerFactory().getMarker("ignored")
+
+    private fun testProvider(level: Level = LogLevel.TRACE): TestProvider =
+        TestProvider(level).also(providersToClose::add)
 
     private fun logPlain(
         logger: Logger,

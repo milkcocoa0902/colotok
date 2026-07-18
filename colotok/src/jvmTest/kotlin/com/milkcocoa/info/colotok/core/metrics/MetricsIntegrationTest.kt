@@ -7,11 +7,23 @@ import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderC
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import kotlinx.coroutines.runBlocking
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class MetricsIntegrationTest {
+    private val providersToClose = mutableListOf<Provider>()
+
+    private fun <T : Provider> T.track(): T = also(providersToClose::add)
+
+    @AfterTest
+    fun tearDown() {
+        providersToClose.forEach { provider ->
+            runCatching { provider.forceShutdown() }
+        }
+        providersToClose.clear()
+    }
 
     private class TestMetricsCollector : MetricsCollector {
         val logCounts = mutableMapOf<Pair<Level, String>, Int>()
@@ -45,7 +57,7 @@ class MetricsIntegrationTest {
     @Test
     fun testMetricsInheritance() {
         val collector = TestMetricsCollector()
-        val provider = StubProvider(ConsoleProviderConfig())
+        val provider = StubProvider(ConsoleProviderConfig()).track()
         
         val context = ColotokLoggerContext()
             .withMetrics(collector)
@@ -64,9 +76,10 @@ class MetricsIntegrationTest {
         val contextCollector = TestMetricsCollector()
         val explicitCollector = TestMetricsCollector()
         
-        val provider = StubProvider(ConsoleProviderConfig().apply {
-            metricsSpec = MetricsCollectorSpec.Explicit(explicitCollector)
-        })
+        val provider =
+            StubProvider(ConsoleProviderConfig().apply {
+                metricsSpec = MetricsCollectorSpec.Explicit(explicitCollector)
+            }).track()
         
         val context = ColotokLoggerContext()
             .withMetrics(contextCollector)
@@ -84,9 +97,10 @@ class MetricsIntegrationTest {
     fun testNoOpMetrics() {
         val contextCollector = TestMetricsCollector()
         
-        val provider = StubProvider(ConsoleProviderConfig().apply {
-            metricsSpec = MetricsCollectorSpec.NoOp
-        })
+        val provider =
+            StubProvider(ConsoleProviderConfig().apply {
+                metricsSpec = MetricsCollectorSpec.NoOp
+            }).track()
         
         val context = ColotokLoggerContext()
             .withMetrics(contextCollector)
@@ -108,9 +122,10 @@ class MetricsIntegrationTest {
             }
         }
 
-        val provider = RecordingProvider(ConsoleProviderConfig().apply {
-            enableInternalMetricsLogging = true
-        })
+        val provider =
+            RecordingProvider(ConsoleProviderConfig().apply {
+                enableInternalMetricsLogging = true
+            }).track()
 
         val context = ColotokLoggerContext()
             .addProvider(provider)
@@ -136,9 +151,10 @@ class MetricsIntegrationTest {
         val contextCollector = TestMetricsCollector()
         val explicitCollector = TestMetricsCollector()
 
-        val provider = StubProvider(ConsoleProviderConfig().apply {
-            metricsSpec = MetricsCollectorSpec.Explicit(explicitCollector, inheritParent = true)
-        })
+        val provider =
+            StubProvider(ConsoleProviderConfig().apply {
+                metricsSpec = MetricsCollectorSpec.Explicit(explicitCollector, inheritParent = true)
+            }).track()
 
         val context = ColotokLoggerContext()
             .withMetrics(contextCollector)
@@ -164,10 +180,11 @@ class MetricsIntegrationTest {
             }
         }
 
-        val provider = RecordingProvider(ConsoleProviderConfig().apply {
-            metricsSpec = MetricsCollectorSpec.Inherit
-            enableInternalMetricsLogging = true
-        })
+        val provider =
+            RecordingProvider(ConsoleProviderConfig().apply {
+                metricsSpec = MetricsCollectorSpec.Inherit
+                enableInternalMetricsLogging = true
+            }).track()
 
         val context = ColotokLoggerContext()
             .withMetrics(contextCollector)

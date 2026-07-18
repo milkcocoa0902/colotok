@@ -3,109 +3,67 @@ package com.milkcocoa.info.colotok.core.provider.loki
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import kotlin.test.Test
-import kotlin.test.assertNotNull
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class LokiProviderTest {
-    
+
     @Test
-    fun testLokiProviderConfigConstructor() {
-        // Test constructor with config object
+    fun config_constructor_exposes_the_validated_config() {
         val config = LokiProviderConfig().apply {
             host = "https://loki.example.com"
             logStream = mapOf("app" to "test-app")
         }
-        
+        val provider = LokiProvider(config)
+
         try {
-            val provider = LokiProvider(config)
-            assertNotNull(provider)
-        } catch (e: Exception) {
-            fail("LokiProvider constructor with config object should not throw: ${e.message}")
+            assertSame(config, provider.config)
+        } finally {
+            provider.forceShutdown()
         }
     }
-    
+
     @Test
-    fun testLokiProviderLambdaConstructor() {
-        // Test constructor with config lambda
+    fun lambda_constructor_applies_the_requested_configuration() {
+        val credential = Credential.Basic("user", "pass")
+        val provider = LokiProvider {
+            host = "https://loki.example.com"
+            logStream = mapOf("app" to "test-app")
+            level = LogLevel.DEBUG
+            formatter = SimpleTextFormatter
+            bufferSize = 10
+            this.credential = credential
+        }
+
         try {
-            val provider = LokiProvider {
-                host = "https://loki.example.com"
-                logStream = mapOf("app" to "test-app")
-                level = LogLevel.DEBUG
-                bufferSize = 10
-            }
-            assertNotNull(provider)
-        } catch (e: Exception) {
-            fail("LokiProvider constructor with lambda should not throw: ${e.message}")
+            val config = provider.config as LokiProviderConfig
+            assertEquals("https://loki.example.com", config.host)
+            assertEquals(mapOf("app" to "test-app"), config.logStream)
+            assertEquals(LogLevel.DEBUG, config.level)
+            assertEquals(SimpleTextFormatter, config.formatter)
+            assertEquals(10, config.bufferSize)
+            assertEquals(credential, config.credential)
+        } finally {
+            provider.forceShutdown()
         }
     }
-    
+
     @Test
-    fun testLokiProviderValidation() {
-        // Test that provider requires host
-        try {
+    fun invalid_configuration_is_rejected_before_a_provider_is_created() {
+        val missingHost = assertFailsWith<IllegalStateException> {
             LokiProvider {
-                // No host provided
                 logStream = mapOf("app" to "test-app")
             }
-            fail("LokiProvider should throw when host is not provided")
-        } catch (e: IllegalStateException) {
-            assertTrue(e.message?.contains("host") == true, "Exception should mention missing host")
         }
-        
-        // Test that provider requires logStream
-        try {
+        assertTrue(missingHost.message.orEmpty().contains("host", ignoreCase = true))
+
+        val missingStream = assertFailsWith<IllegalStateException> {
             LokiProvider {
                 host = "https://loki.example.com"
-                // No logStream provided
             }
-            fail("LokiProvider should throw when logStream is not provided")
-        } catch (e: IllegalStateException) {
-            assertTrue(e.message?.contains("stream") == true, "Exception should mention missing log stream")
         }
-    }
-    
-    @Test
-    fun testFormatterConfiguration() {
-        // Test that formatter can be configured
-        val customFormatter = SimpleTextFormatter
-        
-        val provider = LokiProvider {
-            host = "https://loki.example.com"
-            logStream = mapOf("app" to "test-app")
-            formatter = customFormatter
-        }
-        
-        // We can't directly access the formatter, but we can verify the provider was created
-        assertNotNull(provider)
-    }
-    
-    @Test
-    fun testBufferSizeConfiguration() {
-        // Test that buffer size can be configured
-        val customBufferSize = 100
-        
-        val provider = LokiProvider {
-            host = "https://loki.example.com"
-            logStream = mapOf("app" to "test-app")
-            bufferSize = customBufferSize
-        }
-        
-        // We can't directly access the buffer size, but we can verify the provider was created
-        assertNotNull(provider)
-    }
-    
-    @Test
-    fun testCredentialConfiguration() {
-        // Test that credentials can be configured
-        val provider = LokiProvider {
-            host = "https://loki.example.com"
-            logStream = mapOf("app" to "test-app")
-            credential = Credential.Basic("user", "pass")
-        }
-        
-        // We can't directly access the credentials, but we can verify the provider was created
-        assertNotNull(provider)
+        assertTrue(missingStream.message.orEmpty().contains("stream", ignoreCase = true))
     }
 }

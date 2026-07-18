@@ -54,9 +54,7 @@ class DetailTextFormatterTest {
         val formatter = DetailTextFormatter
 
         Assertions.assertTrue {
-            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).also {
-                println(it)
-            }.equals(
+            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
                 "2023-12-31T12:34:56 (${ThreadWrapper.getCurrentThreadName()})[ERROR] - message, additional = {}"
             )
         }

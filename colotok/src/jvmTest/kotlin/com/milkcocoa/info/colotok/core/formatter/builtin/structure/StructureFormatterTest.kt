@@ -145,9 +145,7 @@ class StructureFormatterTest {
                     level = LogLevel.ERROR,
                     attr = emptyMap()
                 )
-            ).also {
-                println(it)
-            }
+            )
         )
     }
 

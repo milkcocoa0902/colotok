@@ -24,11 +24,15 @@ class CloudwatchProviderTest {
         val factory = RecordingFactory()
         val provider = CloudwatchProvider(validConfig(factory))
 
-        provider.close()
-        provider.join()
+        try {
+            provider.close()
+            provider.join()
 
-        assertEquals(0, factory.createCount)
-        assertEquals(0, factory.client.closeCount)
+            assertEquals(0, factory.createCount)
+            assertEquals(0, factory.client.closeCount)
+        } finally {
+            provider.forceShutdown()
+        }
     }
 
     @Test
@@ -36,10 +40,14 @@ class CloudwatchProviderTest {
         val factory = RecordingFactory()
         val provider = CloudwatchProvider(validConfig(factory))
 
-        provider.forceShutdown()
+        try {
+            provider.forceShutdown()
 
-        assertEquals(0, factory.createCount)
-        assertEquals(0, factory.client.closeCount)
+            assertEquals(0, factory.createCount)
+            assertEquals(0, factory.client.closeCount)
+        } finally {
+            provider.forceShutdown()
+        }
     }
 
     @Test
@@ -50,14 +58,18 @@ class CloudwatchProviderTest {
         val firstAtSameTime = plain("first-same", Instant.fromEpochMilliseconds(1_000))
         val secondAtSameTime = plain("second-same", Instant.fromEpochMilliseconds(1_000))
 
-        provider.onPublish(listOf(later, firstAtSameTime, secondAtSameTime))
-        provider.forceShutdown()
+        try {
+            provider.onPublish(listOf(later, firstAtSameTime, secondAtSameTime))
+            provider.forceShutdown()
 
-        val events = factory.client.calls.single()
-        assertEquals(listOf(1_000L, 1_000L, 2_000L), events.map { it.timestampMillis })
-        assertTrue(events[0].message.contains("first-same"))
-        assertTrue(events[1].message.contains("second-same"))
-        assertEquals(1, factory.client.closeCount)
+            val events = factory.client.calls.single()
+            assertEquals(listOf(1_000L, 1_000L, 2_000L), events.map { it.timestampMillis })
+            assertTrue(events[0].message.contains("first-same"))
+            assertTrue(events[1].message.contains("second-same"))
+            assertEquals(1, factory.client.closeCount)
+        } finally {
+            provider.forceShutdown()
+        }
     }
 
     @Test
@@ -69,9 +81,12 @@ class CloudwatchProviderTest {
             plain("second", Instant.fromEpochMilliseconds(CLOUDWATCH_MAX_BATCH_SPAN_MILLIS + 1)),
         )
 
-        assertFailsWith<TestPublishException> { provider.onPublish(records) }
-        assertEquals(2, factory.client.calls.size)
-        provider.forceShutdown()
+        try {
+            assertFailsWith<TestPublishException> { provider.onPublish(records) }
+            assertEquals(2, factory.client.calls.size)
+        } finally {
+            provider.forceShutdown()
+        }
         assertEquals(1, factory.client.closeCount)
     }
 
@@ -82,16 +97,20 @@ class CloudwatchProviderTest {
         val first = plain("first", Instant.fromEpochMilliseconds(0))
         val second = plain("second", Instant.fromEpochMilliseconds(CLOUDWATCH_MAX_BATCH_SPAN_MILLIS + 1))
 
-        provider.write(first)
-        provider.write(second)
-        provider.flush()
+        try {
+            provider.write(first)
+            provider.write(second)
+            provider.flush()
 
-        assertEquals(4, factory.client.calls.size)
-        assertTrue(factory.client.calls[0].single().message.contains("first"))
-        assertTrue(factory.client.calls[1].single().message.contains("second"))
-        assertTrue(factory.client.calls[2].single().message.contains("first"))
-        assertTrue(factory.client.calls[3].single().message.contains("second"))
-        provider.join()
+            assertEquals(4, factory.client.calls.size)
+            assertTrue(factory.client.calls[0].single().message.contains("first"))
+            assertTrue(factory.client.calls[1].single().message.contains("second"))
+            assertTrue(factory.client.calls[2].single().message.contains("first"))
+            assertTrue(factory.client.calls[3].single().message.contains("second"))
+        } finally {
+            provider.forceShutdown()
+        }
+        assertEquals(1, factory.client.closeCount)
     }
 
     @Test
@@ -100,13 +119,17 @@ class CloudwatchProviderTest {
         val factory = RecordingFactory().apply { client.ensureFailure = expected }
         val provider = CloudwatchProvider(validConfig(factory))
 
-        val actual = assertFailsWith<TestPublishException> {
-            provider.onPublish(listOf(plain("message", Instant.fromEpochMilliseconds(1_000))))
+        try {
+            val actual = assertFailsWith<TestPublishException> {
+                provider.onPublish(listOf(plain("message", Instant.fromEpochMilliseconds(1_000))))
+            }
+            assertTrue(actual === expected)
+            provider.close()
+            provider.join()
+            assertEquals(1, factory.client.closeCount)
+        } finally {
+            provider.forceShutdown()
         }
-        assertTrue(actual === expected)
-        provider.close()
-        provider.join()
-        assertEquals(1, factory.client.closeCount)
     }
 
     private fun validConfig(factory: CloudwatchClientFactory? = null) = CloudwatchProviderConfig().apply {

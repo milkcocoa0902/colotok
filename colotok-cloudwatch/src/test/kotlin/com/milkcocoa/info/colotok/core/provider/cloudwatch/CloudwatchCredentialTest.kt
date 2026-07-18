@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.core.provider.cloudwatch
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class CloudwatchCredentialTest {
     
@@ -46,7 +47,7 @@ class CloudwatchCredentialTest {
         val credential3 = CloudwatchCredential.Default("us-east-1")
         
         assertEquals(credential1, credential2)
-        assert(credential1 != credential3)
+        assertNotEquals(credential1, credential3)
         
         val staticCredential1 = CloudwatchCredential.StaticCredentials(
             region = "us-west-1",
@@ -65,6 +66,6 @@ class CloudwatchCredentialTest {
         )
         
         assertEquals(staticCredential1, staticCredential2)
-        assert(staticCredential1 != staticCredential3)
+        assertNotEquals(staticCredential1, staticCredential3)
     }
 }

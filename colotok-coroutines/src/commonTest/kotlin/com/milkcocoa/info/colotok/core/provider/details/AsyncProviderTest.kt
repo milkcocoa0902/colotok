@@ -8,12 +8,23 @@ import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import kotlinx.coroutines.test.runTest
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class AsyncProviderTest {
+
+    private val providersToClose = mutableListOf<AsyncProvider>()
+
+    @AfterTest
+    fun closeProviders() {
+        providersToClose.forEach { runCatching { it.forceShutdown() } }
+        providersToClose.clear()
+    }
+
+    private fun <T : AsyncProvider> T.track(): T = also(providersToClose::add)
 
     class TestAsyncProviderConfig : AsyncProviderConfig {
         override var level: Level = LogLevel.DEBUG
@@ -98,7 +109,7 @@ class AsyncProviderTest {
 
     @Test
     fun testAsyncLogging() = runTest {
-        val provider = TestAsyncProvider(TestAsyncProviderConfig())
+        val provider = TestAsyncProvider(TestAsyncProviderConfig()).track()
         val record1: LogRecord = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
         val record2: LogRecord = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
 
@@ -117,7 +128,7 @@ class AsyncProviderTest {
 
     @Test
     fun failedPublishRecordsAreRetainedForNextSendTrigger() = runTest {
-        val provider = FailingOnceAsyncProvider(TestAsyncProviderConfig())
+        val provider = FailingOnceAsyncProvider(TestAsyncProviderConfig()).track()
         val record1: LogRecord = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
         val record2: LogRecord = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
 
@@ -136,7 +147,7 @@ class AsyncProviderTest {
     @Test
     fun failed_backlog_retries_only_at_threshold_multiples() = runTest {
         val config = TestAsyncProviderConfig().apply { bufferSize = 2 }
-        val provider = ControlledAsyncProvider(config, failuresRemaining = 2)
+        val provider = ControlledAsyncProvider(config, failuresRemaining = 2).track()
 
         (1..6).forEach { provider.write(record(it)) }
         provider.flush()
@@ -152,7 +163,7 @@ class AsyncProviderTest {
     @Test
     fun failed_backlog_can_expand_to_four_times_buffer_size_and_keeps_fifo() = runTest {
         val config = TestAsyncProviderConfig().apply { bufferSize = 2 }
-        val provider = ControlledAsyncProvider(config)
+        val provider = ControlledAsyncProvider(config).track()
 
         (1..8).forEach { provider.write(record(it)) }
         assertFailsWith<IllegalStateException> { provider.flush() }
@@ -171,7 +182,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = ControlledAsyncProvider(config).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         (1..5).forEach { provider.write(record(it)) }
         assertFailsWith<IllegalStateException> { provider.flush() }
@@ -192,7 +203,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = ControlledAsyncProvider(config).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         (1..4_097).forEach { provider.writeAsync(record(it)) }
         assertFailsWith<IllegalStateException> { provider.flush() }
@@ -205,7 +216,7 @@ class AsyncProviderTest {
     @Test
     fun manual_flush_failure_retains_batch_and_throws() = runTest {
         val config = TestAsyncProviderConfig().apply { bufferSize = 4 }
-        val provider = ControlledAsyncProvider(config)
+        val provider = ControlledAsyncProvider(config).track()
         provider.write(record(1))
 
         val failure = assertFailsWith<IllegalStateException> { provider.flush() }
@@ -232,7 +243,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
         val metricsRecord = LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap())
 
         provider.write(metricsRecord)
@@ -250,7 +261,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = ControlledAsyncProvider(TestAsyncProviderConfig()).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
         assertFailsWith<IllegalStateException> { provider.flush() }
@@ -269,7 +280,7 @@ class AsyncProviderTest {
             TestAsyncProviderConfig().apply { bufferSize = 2 }
         ).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         provider.write(record(1))
         provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
@@ -289,7 +300,7 @@ class AsyncProviderTest {
             failuresRemaining = 0,
         ).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         provider.write(record(1))
         provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
@@ -306,7 +317,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = ControlledAsyncProvider(TestAsyncProviderConfig()).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         (1..4).forEach { provider.write(record(it)) }
         provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
@@ -320,7 +331,7 @@ class AsyncProviderTest {
     fun collector_failure_does_not_break_async_worker_or_flush() = runTest {
         val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
             effectiveMetricsCollector = ThrowingMetricsCollector
-        }
+        }.track()
 
         provider.write(record(1))
         provider.flush()
@@ -334,7 +345,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = TestAsyncProvider(TestAsyncProviderConfig().apply { bufferSize = 2 }).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
 
         provider.writeAsync(record(1))
         provider.writeAsync(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
@@ -350,7 +361,7 @@ class AsyncProviderTest {
         val metrics = RecordingMetricsCollector()
         val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
             effectiveMetricsCollector = metrics
-        }
+        }.track()
         provider.close()
 
         provider.writeAsync(record(1))

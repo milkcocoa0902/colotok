@@ -8,6 +8,8 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
+import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
+import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.color.AnsiColor
 import com.milkcocoa.info.colotok.util.color.Color
@@ -34,6 +36,10 @@ class ConsoleProviderTest {
     private val stdOut = StdOut()
     private var originalIn = System.`in`
     private var originalOut = System.out
+    private val providersToClose = mutableListOf<Provider>()
+
+    private fun consoleProvider(configure: ConsoleProviderConfig.() -> Unit): ConsoleProvider =
+        ConsoleProvider(configure).also(providersToClose::add)
 
     @BeforeEach
     public fun before() {
@@ -48,6 +54,11 @@ class ConsoleProviderTest {
 
     @AfterEach
     public fun after() {
+        providersToClose.forEach { provider ->
+            runCatching { provider.forceShutdown() }
+        }
+        providersToClose.clear()
+
         System.setIn(originalIn)
         System.setOut(originalOut)
 
@@ -57,7 +68,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest01() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = SimpleTextFormatter
                 colorize = false
                 level = LogLevel.DEBUG
@@ -81,7 +92,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest02() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = SimpleTextFormatter
                 colorize = false
                 level = LogLevel.DEBUG
@@ -106,7 +117,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest03() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = SimpleTextFormatter
                 colorize = true
                 level = LogLevel.DEBUG
@@ -131,7 +142,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest04() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailTextFormatter
                 colorize = true
                 level = LogLevel.DEBUG
@@ -160,7 +171,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest05() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailTextFormatter
                 colorize = true
                 level = LogLevel.DEBUG
@@ -185,7 +196,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest06() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailTextFormatter
                 colorize = false
                 level = LogLevel.DEBUG
@@ -216,7 +227,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest07() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = SimpleStructureFormatter
                 colorize = false
                 level = LogLevel.DEBUG
@@ -261,7 +272,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest08() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailStructureFormatter
                 colorize = false
                 level = LogLevel.DEBUG
@@ -308,7 +319,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest09() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailStructureFormatter
                 colorize = false
                 level = LogLevel.OFF
@@ -341,7 +352,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest10() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailStructureFormatter
                 colorize = true
                 level = LogLevel.DEBUG
@@ -390,7 +401,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest11() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = SimpleStructureFormatter
                 colorize = true
                 level = LogLevel.DEBUG
@@ -422,7 +433,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest12() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = SimpleStructureFormatter
                 colorize = true
                 level = LogLevel.DEBUG
@@ -454,7 +465,7 @@ class ConsoleProviderTest {
     @Test
     fun consoleProviderTest13() {
         val provider =
-            ConsoleProvider {
+            consoleProvider {
                 formatter = DetailStructureFormatter
                 colorize = true
                 level = LogLevel.DEBUG

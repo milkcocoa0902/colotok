@@ -7,6 +7,7 @@ import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderC
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
+import kotlin.test.AfterTest
 import kotlin.test.assertIs
 import kotlin.test.assertSame
 import kotlin.test.Test
@@ -16,6 +17,18 @@ import kotlin.test.assertTrue
 import java.util.concurrent.atomic.AtomicInteger
 
 class ColotokLoggerContextTest {
+    private val providersToClose = mutableListOf<RecordingProvider>()
+
+    private fun recordingProvider(): RecordingProvider =
+        RecordingProvider().also(providersToClose::add)
+
+    @AfterTest
+    fun tearDown() {
+        providersToClose.forEach { provider ->
+            runCatching { provider.forceShutdown() }
+        }
+        providersToClose.clear()
+    }
 
     @Test
     fun getLogger_caches_instances_by_name() {
@@ -63,7 +76,7 @@ class ColotokLoggerContextTest {
 
     @Test
     fun shallowCopy_copies_providers_and_attrs_snapshot() {
-        val provider = RecordingProvider()
+        val provider = recordingProvider()
         val original = ColotokLoggerContext()
             .addProvider(provider)
             .withAttrs(mapOf("base" to "A"))
@@ -96,7 +109,7 @@ class ColotokLoggerContextTest {
 
     @Test
     fun withAttrs_replaces_attrs_and_freeze_blocks_mutation() {
-        val provider = RecordingProvider()
+        val provider = recordingProvider()
         val ctx = ColotokLoggerContext()
             .addProvider(provider)
             .withAttrs(mapOf("k1" to "v1"))
@@ -115,7 +128,7 @@ class ColotokLoggerContextTest {
 
     @Test
     fun putAttrs_merges_with_default_attrs() {
-        val provider = RecordingProvider()
+        val provider = recordingProvider()
         val ctx = ColotokLoggerContext()
             .addProvider(provider)
             .withAttrs(mapOf("a" to "1"))

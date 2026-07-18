@@ -1,5 +1,7 @@
 package com.milkcocoa.info.colotok.core.provider.loki
 
+import com.milkcocoa.info.colotok.core.formatter.builtin.structure.DetailStructureFormatter
+import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import io.ktor.client.HttpClient
@@ -9,6 +11,11 @@ import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.serializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -75,10 +82,14 @@ class LokiProviderRemoteTest {
             }
         }
         val ownedProvider = LokiProvider(ownedConfig)
-        ownedProvider.onPublish(listOf(plain()))
-        ownedProvider.close()
-        ownedProvider.join()
-        assertEquals(1, ownedCloseCount)
+        try {
+            ownedProvider.onPublish(listOf(plain()))
+            ownedProvider.close()
+            ownedProvider.join()
+            assertEquals(1, ownedCloseCount)
+        } finally {
+            runCatching { ownedProvider.forceShutdown() }
+        }
 
         var injectedCloseCount = 0
         var injectedRequestCount = 0
@@ -94,13 +105,17 @@ class LokiProviderRemoteTest {
             httpClient = injected
         }
         val injectedProvider = LokiProvider(injectedConfig)
-        injectedProvider.onPublish(listOf(plain()))
-        injectedProvider.close()
-        injectedProvider.join()
-        assertEquals(0, injectedCloseCount)
-        injected.get("https://loki.example.com/health")
-        assertEquals(2, injectedRequestCount)
-        injected.close()
+        try {
+            injectedProvider.onPublish(listOf(plain()))
+            injectedProvider.close()
+            injectedProvider.join()
+            assertEquals(0, injectedCloseCount)
+            injected.get("https://loki.example.com/health")
+            assertEquals(2, injectedRequestCount)
+        } finally {
+            runCatching { injectedProvider.forceShutdown() }
+            injected.close()
+        }
     }
 
     @Test
@@ -113,12 +128,16 @@ class LokiProviderRemoteTest {
         val provider = LokiProvider(validConfig().apply { httpClient = client })
         val eventTime = Instant.fromEpochSeconds(1_700_000_000, 123_456_789)
 
-        provider.onPublish(listOf(plain(eventTimestamp = eventTime)))
-        provider.close()
-        provider.join()
+        try {
+            provider.onPublish(listOf(plain(eventTimestamp = eventTime)))
+            provider.close()
+            provider.join()
 
-        assertTrue(requestBody.contains("1700000000123456789"))
-        client.close()
+            assertTrue(requestBody.contains("1700000000123456789"))
+        } finally {
+            runCatching { provider.forceShutdown() }
+            client.close()
+        }
     }
 
     @Test
@@ -126,13 +145,17 @@ class LokiProviderRemoteTest {
         val client = HttpClient(MockEngine { respond("unavailable", HttpStatusCode.ServiceUnavailable) })
         val provider = LokiProvider(validConfig().apply { httpClient = client })
 
-        val failure = assertFailsWith<IllegalStateException> {
-            provider.onPublish(listOf(plain()))
+        try {
+            val failure = assertFailsWith<IllegalStateException> {
+                provider.onPublish(listOf(plain()))
+            }
+            assertTrue(failure.message.orEmpty().contains("503"))
+            provider.close()
+            provider.join()
+        } finally {
+            runCatching { provider.forceShutdown() }
+            client.close()
         }
-        assertTrue(failure.message.orEmpty().contains("503"))
-        provider.close()
-        provider.join()
-        client.close()
     }
 
     @Test
@@ -148,13 +171,58 @@ class LokiProviderRemoteTest {
         })
         val provider = LokiProvider(validConfig().apply { httpClient = client })
 
-        assertFailsWith<IllegalStateException> { provider.onPublish(listOf(plain())) }
-        provider.onPublish(listOf(plain()))
+        try {
+            assertFailsWith<IllegalStateException> { provider.onPublish(listOf(plain())) }
+            provider.onPublish(listOf(plain()))
 
-        assertEquals(2, requests)
-        provider.close()
-        provider.join()
-        client.close()
+            assertEquals(2, requests)
+            provider.close()
+            provider.join()
+        } finally {
+            runCatching { provider.forceShutdown() }
+            client.close()
+        }
+    }
+
+    @Test
+    fun `structured record fields and attributes reach the Loki payload`() = runTest {
+        var requestBody = ""
+        val client = HttpClient(MockEngine { request ->
+            requestBody = (request.body as TextContent).text
+            respond("", HttpStatusCode.NoContent)
+        })
+        val provider = LokiProvider(validConfig().apply {
+            httpClient = client
+            formatter = DetailStructureFormatter
+        })
+
+        try {
+            provider.onPublish(
+                listOf(
+                    LogRecord.StructuredText(
+                        name = "auth-service",
+                        msg = TestLogStructure("User logged in", 12345),
+                        serializer = serializer<TestLogStructure>(),
+                        level = LogLevel.INFO,
+                        attr = mapOf("component" to "authentication"),
+                    )
+                )
+            )
+            provider.close()
+            provider.join()
+
+            val payload = Json.decodeFromString(LokiPushPayload.serializer(), requestBody)
+            val formatted = Json.parseToJsonElement(
+                payload.streams.single().values.single().value
+            ).jsonObject
+            val message = formatted.getValue("message").jsonObject
+            assertEquals(JsonPrimitive("User logged in"), message["message"])
+            assertEquals(JsonPrimitive(12345), message["userId"])
+            assertEquals(JsonPrimitive("authentication"), formatted["component"])
+        } finally {
+            runCatching { provider.forceShutdown() }
+            client.close()
+        }
     }
 
     private fun validConfig() = LokiProviderConfig().apply {
@@ -172,4 +240,10 @@ class LokiProviderRemoteTest {
         attr = emptyMap(),
         eventTimestamp = eventTimestamp,
     )
+
+    @Serializable
+    private data class TestLogStructure(
+        val message: String,
+        val userId: Int,
+    ) : LogStructure
 }

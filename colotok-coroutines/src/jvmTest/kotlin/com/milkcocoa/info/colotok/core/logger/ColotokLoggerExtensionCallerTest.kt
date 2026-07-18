@@ -14,11 +14,15 @@ class ColotokLoggerExtensionCallerTest {
             providers = listOf(provider)
         }
 
-        logger.infoAsync("message")
-        provider.flush()
-        val formatted = object : TextFormatter("${Element.CALLER}") {}.format(provider.lastRecord!!)
+        try {
+            logger.infoAsync("message")
+            provider.flush()
+            val formatted = object : TextFormatter("${Element.CALLER}") {}.format(provider.lastRecord!!)
 
-        assertTrue(formatted.contains("async_logger_captures_the_user_call_site"), formatted)
-        provider.join()
+            assertTrue(formatted.contains("async_logger_captures_the_user_call_site"), formatted)
+        } finally {
+            provider.close()
+            provider.join()
+        }
     }
 }
