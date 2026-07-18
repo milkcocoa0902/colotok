@@ -112,21 +112,26 @@ abstract class AsyncProvider(
     }
 
     suspend fun writeAsync(record: LogRecord) {
-        if (record.level.isEnabledFor(config.level)) {
-            val accepted = try {
-                channel.send(record)
-                true
-            } catch (_: ClosedSendChannelException) {
-                false
-            }
+        if (!record.level.isEnabledFor(config.level)) return
+
+        try {
+            channel.send(record)
+        } catch (throwable: Throwable) {
+            if (throwable is CancellationException) throw throwable
             if (record !is LogRecord.Metrics) {
                 collectMetricsBestEffort {
-                    if (accepted) {
-                        effectiveMetricsCollector.incrementLogCount(record.level, providerName)
-                    } else {
-                        effectiveMetricsCollector.incrementErrorCount(providerName, "buffer_full")
-                    }
+                    val errorType =
+                        if (throwable is ClosedSendChannelException) "provider_closed" else "provider_failed"
+                    effectiveMetricsCollector.incrementErrorCount(providerName, errorType)
                 }
+            }
+            if (throwable !is ClosedSendChannelException) throw throwable
+            return
+        }
+
+        if (record !is LogRecord.Metrics) {
+            collectMetricsBestEffort {
+                effectiveMetricsCollector.incrementLogCount(record.level, providerName)
             }
         }
     }

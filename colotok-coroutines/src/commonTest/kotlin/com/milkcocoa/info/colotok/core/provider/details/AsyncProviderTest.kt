@@ -476,6 +476,46 @@ class AsyncProviderTest {
         provider.join()
 
         assertEquals(0, metrics.logCount)
-        assertEquals(listOf("buffer_full"), metrics.errors)
+        assertEquals(listOf("provider_closed"), metrics.errors)
+    }
+
+    @Test
+    fun write_async_after_failed_channel_reports_failure_and_rethrows_it() = runTest {
+        val metrics = RecordingMetricsCollector()
+        val expected = IllegalStateException("channel failed")
+        val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
+            effectiveMetricsCollector = metrics
+        }.track()
+        provider.channel.close(expected)
+
+        val actual = assertFailsWith<IllegalStateException> {
+            provider.writeAsync(record(1))
+        }
+        provider.job.join()
+
+        assertEquals(expected.message, actual.message)
+        assertEquals(0, metrics.logCount)
+        assertEquals(listOf("provider_failed"), metrics.errors)
+    }
+
+    @Test
+    fun rejected_metrics_record_and_throwing_collector_do_not_change_terminal_behavior() = runTest {
+        val metrics = RecordingMetricsCollector()
+        val metricsProvider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
+            effectiveMetricsCollector = metrics
+        }.track()
+        metricsProvider.close()
+
+        metricsProvider.writeAsync(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+        metricsProvider.join()
+        assertEquals(emptyList(), metrics.errors)
+
+        val throwingProvider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
+            effectiveMetricsCollector = ThrowingMetricsCollector
+        }.track()
+        throwingProvider.close()
+
+        throwingProvider.writeAsync(record(1))
+        throwingProvider.join()
     }
 }
