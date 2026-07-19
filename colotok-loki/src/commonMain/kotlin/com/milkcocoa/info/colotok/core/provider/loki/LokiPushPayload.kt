@@ -14,8 +14,13 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
+ * Represents the main payload sent to Loki's API.
+ *
+ * This class follows Loki's API format for pushing logs, which consists of
+ * a list of streams, each containing labels and log entries.
+ *
  * Example of the JSON payload structure sent to Loki:
- * 
+ *
  * {
  *   "streams": [
  *     {
@@ -30,23 +35,17 @@ import kotlin.time.Instant
  *     }
  *   ]
  * }
- */
-/**
- * Represents the main payload sent to Loki's API.
- * 
- * This class follows Loki's API format for pushing logs, which consists of
- * a list of streams, each containing labels and log entries.
- * 
+ *
  * @property streams List of log streams to send to Loki
  */
 @Serializable
 internal data class LokiPushPayload(
-    val streams: List<LokiStream>,
+    val streams: List<LokiStream>
 )
 
 /**
  * Represents a single log entry with a timestamp and value.
- * 
+ *
  * @property timestamp The time when the log entry was created
  * @property value The log message content
  */
@@ -54,12 +53,12 @@ internal data class LokiPushPayload(
 @Serializable(with = LokiValueSerializer::class)
 internal data class LokiValue(
     val timestamp: Instant = Clock.System.now(),
-    val value: String,
+    val value: String
 )
 
 /**
  * Custom serializer for LokiValue that formats it according to Loki's API requirements.
- * 
+ *
  * Loki expects log entries as arrays with two elements: [timestamp_nanoseconds, message]
  */
 internal class LokiValueSerializer : KSerializer<LokiValue> {
@@ -71,15 +70,21 @@ internal class LokiValueSerializer : KSerializer<LokiValue> {
 
     /**
      * Serializes a LokiValue to a list of strings in the format expected by Loki.
-     * 
+     *
      * @param encoder The encoder to write to
      * @param value The LokiValue to serialize
      */
     @OptIn(ExperimentalTime::class)
-    override fun serialize(encoder: Encoder, value: LokiValue) {
+    override fun serialize(
+        encoder: Encoder,
+        value: LokiValue
+    ) {
         // Convert timestamp to nanoseconds (seconds * 10^9 + nanosecond adjustment)
-        val timestampNanos = (value.timestamp.epochSeconds * 1_000_000_000 + 
-                             value.timestamp.nanosecondsOfSecond).toString()
+        val timestampNanos =
+            (
+                value.timestamp.epochSeconds * 1_000_000_000 +
+                    value.timestamp.nanosecondsOfSecond
+            ).toString()
 
         // Encode as a list of two strings: [timestamp_string, value_string]
         val stringList = listOf(timestampNanos, value.value)
@@ -88,7 +93,7 @@ internal class LokiValueSerializer : KSerializer<LokiValue> {
 
     /**
      * Deserializes a list of strings into a LokiValue.
-     * 
+     *
      * @param decoder The decoder to read from
      * @return The deserialized LokiValue
      */
@@ -116,10 +121,10 @@ internal class LokiValueSerializer : KSerializer<LokiValue> {
 
 /**
  * Represents a stream of log entries in Loki.
- * 
+ *
  * A stream consists of a set of labels (key-value pairs) that identify the stream,
  * and a list of log values (entries) that belong to this stream.
- * 
+ *
  * @property stream Map of labels that identify this log stream
  * @property values List of log entries in this stream
  */

@@ -35,8 +35,10 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
 internal fun isConsoleOutputEnabled(
     isOutputEnabled: Boolean,
     isEnabledForRelease: Boolean,
-    detectDebugModeFn: () -> Boolean,
+    detectDebugModeFn: () -> Boolean
 ): Boolean = isOutputEnabled && (isEnabledForRelease || detectDebugModeFn())
 
-internal fun normalizeLogTag(name: String, sdkInt: Int): String =
-    if (sdkInt <= 25) name.take(23) else name
+internal fun normalizeLogTag(
+    name: String,
+    sdkInt: Int
+): String = if (sdkInt <= 25) name.take(23) else name

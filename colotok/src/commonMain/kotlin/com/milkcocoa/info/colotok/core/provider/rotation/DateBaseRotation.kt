@@ -23,7 +23,7 @@ class DateBaseRotation(private val period: Duration = 7.days) : Rotation {
             createdAtMillis = metadata.createdAtMillis,
             lastModifiedAtMillis = metadata.lastModifiedAtMillis,
             period = period,
-            now = Clock.System.now(),
+            now = Clock.System.now()
         )
     }
 
@@ -45,7 +45,7 @@ internal fun isRotationNeeded(
     createdAtMillis: Long?,
     lastModifiedAtMillis: Long?,
     period: Duration,
-    now: Instant,
+    now: Instant
 ): Boolean {
     val baseTimestampMillis = createdAtMillis ?: lastModifiedAtMillis ?: return false
     val baseTimestamp = Instant.fromEpochMilliseconds(baseTimestampMillis)

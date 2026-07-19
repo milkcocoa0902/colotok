@@ -1,7 +1,7 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.text
 
-import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
 import io.mockk.every
@@ -38,7 +38,9 @@ class PlainTextFormatterTest {
     fun plainTextFormatterTest01() {
         val formatter = PlainTextFormatter
         Assertions.assertTrue {
-            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())).equals(
+            formatter.format(
+                LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())
+            ).equals(
                 "message"
             )
         }

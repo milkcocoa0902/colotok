@@ -8,7 +8,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * JavaScript implementation of the blocking function.
- * 
+ *
  * IMPORTANT: In Kotlin/JS, true synchronous execution with `runBlocking` is not supported.
  * This implementation uses GlobalScope.launch instead, which means:
  * - The function returns immediately without waiting for the coroutine to complete

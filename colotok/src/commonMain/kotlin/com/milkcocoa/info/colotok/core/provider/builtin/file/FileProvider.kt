@@ -47,6 +47,7 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
         }
 
     private val mutex = Mutex()
+
     override suspend fun onMessage(record: LogRecord) {
         mutex.withLock {
             getFileSystem().appendingSink(
@@ -57,7 +58,7 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
                 sink.flush()
             }
 
-            if(rotation?.isRotateNeeded(filePath) == true){
+            if (rotation?.isRotateNeeded(filePath) == true) {
                 rotation.doRotate(filePath)
             }
         }

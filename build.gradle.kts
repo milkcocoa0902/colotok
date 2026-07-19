@@ -28,20 +28,22 @@ subprojects {
         if (moduleName in setOf("colotok", "colotok-coroutines", "colotok-loki")) {
             // BCV 0.18.1 does not discover AGP 9 external Android-KMP targets (BCV #312).
             // Remove this bridge once BCV or KGP validates that target directly.
-            val androidKmpApiBuild = tasks.register<KotlinApiBuildTask>("androidKmpApiBuild") {
-                description = "Builds the public Android API dump for the AGP 9 Android-KMP target"
-                dependsOn("compileAndroidMain")
-                inputClassesDirs.from(layout.buildDirectory.dir("classes/kotlin/android/main"))
-                outputApiFile.set(layout.buildDirectory.file("api/android/$moduleName.api"))
-                runtimeClasspath.from(configurations.named("bcv-rt-jvm-cp-resolver"))
-            }
-            val androidKmpApiCheck = tasks.register<KotlinApiCompareTask>("androidKmpApiCheck") {
-                group = LifecycleBasePlugin.VERIFICATION_GROUP
-                description = "Checks the Android-KMP public API against the checked-in golden dump"
-                dependsOn(androidKmpApiBuild)
-                projectApiFile.set(layout.projectDirectory.file("api/android/$moduleName.api"))
-                generatedApiFile.set(androidKmpApiBuild.flatMap { it.outputApiFile })
-            }
+            val androidKmpApiBuild =
+                tasks.register<KotlinApiBuildTask>("androidKmpApiBuild") {
+                    description = "Builds the public Android API dump for the AGP 9 Android-KMP target"
+                    dependsOn("compileAndroidMain")
+                    inputClassesDirs.from(layout.buildDirectory.dir("classes/kotlin/android/main"))
+                    outputApiFile.set(layout.buildDirectory.file("api/android/$moduleName.api"))
+                    runtimeClasspath.from(configurations.named("bcv-rt-jvm-cp-resolver"))
+                }
+            val androidKmpApiCheck =
+                tasks.register<KotlinApiCompareTask>("androidKmpApiCheck") {
+                    group = LifecycleBasePlugin.VERIFICATION_GROUP
+                    description = "Checks the Android-KMP public API against the checked-in golden dump"
+                    dependsOn(androidKmpApiBuild)
+                    projectApiFile.set(layout.projectDirectory.file("api/android/$moduleName.api"))
+                    generatedApiFile.set(androidKmpApiBuild.flatMap { it.outputApiFile })
+                }
 
             tasks.named("apiCheck") {
                 dependsOn(androidKmpApiCheck)
@@ -57,7 +59,6 @@ subprojects {
         }
     }
 }
-
 
 val ktlint by configurations.creating
 

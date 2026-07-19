@@ -3,7 +3,6 @@ package com.milkcocoa.info.colotok.util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.promise
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -19,13 +18,13 @@ actual fun <T> runBlocking(
     // In JS, we cannot block. We start the coroutine and return immediately.
     // This is useful for shutdown/forceShutdown where we want to trigger cleanup
     // without crashing the JS environment.
-    
+
     // Note: If T is not Unit, this will likely cause a ClassCastException later,
     // but for the purposes of this library (shutdown calls), it works.
     GlobalScope.launch(context) {
         block()
     }
-    
+
     @Suppress("UNCHECKED_CAST")
     return Unit as T
 }

@@ -26,13 +26,14 @@ class CloudwatchBatchTest {
 
     @Test
     fun `allows exactly 24 hours and splits at one millisecond more`() {
-        val batches = partitionCloudwatchEvents(
-            listOf(
-                indexed(0, "first", timestamp = 0),
-                indexed(1, "boundary", timestamp = CLOUDWATCH_MAX_BATCH_SPAN_MILLIS),
-                indexed(2, "after", timestamp = CLOUDWATCH_MAX_BATCH_SPAN_MILLIS + 1),
-            ),
-        )
+        val batches =
+            partitionCloudwatchEvents(
+                listOf(
+                    indexed(0, "first", timestamp = 0),
+                    indexed(1, "boundary", timestamp = CLOUDWATCH_MAX_BATCH_SPAN_MILLIS),
+                    indexed(2, "after", timestamp = CLOUDWATCH_MAX_BATCH_SPAN_MILLIS + 1)
+                )
+            )
 
         assertEquals(listOf(2, 1), batches.map { it.size })
     }
@@ -48,16 +49,20 @@ class CloudwatchBatchTest {
 
     @Test
     fun `time span comparison does not overflow at long extremes`() {
-        val batches = partitionCloudwatchEvents(
-            listOf(
-                indexed(0, "minimum", timestamp = Long.MIN_VALUE),
-                indexed(1, "maximum", timestamp = Long.MAX_VALUE),
-            ),
-        )
+        val batches =
+            partitionCloudwatchEvents(
+                listOf(
+                    indexed(0, "minimum", timestamp = Long.MIN_VALUE),
+                    indexed(1, "maximum", timestamp = Long.MAX_VALUE)
+                )
+            )
 
         assertEquals(listOf(1, 1), batches.map { it.size })
     }
 
-    private fun indexed(index: Int, message: String, timestamp: Long = index.toLong()) =
-        IndexedCloudwatchEvent(index, CloudwatchEvent(timestamp, message))
+    private fun indexed(
+        index: Int,
+        message: String,
+        timestamp: Long = index.toLong()
+    ) = IndexedCloudwatchEvent(index, CloudwatchEvent(timestamp, message))
 }

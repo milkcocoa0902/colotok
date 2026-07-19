@@ -40,22 +40,25 @@ class LogRecordSnapshotTest {
     }
 
     @Test
-    fun one_log_call_shares_record_instance_across_providers() = runBlocking {
-        val firstProvider = recordingProvider()
-        val secondProvider = recordingProvider()
-        val logger = ColotokLogger(
-            name = "snapshot",
-            config = ColotokConfig().apply {
-                providers = listOf(firstProvider, secondProvider)
-            }
-        )
+    fun one_log_call_shares_record_instance_across_providers() =
+        runBlocking {
+            val firstProvider = recordingProvider()
+            val secondProvider = recordingProvider()
+            val logger =
+                ColotokLogger(
+                    name = "snapshot",
+                    config =
+                        ColotokConfig().apply {
+                            providers = listOf(firstProvider, secondProvider)
+                        }
+                )
 
-        logger.info("message")
-        firstProvider.flush()
-        secondProvider.flush()
+            logger.info("message")
+            firstProvider.flush()
+            secondProvider.flush()
 
-        assertSame(firstProvider.records.single(), secondProvider.records.single())
-    }
+            assertSame(firstProvider.records.single(), secondProvider.records.single())
+        }
 
     @Test
     fun disabled_log_does_not_read_attrs_or_execute_scoped_block() {
@@ -79,43 +82,47 @@ class LogRecordSnapshotTest {
     }
 
     @Test
-    fun logger_snapshots_mutable_attrs_and_mdc_at_call_time() = runBlocking {
-        val provider = recordingProvider()
-        val attrs = mutableMapOf("attr" to "before")
-        val config = ColotokConfig().apply {
-            providers = listOf(provider)
-            defaultAttrs = attrs
+    fun logger_snapshots_mutable_attrs_and_mdc_at_call_time() =
+        runBlocking {
+            val provider = recordingProvider()
+            val attrs = mutableMapOf("attr" to "before")
+            val config =
+                ColotokConfig().apply {
+                    providers = listOf(provider)
+                    defaultAttrs = attrs
+                }
+            val logger = ColotokLogger("snapshot", config)
+            MDC.put("request_id", "before")
+
+            logger.info("message")
+            attrs["attr"] = "after"
+            MDC.put("request_id", "after")
+            provider.flush()
+
+            val record = provider.records.single()
+            assertEquals("before", record.attr["attr"])
+            assertEquals("before", record.mdcContextDataSnapshot.data["request_id"])
         }
-        val logger = ColotokLogger("snapshot", config)
-        MDC.put("request_id", "before")
-
-        logger.info("message")
-        attrs["attr"] = "after"
-        MDC.put("request_id", "after")
-        provider.flush()
-
-        val record = provider.records.single()
-        assertEquals("before", record.attr["attr"])
-        assertEquals("before", record.mdcContextDataSnapshot.data["request_id"])
-    }
 
     @Test
-    fun level_scoped_logger_snapshots_mutable_attrs_at_call_time() = runBlocking {
-        val provider = recordingProvider()
-        val attrs = mutableMapOf("attr" to "before")
-        val logger = LevelScopedColotokLogger(
-            name = "snapshot",
-            providers = listOf(provider),
-            attrs = attrs,
-            level = LogLevel.INFO
-        )
+    fun level_scoped_logger_snapshots_mutable_attrs_at_call_time() =
+        runBlocking {
+            val provider = recordingProvider()
+            val attrs = mutableMapOf("attr" to "before")
+            val logger =
+                LevelScopedColotokLogger(
+                    name = "snapshot",
+                    providers = listOf(provider),
+                    attrs = attrs,
+                    level = LogLevel.INFO
+                )
 
-        logger.print("message")
-        attrs["attr"] = "after"
-        provider.flush()
+            logger.print("message")
+            attrs["attr"] = "after"
+            provider.flush()
 
-        assertEquals("before", provider.records.single().attr["attr"])
-    }
+            assertEquals("before", provider.records.single().attr["attr"])
+        }
 
     @Test
     fun mdc_snapshot_accessor_returns_defensive_copy() {
@@ -139,48 +146,53 @@ class LogRecordSnapshotTest {
     }
 
     @Test
-    fun logger_captures_caller_before_delayed_format() = runBlocking {
-        val provider = recordingProvider()
-        val logger = ColotokLogger(
-            name = "snapshot",
-            config = ColotokConfig().apply { providers = listOf(provider) }
-        )
+    fun logger_captures_caller_before_delayed_format() =
+        runBlocking {
+            val provider = recordingProvider()
+            val logger =
+                ColotokLogger(
+                    name = "snapshot",
+                    config = ColotokConfig().apply { providers = listOf(provider) }
+                )
 
-        logger.info("message")
-        provider.flush()
-        val record = provider.records.single()
-        val formatted = object : TextFormatter("${Element.CALLER}") {}.format(record)
-        val structured = object : StructuredFormatter(listOf(Element.CALLER)) {}.format(record)
+            logger.info("message")
+            provider.flush()
+            val record = provider.records.single()
+            val formatted = object : TextFormatter("${Element.CALLER}") {}.format(record)
+            val structured = object : StructuredFormatter(listOf(Element.CALLER)) {}.format(record)
 
-        assertTrue(formatted.contains("logger_captures_caller_before_delayed_format"), formatted)
-        assertTrue(structured.contains("logger_captures_caller_before_delayed_format"), structured)
-    }
+            assertTrue(formatted.contains("logger_captures_caller_before_delayed_format"), formatted)
+            assertTrue(structured.contains("logger_captures_caller_before_delayed_format"), structured)
+        }
 
     @Test
-    fun structured_logger_captures_caller_despite_inline_overload() = runBlocking {
-        val provider = recordingProvider()
-        val logger = ColotokLogger(
-            name = "snapshot",
-            config = ColotokConfig().apply { providers = listOf(provider) }
-        )
+    fun structured_logger_captures_caller_despite_inline_overload() =
+        runBlocking {
+            val provider = recordingProvider()
+            val logger =
+                ColotokLogger(
+                    name = "snapshot",
+                    config = ColotokConfig().apply { providers = listOf(provider) }
+                )
 
-        logger.info(SnapshotStructure("message"))
-        provider.flush()
-        val formatted = object : TextFormatter("${Element.CALLER}") {}.format(provider.records.single())
+            logger.info(SnapshotStructure("message"))
+            provider.flush()
+            val formatted = object : TextFormatter("${Element.CALLER}") {}.format(provider.records.single())
 
-        assertTrue(formatted.contains("structured_logger_captures_caller_despite_inline_overload"), formatted)
-    }
+            assertTrue(formatted.contains("structured_logger_captures_caller_despite_inline_overload"), formatted)
+        }
 
     @Test
     fun text_and_structured_formatters_use_explicit_event_timestamp() {
         val timestamp = Instant.parse("2020-02-03T04:05:06.789Z")
-        val record = LogRecord.PlainText(
-            name = "snapshot",
-            msg = "message",
-            level = LogLevel.INFO,
-            attr = emptyMap(),
-            eventTimestamp = timestamp,
-        )
+        val record =
+            LogRecord.PlainText(
+                name = "snapshot",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap(),
+                eventTimestamp = timestamp
+            )
 
         val text = object : TextFormatter("${Element.DATETIME}") {}.format(record)
         val structured = object : StructuredFormatter(listOf(Element.DATETIME)) {}.format(record)

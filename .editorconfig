@@ -100,3 +100,11 @@ ij_kotlin_while_on_new_line = false
 ij_kotlin_wrap_elvis_expressions = 1
 ij_kotlin_wrap_expression_body_functions = 1
 ij_kotlin_wrap_first_method_in_call_chain = false
+
+[**/build.gradle.kts]
+# Gradle properties intentionally keep the uppercase names from gradle.properties.
+ktlint_standard_property-naming = disabled
+
+[colotok-coroutines/src/**/kotlin/**/blocking*.kt]
+# Keep the established expect/actual file names aligned across source sets.
+ktlint_standard_filename = disabled

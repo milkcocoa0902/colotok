@@ -1,9 +1,9 @@
 @file:OptIn(ExperimentalEncodingApi::class)
+
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import kotlin.io.encoding.ExperimentalEncodingApi
-
 import java.util.Properties
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -82,8 +82,6 @@ kotlin {
 
 dependencies { }
 
-
-
 kover {
     reports {
         filters {
@@ -108,20 +106,20 @@ kover {
                     "*_MembersInjector*",
                     "*_ProvideFactory*",
                     "*_SingletonC*",
-                    "*_TestComponentDataSupplier*",
+                    "*_TestComponentDataSupplier*"
                 )
             }
         }
     }
 }
 //
-//koverReport {
+// koverReport {
 //    filters {
 //        excludes{
 //            classes("")
 //        }
 //    }
-//}
+// }
 
 val CORE_LIBRARY_DESCRIPTION: String by project
 val PROJECT_URL: String by project
@@ -133,12 +131,11 @@ val DEVELOPER_NAME: String by project
 val DEVELOPER_EMAIL: String by project
 val REPOSITORY_URL: String by project
 
-
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     coordinates(
-        artifactId = "colotok",
+        artifactId = "colotok"
     )
 
     pom {
@@ -167,7 +164,6 @@ mavenPublishing {
         }
     }
 }
-
 
 // ローカルのSonatype Nexusにアップロードする設定
 publishing {
@@ -210,7 +206,7 @@ publishing {
     }
 
     repositories {
-        val publishTarget = findProperty("PUBLISH_TARGET") as String? ?: "nexus"  // デフォルト Nexus
+        val publishTarget = findProperty("PUBLISH_TARGET") as String? ?: "nexus" // デフォルト Nexus
 
         if (publishTarget == "nexus") {
             maven {

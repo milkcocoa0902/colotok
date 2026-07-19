@@ -12,7 +12,7 @@ import io.ktor.client.engine.cio.*
 /**
  * Represents authentication credentials for Loki API access.
  */
-sealed class Credential{
+sealed class Credential {
     /**
      * Basic authentication with username and password.
      *
@@ -24,11 +24,11 @@ sealed class Credential{
 
 /**
  * Configuration for the Loki log provider.
- * 
+ *
  * This class contains all the settings needed to configure a connection to a Loki server
  * for sending log data.
  */
-class LokiProviderConfig: AsyncProviderConfig {
+class LokiProviderConfig : AsyncProviderConfig {
     /** The minimum log level that will be sent to Loki */
     override var level: Level = LogLevel.INFO
 
@@ -60,10 +60,11 @@ class LokiProviderConfig: AsyncProviderConfig {
      * the caller remains caller-owned and is never closed by [LokiProvider].
      */
     var httpClient: HttpClient
-        get() = currentHttpClient ?: httpClientFactory().also {
-            currentHttpClient = it
-            providerOwnsHttpClient = true
-        }
+        get() =
+            currentHttpClient ?: httpClientFactory().also {
+                currentHttpClient = it
+                providerOwnsHttpClient = true
+            }
         set(value) {
             val previous = currentHttpClient
             if (previous !== value && providerOwnsHttpClient) {
@@ -73,11 +74,12 @@ class LokiProviderConfig: AsyncProviderConfig {
             providerOwnsHttpClient = previous === value && providerOwnsHttpClient
         }
 
-    internal fun acquireHttpClient(): LokiHttpClientLease = LokiHttpClientLease(
-        client = httpClient,
-        providerOwned = providerOwnsHttpClient,
-        close = httpClientCloser,
-    )
+    internal fun acquireHttpClient(): LokiHttpClientLease =
+        LokiHttpClientLease(
+            client = httpClient,
+            providerOwned = providerOwnsHttpClient,
+            close = httpClientCloser
+        )
 
     /** Authentication credentials for Loki API */
     var credential: Credential? = null
@@ -86,5 +88,5 @@ class LokiProviderConfig: AsyncProviderConfig {
 internal data class LokiHttpClientLease(
     val client: HttpClient,
     val providerOwned: Boolean,
-    val close: (HttpClient) -> Unit,
+    val close: (HttpClient) -> Unit
 )

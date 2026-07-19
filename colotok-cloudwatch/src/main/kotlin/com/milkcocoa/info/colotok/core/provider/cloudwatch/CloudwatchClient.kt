@@ -17,38 +17,48 @@ internal interface CloudwatchClientFactory {
 
 internal interface CloudwatchClient {
     suspend fun ensureLogGroup(logGroup: String)
-    suspend fun ensureLogStream(logGroup: String, logStream: String)
+
+    suspend fun ensureLogStream(
+        logGroup: String,
+        logStream: String
+    )
+
     suspend fun putLogEvents(
         logGroup: String,
         logStream: String,
         events: List<CloudwatchEvent>,
-        sequenceToken: String?,
+        sequenceToken: String?
     ): String?
+
     fun close()
 }
 
 internal object AwsCloudwatchClientFactory : CloudwatchClientFactory {
     override fun create(credential: CloudwatchCredential): CloudwatchClient {
-        val client = CloudWatchLogsClient {
-            region = credential.region
-            credentialsProvider = when (credential) {
-                is CloudwatchCredential.Default -> DefaultChainCredentialsProvider()
-                is CloudwatchCredential.StaticCredentials -> StaticCredentialsProvider {
-                    accessKeyId = credential.accessKeyId
-                    secretAccessKey = credential.secretAccessKey
-                }
-                is CloudwatchCredential.Profile -> ProfileCredentialsProvider(
-                    profileName = credential.profileName,
-                )
-                is CloudwatchCredential.FromEnvironments -> EnvironmentCredentialsProvider()
+        val client =
+            CloudWatchLogsClient {
+                region = credential.region
+                credentialsProvider =
+                    when (credential) {
+                        is CloudwatchCredential.Default -> DefaultChainCredentialsProvider()
+                        is CloudwatchCredential.StaticCredentials ->
+                            StaticCredentialsProvider {
+                                accessKeyId = credential.accessKeyId
+                                secretAccessKey = credential.secretAccessKey
+                            }
+                        is CloudwatchCredential.Profile ->
+                            ProfileCredentialsProvider(
+                                profileName = credential.profileName
+                            )
+                        is CloudwatchCredential.FromEnvironments -> EnvironmentCredentialsProvider()
+                    }
             }
-        }
         return AwsCloudwatchClient(client)
     }
 }
 
 private class AwsCloudwatchClient(
-    private val client: CloudWatchLogsClient,
+    private val client: CloudWatchLogsClient
 ) : CloudwatchClient {
     override suspend fun ensureLogGroup(logGroup: String) {
         try {
@@ -58,7 +68,10 @@ private class AwsCloudwatchClient(
         }
     }
 
-    override suspend fun ensureLogStream(logGroup: String, logStream: String) {
+    override suspend fun ensureLogStream(
+        logGroup: String,
+        logStream: String
+    ) {
         try {
             client.createLogStream {
                 logGroupName = logGroup
@@ -73,18 +86,20 @@ private class AwsCloudwatchClient(
         logGroup: String,
         logStream: String,
         events: List<CloudwatchEvent>,
-        sequenceToken: String?,
-    ): String? = client.putLogEvents {
-        logGroupName = logGroup
-        logStreamName = logStream
-        this.sequenceToken = sequenceToken
-        logEvents = events.map { event ->
-            InputLogEvent {
-                timestamp = event.timestampMillis
-                message = event.message
-            }
-        }
-    }.nextSequenceToken
+        sequenceToken: String?
+    ): String? =
+        client.putLogEvents {
+            logGroupName = logGroup
+            logStreamName = logStream
+            this.sequenceToken = sequenceToken
+            logEvents =
+                events.map { event ->
+                    InputLogEvent {
+                        timestamp = event.timestampMillis
+                        message = event.message
+                    }
+                }
+        }.nextSequenceToken
 
     override fun close() = client.close()
 }

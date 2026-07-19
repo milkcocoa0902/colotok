@@ -1,8 +1,6 @@
 package com.milkcocoa.info.colotok.core.formatter.details
 
-import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
-import kotlinx.serialization.KSerializer
 
 /**
  * Interface for log formatter.

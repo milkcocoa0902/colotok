@@ -3,8 +3,11 @@ package com.milkcocoa.info.colotok.core.logger
 import org.slf4j.spi.MDCAdapter
 import java.util.Deque
 
-class ColotokMDCAdapter: MDCAdapter {
-    override fun put(key: String?, `val`: String?) {
+class ColotokMDCAdapter : MDCAdapter {
+    override fun put(
+        key: String?,
+        `val`: String?
+    ) {
         key ?: return
         `val` ?: return
 
@@ -43,7 +46,10 @@ class ColotokMDCAdapter: MDCAdapter {
         MDC.setThreadLocalContext(data)
     }
 
-    override fun pushByKey(key: String?, value: String?) {
+    override fun pushByKey(
+        key: String?,
+        value: String?
+    ) {
         if (key == null || value == null) return
 
         val ctx = MDC.getThreadLocalContext()

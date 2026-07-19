@@ -51,8 +51,7 @@ class ColotokLogger4J(private val name: String) : Logger {
         }
     }
 
-    private fun isEnabled(level: Level): Boolean =
-        delegate.providers.any { level.isEnabledFor(it.config.level) }
+    private fun isEnabled(level: Level): Boolean = delegate.providers.any { level.isEnabledFor(it.config.level) }
 
     private fun logFormatted(
         level: Level,

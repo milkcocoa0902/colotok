@@ -16,12 +16,13 @@ suspend fun ColotokLogger.atAsync(
     msg: String
 ) {
     val p = providers
-    val record = LogRecord.PlainText(
-        name = name,
-        msg = msg,
-        level = level,
-        attr = attrs.toMap(),
-    )
+    val record =
+        LogRecord.PlainText(
+            name = name,
+            msg = msg,
+            level = level,
+            attr = attrs.toMap()
+        )
     withContext(Dispatchers.Default) {
         p.map {
             async {
@@ -30,7 +31,6 @@ suspend fun ColotokLogger.atAsync(
         }.awaitAll()
     }
 }
-
 
 suspend fun ColotokLogger.atAsync(
     level: Level,
@@ -38,12 +38,13 @@ suspend fun ColotokLogger.atAsync(
     attr: Map<String, String>
 ) {
     val p = providers
-    val record = LogRecord.PlainText(
-        name = name,
-        msg = msg,
-        level = level,
-        attr = attrs.plus(attr).toMap(),
-    )
+    val record =
+        LogRecord.PlainText(
+            name = name,
+            msg = msg,
+            level = level,
+            attr = attrs.plus(attr).toMap()
+        )
     withContext(Dispatchers.Default) {
         p.map {
             async {
@@ -53,20 +54,20 @@ suspend fun ColotokLogger.atAsync(
     }
 }
 
-
 @OptIn(InternalSerializationApi::class)
 suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     level: Level,
     msg: T
 ) {
     val p = providers
-    val record = LogRecord.StructuredText(
-        name = name,
-        msg = msg,
-        level = level,
-        serializer = T::class.serializer(),
-        attr = attrs.toMap(),
-    )
+    val record =
+        LogRecord.StructuredText(
+            name = name,
+            msg = msg,
+            level = level,
+            serializer = T::class.serializer(),
+            attr = attrs.toMap()
+        )
     withContext(Dispatchers.Default) {
         p.map {
             async {
@@ -83,13 +84,14 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     attr: Map<String, String>
 ) {
     val p = providers
-    val record = LogRecord.StructuredText(
-        name = name,
-        msg = msg,
-        level = level,
-        serializer = T::class.serializer(),
-        attr = attrs.plus(attr).toMap(),
-    )
+    val record =
+        LogRecord.StructuredText(
+            name = name,
+            msg = msg,
+            level = level,
+            serializer = T::class.serializer(),
+            attr = attrs.plus(attr).toMap()
+        )
     withContext(Dispatchers.Default) {
         p.map {
             async {
@@ -121,23 +123,38 @@ suspend fun ColotokLogger.errorAsync(msg: String) {
 }
 
 // Level-specific methods with attributes
-suspend fun ColotokLogger.traceAsync(msg: String, attr: Map<String, String>) {
+suspend fun ColotokLogger.traceAsync(
+    msg: String,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.TRACE, msg, attr)
 }
 
-suspend fun ColotokLogger.debugAsync(msg: String, attr: Map<String, String>) {
+suspend fun ColotokLogger.debugAsync(
+    msg: String,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.DEBUG, msg, attr)
 }
 
-suspend fun ColotokLogger.infoAsync(msg: String, attr: Map<String, String>) {
+suspend fun ColotokLogger.infoAsync(
+    msg: String,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.INFO, msg, attr)
 }
 
-suspend fun ColotokLogger.warnAsync(msg: String, attr: Map<String, String>) {
+suspend fun ColotokLogger.warnAsync(
+    msg: String,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.WARN, msg, attr)
 }
 
-suspend fun ColotokLogger.errorAsync(msg: String, attr: Map<String, String>) {
+suspend fun ColotokLogger.errorAsync(
+    msg: String,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.ERROR, msg, attr)
 }
 
@@ -169,27 +186,42 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.errorAsync(msg: T) {
 
 // Level-specific methods for LogStructure objects with attributes
 @OptIn(InternalSerializationApi::class)
-suspend inline fun <reified T : LogStructure> ColotokLogger.traceAsync(msg: T, attr: Map<String, String>) {
+suspend inline fun <reified T : LogStructure> ColotokLogger.traceAsync(
+    msg: T,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.TRACE, msg, attr)
 }
 
 @OptIn(InternalSerializationApi::class)
-suspend inline fun <reified T : LogStructure> ColotokLogger.debugAsync(msg: T, attr: Map<String, String>) {
+suspend inline fun <reified T : LogStructure> ColotokLogger.debugAsync(
+    msg: T,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.DEBUG, msg, attr)
 }
 
 @OptIn(InternalSerializationApi::class)
-suspend inline fun <reified T : LogStructure> ColotokLogger.infoAsync(msg: T, attr: Map<String, String>) {
+suspend inline fun <reified T : LogStructure> ColotokLogger.infoAsync(
+    msg: T,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.INFO, msg, attr)
 }
 
 @OptIn(InternalSerializationApi::class)
-suspend inline fun <reified T : LogStructure> ColotokLogger.warnAsync(msg: T, attr: Map<String, String>) {
+suspend inline fun <reified T : LogStructure> ColotokLogger.warnAsync(
+    msg: T,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.WARN, msg, attr)
 }
 
 @OptIn(InternalSerializationApi::class)
-suspend inline fun <reified T : LogStructure> ColotokLogger.errorAsync(msg: T, attr: Map<String, String>) {
+suspend inline fun <reified T : LogStructure> ColotokLogger.errorAsync(
+    msg: T,
+    attr: Map<String, String>
+) {
     atAsync(LogLevel.ERROR, msg, attr)
 }
 
@@ -214,7 +246,10 @@ suspend fun ColotokLogger.atErrorAsync(block: suspend LevelScopedColotokLogger.(
     atAsync(LogLevel.ERROR, block)
 }
 
-suspend fun ColotokLogger.atAsync(level: Level, block: suspend LevelScopedColotokLogger.() -> Unit) {
+suspend fun ColotokLogger.atAsync(
+    level: Level,
+    block: suspend LevelScopedColotokLogger.() -> Unit
+) {
     LevelScopedColotokLogger(
         name = name,
         providers = providers,

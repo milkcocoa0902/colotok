@@ -20,7 +20,6 @@ dependencies {
 
     implementation(libs.slf4j2.api)
     implementation(project(":colotok-slf4j2"))
-
 }
 
 tasks.test {
@@ -34,8 +33,8 @@ java {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のソースコード
-    targetCompatibility = JavaVersion.VERSION_11.toString()  // 🔹 Java 11 互換のバイトコードを出力
+    sourceCompatibility = JavaVersion.VERSION_11.toString() // 🔹 Java 11 互換のソースコード
+    targetCompatibility = JavaVersion.VERSION_11.toString() // 🔹 Java 11 互換のバイトコードを出力
 }
 
 kotlin {

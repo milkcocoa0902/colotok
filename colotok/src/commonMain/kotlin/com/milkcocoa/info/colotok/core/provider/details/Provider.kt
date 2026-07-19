@@ -26,7 +26,7 @@ class ProviderClosedException(
     message: String = "Provider is closed"
 ) : IllegalStateException(message)
 
-interface IProvider: AutoCloseable {
+interface IProvider : AutoCloseable {
     val config: ProviderConfig
     val coroutineScope: CoroutineScope
     val channel: Channel<LogRecord>
@@ -41,17 +41,22 @@ interface IProvider: AutoCloseable {
      * and every policy rejects records after this provider stops being open.
      */
     fun write(record: LogRecord)
+
     suspend fun flush(timeout: Duration = 1000.milliseconds)
-    suspend fun onFlush(){}
+
+    suspend fun onFlush() {}
+
     suspend fun onMessage(record: LogRecord)
-    fun onClosed(){}
-    fun forceShutdown(){}
+
+    fun onClosed() {}
+
+    fun forceShutdown() {}
 }
 
 abstract class Provider(
     override val config: ProviderConfig,
     onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
-): IProvider {
+) : IProvider {
     public var effectiveMetricsCollector: MetricsCollector = NoOpMetricsCollector
 
     private enum class State {
@@ -59,7 +64,7 @@ abstract class Provider(
         CLOSING,
         CLOSED,
         CANCELLED,
-        FAILED,
+        FAILED
     }
 
     private val state = MutableStateFlow(State.OPEN)
@@ -67,61 +72,63 @@ abstract class Provider(
     private val closedHookInvoked = MutableStateFlow(false)
 
     override val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    override val channel = Channel<LogRecord>(
-        capacity = Channel.BUFFERED,
-        onBufferOverflow = onBufferOverflow
-    )
-    override val job = coroutineScope.launch {
-        try {
-            for (record in channel) {
-                if (record is LogRecord.Pin) {
+    override val channel =
+        Channel<LogRecord>(
+            capacity = Channel.BUFFERED,
+            onBufferOverflow = onBufferOverflow
+        )
+    override val job =
+        coroutineScope.launch {
+            try {
+                for (record in channel) {
+                    if (record is LogRecord.Pin) {
+                        try {
+                            onFlush()
+                            record.deferred.complete(Unit)
+                        } catch (throwable: Throwable) {
+                            record.deferred.completeExceptionally(throwable)
+                            throw throwable
+                        }
+                        continue
+                    }
+                    onMessage(record)
+                }
+            } catch (throwable: Throwable) {
+                if (throwable !is CancellationException || state.value != State.CANCELLED) {
+                    fail(throwable)
+                }
+            } finally {
+                if (state.value == State.CLOSING) {
                     try {
                         onFlush()
-                        record.deferred.complete(Unit)
                     } catch (throwable: Throwable) {
-                        record.deferred.completeExceptionally(throwable)
-                        throw throwable
-                    }
-                    continue
-                }
-                onMessage(record)
-            }
-        } catch (throwable: Throwable) {
-            if (throwable !is CancellationException || state.value != State.CANCELLED) {
-                fail(throwable)
-            }
-        } finally {
-            if (state.value == State.CLOSING) {
-                try {
-                    onFlush()
-                } catch (throwable: Throwable) {
-                    if (throwable !is CancellationException || state.value != State.CANCELLED) {
-                        fail(throwable)
-                    }
-                }
-            }
-
-            withContext(NonCancellable) {
-                closeResources()
-
-                val terminalFailure = failure.value
-                while (true) {
-                    val pending = channel.tryReceive().getOrNull() ?: break
-                    if (pending is LogRecord.Pin) {
-                        pending.deferred.completeExceptionally(
-                            terminalFailure ?: ProviderClosedException()
-                        )
+                        if (throwable !is CancellationException || state.value != State.CANCELLED) {
+                            fail(throwable)
+                        }
                     }
                 }
 
-                when (state.value) {
-                    State.CLOSING -> state.value = State.CLOSED
-                    State.OPEN -> state.value = State.CLOSED
-                    else -> Unit
+                withContext(NonCancellable) {
+                    closeResources()
+
+                    val terminalFailure = failure.value
+                    while (true) {
+                        val pending = channel.tryReceive().getOrNull() ?: break
+                        if (pending is LogRecord.Pin) {
+                            pending.deferred.completeExceptionally(
+                                terminalFailure ?: ProviderClosedException()
+                            )
+                        }
+                    }
+
+                    when (state.value) {
+                        State.CLOSING -> state.value = State.CLOSED
+                        State.OPEN -> state.value = State.CLOSED
+                        else -> Unit
+                    }
                 }
             }
         }
-    }
 
     private fun fail(throwable: Throwable) {
         if (failure.compareAndSet(null, throwable)) {
@@ -157,11 +164,12 @@ abstract class Provider(
         }
 
         if (record !is LogRecord.Metrics) {
-            val errorType = when {
-                failure.value != null || sendResult?.exceptionOrNull() != null -> "provider_failed"
-                observedState != State.OPEN || sendResult?.isClosed == true -> "provider_closed"
-                else -> "buffer_full"
-            }
+            val errorType =
+                when {
+                    failure.value != null || sendResult?.exceptionOrNull() != null -> "provider_failed"
+                    observedState != State.OPEN || sendResult?.isClosed == true -> "provider_closed"
+                    else -> "buffer_full"
+                }
             effectiveMetricsCollector.collectBestEffort {
                 incrementErrorCount(this@Provider::class.simpleName ?: "unknown", errorType)
             }

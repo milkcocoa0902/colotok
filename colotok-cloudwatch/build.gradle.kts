@@ -30,7 +30,7 @@ java {
     }
 }
 
-kotlin{
+kotlin {
     jvmToolchain(11)
 }
 
@@ -44,12 +44,11 @@ val DEVELOPER_NAME: String by project
 val DEVELOPER_EMAIL: String by project
 val REPOSITORY_URL: String by project
 
-
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     coordinates(
-        artifactId = "colotok-cloudwatch",
+        artifactId = "colotok-cloudwatch"
     )
 
     pom {

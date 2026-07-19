@@ -4,7 +4,6 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.details.Provider
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
@@ -35,12 +34,13 @@ class ColotokLogger(
     ) {
         val p = providers
         if (p.none { level.isEnabledFor(it.config.level) }) return
-        val record = LogRecord.PlainText(
-            name = name,
-            msg = msg,
-            level = level,
-            attr = attrs.toMap()
-        )
+        val record =
+            LogRecord.PlainText(
+                name = name,
+                msg = msg,
+                level = level,
+                attr = attrs.toMap()
+            )
         p.forEach {
             it.write(record)
         }
@@ -59,12 +59,13 @@ class ColotokLogger(
     ) {
         val p = providers
         if (p.none { level.isEnabledFor(it.config.level) }) return
-        val record = LogRecord.PlainText(
-            name = name,
-            msg = msg,
-            level = level,
-            attr = attrs.plus(attr)
-        )
+        val record =
+            LogRecord.PlainText(
+                name = name,
+                msg = msg,
+                level = level,
+                attr = attrs.plus(attr)
+            )
         p.forEach {
             it.write(record)
         }
@@ -81,13 +82,14 @@ class ColotokLogger(
     ) {
         val p = providers
         if (p.none { level.isEnabledFor(it.config.level) }) return
-        val record = LogRecord.StructuredText(
-            name = name,
-            msg = msg,
-            level = level,
-            serializer = serializer<T>(),
-            attr = attrs.toMap()
-        )
+        val record =
+            LogRecord.StructuredText(
+                name = name,
+                msg = msg,
+                level = level,
+                serializer = serializer<T>(),
+                attr = attrs.toMap()
+            )
         p.forEach {
             it.write(record)
         }
@@ -106,13 +108,14 @@ class ColotokLogger(
     ) {
         val p = providers
         if (p.none { level.isEnabledFor(it.config.level) }) return
-        val record = LogRecord.StructuredText(
-            name = name,
-            msg = msg,
-            level = level,
-            serializer = serializer<T>(),
-            attr = attrs.plus(attr)
-        )
+        val record =
+            LogRecord.StructuredText(
+                name = name,
+                msg = msg,
+                level = level,
+                serializer = serializer<T>(),
+                attr = attrs.plus(attr)
+            )
         p.forEach {
             it.write(record)
         }

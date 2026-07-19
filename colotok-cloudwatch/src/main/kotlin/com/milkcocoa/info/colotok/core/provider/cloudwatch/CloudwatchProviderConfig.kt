@@ -7,29 +7,30 @@ import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
 
-sealed interface CloudwatchCredential{
+sealed interface CloudwatchCredential {
     val region: String
+
     data class FromEnvironments(
-        override val region: String,
+        override val region: String
     ) : CloudwatchCredential
 
     data class StaticCredentials(
         override val region: String,
         val accessKeyId: String,
         val secretAccessKey: String
-    ):  CloudwatchCredential
+    ) : CloudwatchCredential
 
     data class Profile(
-        override  val region: String,
-        val profileName: String,
-    ): CloudwatchCredential
+        override val region: String,
+        val profileName: String
+    ) : CloudwatchCredential
 
     data class Default(
-        override val  region: String,
-    ): CloudwatchCredential
+        override val region: String
+    ) : CloudwatchCredential
 }
 
-class CloudwatchProviderConfig: AsyncProviderConfig {
+class CloudwatchProviderConfig : AsyncProviderConfig {
     internal var clientFactory: CloudwatchClientFactory = AwsCloudwatchClientFactory
 
     override var level: Level = LogLevel.DEBUG
@@ -40,5 +41,5 @@ class CloudwatchProviderConfig: AsyncProviderConfig {
     var logGroup: String? = null
     var logStream: String? = null
     var credential: CloudwatchCredential? = null
-    override var bufferSize:  Int = 50
+    override var bufferSize: Int = 50
 }

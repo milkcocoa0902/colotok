@@ -2,7 +2,6 @@ rootProject.name = "Colotok"
 include("colotok")
 include("sample")
 
-
 pluginManagement {
     repositories {
         google {
