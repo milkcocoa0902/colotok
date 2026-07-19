@@ -35,6 +35,15 @@ class ColotokLogger4J(private val name: String) : Logger {
         message: String,
         throwable: Throwable? = null
     ) {
+        if (!isEnabled(level)) return
+        logEnabled(level, message, throwable)
+    }
+
+    private fun logEnabled(
+        level: Level,
+        message: String,
+        throwable: Throwable?
+    ) {
         if (throwable == null) {
             delegate.at(level, message)
         } else {
@@ -50,8 +59,9 @@ class ColotokLogger4J(private val name: String) : Logger {
         pattern: String?,
         vararg arguments: Any?
     ) {
+        if (!isEnabled(level)) return
         val formatted = formatMessage(pattern, *arguments)
-        log(level, formatted.message, formatted.throwable)
+        logEnabled(level, formatted.message, formatted.throwable)
     }
 
     override fun info(msg: String?) {

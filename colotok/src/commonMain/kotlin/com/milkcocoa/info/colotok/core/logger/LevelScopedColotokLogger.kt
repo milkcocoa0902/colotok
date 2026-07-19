@@ -33,7 +33,7 @@ final class LevelScopedColotokLogger(
             name = name,
             msg = msg,
             level = level,
-            attr = attrs.plus(attr).toMap()
+            attr = attrs.plus(attr)
         )
         providers.forEach {
             it.write(record)
@@ -64,7 +64,7 @@ final class LevelScopedColotokLogger(
             msg = msg,
             level = level,
             serializer = T::class.serializer(),
-            attr = attrs.plus(attr).toMap()
+            attr = attrs.plus(attr)
         )
         providers.forEach {
             it.write(record)

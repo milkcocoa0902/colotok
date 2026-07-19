@@ -34,6 +34,7 @@ class ColotokLogger(
         msg: String
     ) {
         val p = providers
+        if (p.none { level.isEnabledFor(it.config.level) }) return
         val record = LogRecord.PlainText(
             name = name,
             msg = msg,
@@ -57,11 +58,12 @@ class ColotokLogger(
         attr: Map<String, String>
     ) {
         val p = providers
+        if (p.none { level.isEnabledFor(it.config.level) }) return
         val record = LogRecord.PlainText(
             name = name,
             msg = msg,
             level = level,
-            attr = attrs.plus(attr).toMap()
+            attr = attrs.plus(attr)
         )
         p.forEach {
             it.write(record)
@@ -78,6 +80,7 @@ class ColotokLogger(
         msg: T
     ) {
         val p = providers
+        if (p.none { level.isEnabledFor(it.config.level) }) return
         val record = LogRecord.StructuredText(
             name = name,
             msg = msg,
@@ -102,12 +105,13 @@ class ColotokLogger(
         attr: Map<String, String>
     ) {
         val p = providers
+        if (p.none { level.isEnabledFor(it.config.level) }) return
         val record = LogRecord.StructuredText(
             name = name,
             msg = msg,
             level = level,
             serializer = serializer<T>(),
-            attr = attrs.plus(attr).toMap()
+            attr = attrs.plus(attr)
         )
         p.forEach {
             it.write(record)
@@ -420,9 +424,11 @@ class ColotokLogger(
         level: Level,
         block: LevelScopedColotokLogger.() -> Unit
     ) {
+        val p = providers
+        if (p.none { level.isEnabledFor(it.config.level) }) return
         LevelScopedColotokLogger(
             name = name,
-            providers = providers,
+            providers = p,
             attrs = attrs,
             level = level
         ).block()

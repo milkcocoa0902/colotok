@@ -226,6 +226,26 @@ class ColotokLogger4JTest {
     }
 
     @Test
+    fun disabled_level_does_not_format_arguments() {
+        ColotokLoggerContext.setDefault(
+            ColotokLoggerContext().addProvider(testProvider(LogLevel.OFF))
+        )
+        val logger = LoggerFactory.getLogger("disabled-formatting-test")
+        var formatted = false
+        val argument =
+            object {
+                override fun toString(): String {
+                    formatted = true
+                    return "value"
+                }
+            }
+
+        logger.info("value={}", argument)
+
+        assertFalse(formatted)
+    }
+
+    @Test
     fun all_levels_support_slf4j_placeholder_overloads() {
         runBlocking {
             val logger = LoggerFactory.getLogger("overload-contract-test")

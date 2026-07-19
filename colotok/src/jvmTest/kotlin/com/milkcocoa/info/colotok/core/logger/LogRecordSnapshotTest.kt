@@ -58,6 +58,27 @@ class LogRecordSnapshotTest {
     }
 
     @Test
+    fun disabled_log_does_not_read_attrs_or_execute_scoped_block() {
+        var attrsRead = false
+        var blockExecuted = false
+        val logger =
+            ColotokLogger(
+                name = "disabled",
+                providersProvider = { emptyList() },
+                attrsProvider = {
+                    attrsRead = true
+                    emptyMap()
+                }
+            )
+
+        logger.info("ignored")
+        logger.atInfo { blockExecuted = true }
+
+        assertEquals(false, attrsRead)
+        assertEquals(false, blockExecuted)
+    }
+
+    @Test
     fun logger_snapshots_mutable_attrs_and_mdc_at_call_time() = runBlocking {
         val provider = recordingProvider()
         val attrs = mutableMapOf("attr" to "before")

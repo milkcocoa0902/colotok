@@ -4,11 +4,13 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
-import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
-import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
+import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -203,7 +205,9 @@ class AsyncProviderTest {
 
         provider.write(record(1))
         provider.write(record(2))
-        withTimeout(5_000) { metrics.targetReached.await() }
+        withContext(Dispatchers.Default) {
+            withTimeout(5_000) { metrics.targetReached.await() }
+        }
 
         provider.forceShutdown()
         provider.job.join()
