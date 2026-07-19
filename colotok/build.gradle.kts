@@ -7,7 +7,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.kover)
     id("maven-publish")
@@ -28,12 +28,11 @@ kotlin {
         }
     }
 
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-
-        publishLibraryVariants("release")
+    android {
+        compileSdk = 36
+        namespace = "com.milkcocoa.info.colotok"
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
+        withHostTest {}
     }
 
     iosX64()
@@ -57,6 +56,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
         jsMain.dependencies {
             implementation(libs.okio.nodefilesystem)
@@ -73,15 +73,10 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
-}
 
-android {
-    compileSdk = 36
-    namespace = "com.milkcocoa.info.colotok"
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        enabled.set(true)
     }
 }
 

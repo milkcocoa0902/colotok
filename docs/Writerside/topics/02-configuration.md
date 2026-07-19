@@ -17,6 +17,18 @@ you can get the logger instance by `ColotokLoggerContext#getLogger()`
 > if none of `addProvider()` is called, the logger will not print the log anywhere
 > {style="note"}
 
+On Android, the default `ConsoleProvider()` does not write to Logcat. Supply the debug-mode decision explicitly when debug output is wanted:
+
+```Kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider {
+        detectDebugModeFn = { BuildConfig.DEBUG }
+    })
+    .getLogger()
+```
+
+Output is enabled only when `isOutputEnabled && (isEnabledForRelease || detectDebugModeFn())` is true. The defaults are `true`, `false`, and `{ false }`, respectively, so the default result is no output. Colotok does not infer `BuildConfig.DEBUG`.
+
 ## Print log
 
 ### Text Logging
@@ -100,7 +112,7 @@ logger.info(
 Since Colotok processes logs asynchronously, you should explicitly shut down the logger context to ensure all logs are flushed and resources are released before the application exits.
 
 ### Normal Shutdown
-`shutdown()` will stop accepting new logs and wait for all queued logs to be processed by the providers.
+`shutdown()` stops accepting new logs and suspends until all queued logs have been processed, provider buffers have been flushed, and resources have been closed.
 
 ```kotlin
 val context = ColotokLoggerContext()
@@ -113,13 +125,29 @@ context.shutdown()
 ### Force Shutdown
 If you need to close the logger immediately without waiting for the queue to be cleared, use `forceShutdown()`.
 
+Queued records may be lost. The provider close hook still runs.
+
 ```kotlin
 context.forceShutdown()
 ```
 
 ### Manual Flush
-If you only want to ensure that all current logs in the queue are written without shutting down the context, you can flush individual providers:
+If you only want to ensure that records accepted before a point are processed without shutting down the context, flush individual providers while they are open:
 
 ```kotlin
 context.providers.forEach { it.flush() }
 ```
+
+`Provider.close()` starts graceful closure but does not wait. `Provider.join()` starts closure when necessary and suspends until completion. Once graceful or forced closure has started, `flush()` throws `ProviderClosedException`.
+
+## Event snapshots and delivery
+
+The event timestamp, thread, caller where supported, attributes, and MDC are snapshotted at the logging call. Delayed formatting and remote publication keep that original event time. Mutating the original maps afterwards does not change output, and every provider receives the same event snapshot for that call. JavaScript currently leaves caller empty because no portable JS call-site implementation is provided.
+
+On JS/Node, MDC follows Node `AsyncLocalStorage` resources. Root operations, nested scope restoration, and native async-chain propagation are supported. Kotlin coroutine siblings are not guaranteed to have isolated MDC mutation because a coroutine `Job` is not always a separate Node async resource. Logging-call snapshots remain isolated.
+
+On Kotlin/Native, MDC is thread-local. Basic operations and logging-call snapshots are supported on the current thread; automatic propagation or isolation across coroutine thread switches is not guaranteed.
+
+For an `AsyncProvider`, `bufferSize` is a publish threshold in `1..4096`. Failed batches are retained up to `min(bufferSize * 4, 4096)` records. When that capacity is exhausted, the newest incoming record is dropped, preserving the older records for retry. If a remote destination accepts part of a batch before the provider reports failure, retrying the retained batch can produce duplicates; integrations should be designed for at-least-once delivery.
+
+An automatic publish failure is recorded and can be retried by a later publish attempt. A failure from an explicit `flush()` is propagated and moves the provider to its failed terminal state; `join()` reports the same original failure.

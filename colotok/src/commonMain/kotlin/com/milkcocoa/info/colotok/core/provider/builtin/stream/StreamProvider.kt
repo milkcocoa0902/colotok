@@ -12,11 +12,9 @@ class StreamProvider(config: StreamProviderConfig) : Provider(config) {
     private val outputStream = config.outputStreamBuilder
 
     override suspend fun onMessage(record: LogRecord) {
-        runCatching {
-            outputStream.invoke().buffer().use { sink ->
-                sink.write(record.format(config.formatter).plus("\n").encodeToByteArray())
-                sink.flush()
-            }
+        outputStream.invoke().buffer().use { sink ->
+            sink.write(record.format(config.formatter).plus("\n").encodeToByteArray())
+            sink.flush()
         }
     }
 

@@ -24,7 +24,8 @@ COLOTOK; Code-Base Logging Runtime  for Kotlin
 ✅ Structure Logging  
 ✅ MDC (Mapped Diagnostic Context)  
 ✅ Metrics Collection
-　🌟 Built-in metrics (Log count, Error count, Buffer size, Write duration)
+　🌟 Built-in metrics (Accepted enqueue count, Error count, AsyncProvider buffer size)
+　🌟 Write-duration extension point (Not emitted automatically by the runtime)
 　🌟 Multiple collection strategies (Inherit, Explicit, Internal Logging)
 　🌟 Composite metrics (Collect to multiple destinations simultaneously)
 
@@ -71,6 +72,9 @@ Colotok provides several plugins to extend its functionality:
 | colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.4.2` |   send logs to AWS CloudWatch   |      JVM       |
 |    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.4.2`    |    send logs to Grafana Loki    | Multi Platform |
 
+Each SLF4J binding publishes the matching `slf4j-api` major as a transitive compile dependency.
+Applications only need the selected Colotok binding unless they intentionally manage the SLF4J API version themselves.
+
 # Dependencies
 
 If you want to use **Structured Logging** or **Internal Metrics Logging**, you need to enable the Kotlin Serialization plugin in your project. 
@@ -97,6 +101,28 @@ val logger = ColotokLoggerContext()
     .getLogger()
 
 ```
+
+On Android, a default `ConsoleProvider()` does not write to Logcat. Android output is enabled
+only when `isOutputEnabled` is `true` and either release output is allowed or the supplied debug
+detector returns `true`:
+
+```kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider {
+        detectDebugModeFn = { BuildConfig.DEBUG }
+    })
+    .getLogger()
+```
+
+| `isOutputEnabled` | `isEnabledForRelease` | `detectDebugModeFn()` | Output |
+| :---: | :---: | :---: | :---: |
+| `false` | any | any | disabled |
+| `true` | `true` | any | enabled |
+| `true` | `false` | `true` | enabled |
+| `true` | `false` | `false` | disabled (default) |
+
+Colotok deliberately does not infer `BuildConfig.DEBUG`. Set `isOutputEnabled = false` when
+output must remain disabled regardless of the other gates.
 
 more details config
 ```Kotlin
@@ -168,7 +194,7 @@ logger.info("message what happen")
 this formatter shows as below style's log
 
 ```Kotlin
-logger.ingo("message what happen", mapOf("param1" to "a custom attribute"))
+logger.info("message what happen", mapOf("param1" to "a custom attribute"))
 
 // 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - message what happen, additional = {param1=a custom attribute}
 ```
@@ -206,7 +232,7 @@ logger.info(
 
 logger.info("message what happen")
 
-// {"msg":"message what happen","level":"INFO","date":"2023-12-29"}
+// {"message":"message what happen","level":"INFO","date":"2023-12-29"}
 ```
 ### 2. DetailStructureFormatter
 this formatter shows bellow style's log
@@ -232,6 +258,10 @@ logger.info("message what happen")
 // {"message":"message what happen","level":"INFO","thread":"main","date":"2023-12-29T12:27:22.5908"}
 ```
 
+`StructuredFormatter` emits at most one JSON `date` field. `Element.DATETIME` takes precedence
+over `Element.DATE` and `Element.TIME`; `DATE` plus `TIME` is treated as `DATETIME`. A single
+`DATE` or `TIME` emits only that component. These choices are normalized silently.
+
 
 
 ## Provider
@@ -251,90 +281,16 @@ this provider output log into file without ansi-color.
 this provider output log into stream where you specified.  
 
 ### 4. Customize
-you can also output to remote or sql or others by create own provider.  
-example
 
-#### define custom provider
-if you want to write log into slack, you create a SlackProvider like this
+You can create a `Provider` for a local destination or an `AsyncProvider` for a batched remote
+destination. Prefer the provided lifecycle and buffering implementation instead of maintaining a
+second queue inside a custom provider. See the [custom provider guide](https://milkcocoa0902.github.io/colotok/Create-Plugin.html).
 
-```kotlin
-@Serializable
-data class SlackWebhookPayload(
-    val text: String,
-)
-
-class SlackProvider(config: SlackProviderConfig): Provider {
-    constructor(config: SlackProviderConfig.() -> Unit): this(SlackProviderConfig().apply(config))
-
-    class SlackProviderConfig() : ProviderConfig {
-        var webhook_url: String = ""
-
-        override var level: level = LogLevel.DEBUG
-
-        override var formatter: Formatter = DetailTextFormatter
-    }
-
-    private val webhookUrl = config.webhook_url
-    private val logLevel = config.level
-    private val formatter = config.formatter
-
-    override fun write(name: String, msg: String, level: LogLevel, attr: Map<String, String>) {
-        if(level.isEnabledFor(logLevel).not()){
-            return
-        }
-        kotlin.runCatching {
-            webhookUrl.httpPost()
-                .appendHeader("Content-Type" to "application/json")
-                .body(Json.encodeToString(text = formatter.format(msg, level, attr)))
-                .response()
-        }.getOrElse { println(it) }
-    }
-
-    override fun <T : LogStructure> write(
-        name: String,
-        msg: T,
-        serializer: KSerializer<T>,
-        level: LogLevel,
-        attr: Map<String, String>
-    ) {
-        if(level.isEnabledFor(logLevel).not()){
-            return
-        }
-        kotlin.runCatching {
-            webhookUrl.httpPost()
-                .appendHeader("Content-Type" to "application/json")
-                .body(Json.encodeToString(text = formatter.format(msg, serializer, level, attr)))
-                .response()
-        }.getOrElse { println(it) }
-    }
-}
-```
-
-#### use your provider
-now you can use SlackProvider to write the log into slack.
-
-```kotlin
-val logger = ColotokLoggerContext()
-        .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
-            formatter = DetailTextFormatter
-            level = LogLevel.DEBUG
-        }))
-        .addProvider(SlackProvider{
-            webhook_url = "your slack webhook url"
-            formatter = SimpleTextFormatter
-            level = LogLevel.WARN
-        })
-        .getLogger()
-```
-
-#### print the log
-```kotlin
-logger.info("info level log")
-// written the log only console
-
-logger.error("error level log")
-// written the log both of console and slack
-```
+`Provider.write()` performs a non-blocking enqueue attempt. With the default `SUSPEND` overflow
+policy it does not wait for capacity; when the channel is full, the newest record is rejected and
+the already accepted FIFO prefix is preserved. `AsyncProvider.writeAsync()` suspends until channel
+capacity is available. Coroutine `*Async` calls targeting a regular `Provider` still delegate to
+the same non-blocking `write()` path.
 
 
 
@@ -376,7 +332,7 @@ suspend fun processRequest() {
     }
 }
 
-// On JS platform
+// On JS/Node (native async-chain scope)
 fun processRequest() {
     MDC.withContext {
         MDC.put("requestId", "12345")
@@ -394,6 +350,14 @@ fun processRequest() {
     }
 }
 ```
+
+On JS/Node, MDC follows Node `AsyncLocalStorage` resources. Root operations, nested scope restoration,
+and values across a native async chain are supported. Kotlin coroutine siblings are not distinct Node
+async resources in every resume path, so sibling-local MDC mutation is not guaranteed to be isolated.
+Each `LogRecord` still takes a deep MDC snapshot when the logging call is made.
+
+On Kotlin/Native, MDC is thread-local. Basic operations and log-call snapshots are supported on the
+current thread, but automatic propagation or isolation across coroutine thread switches is not guaranteed.
 
 ## Metrics Configuration
 
@@ -415,9 +379,39 @@ val logger = ColotokLoggerContext()
     .getLogger()
 ```
 
+Runtime metrics describe enqueue and buffering behavior; they do not by themselves confirm that a
+destination accepted a record.
+
+| Event | Log count | Error | Buffer size | Write duration |
+|---|---:|---|---|---:|
+| Accepted normal record | incremented after enqueue acceptance | none | updated by `AsyncProvider` | not emitted |
+| Record filtered by level | none | none | none | not emitted |
+| Full rejection from default synchronous `write()` | none | `buffer_full` | none | not emitted |
+| Rejection after normal close or force shutdown | none | `provider_closed` | none | not emitted |
+| Rejection after provider failure | none | `provider_failed` | none | not emitted |
+| Async publish failure | no additional count | `publish_failed` | failed batch retained | not emitted |
+| Newest record dropped at the retention limit | no additional count | `retention_limit_reached` | remains at the limit | not emitted |
+| `LogRecord.Metrics` | no self-count | no self-error | no self-update | not emitted |
+| Collector throws | best-effort metric is lost | no recursive error | no recursive update | not emitted |
+
+The default synchronous `write()` is best-effort and reports `buffer_full` instead of waiting.
+`AsyncProvider.writeAsync()` waits for capacity, so channel pressure alone does not produce a full
+rejection. Terminal failure is still reported, and a provider failure is rethrown to the async
+caller.
+
+`recordWriteDuration()` remains part of `MetricsCollector` for custom instrumentation, but Colotok
+does not currently call it automatically. A future built-in duration metric must first define
+whether it measures queue wait, handler time, publish time, or end-to-end time.
+
+Internal metrics logging writes `LogRecord.Metrics` back to the same provider. It shares the same
+level filter and channel capacity and, for `AsyncProvider`, the same retention buffer. Internal
+metrics can therefore be rejected under pressure. Metrics records do not emit metrics about
+themselves, which prevents recursive growth. `MetricsCollectorSpec.NoOp` disables the base
+collector; internal metrics logging can still be enabled separately.
+
 ## Logger Shutdown
 
-Since version 0.4.2, Colotok supports explicit shutdown to ensure all logs are flushed and resources are released.
+Use graceful shutdown when queued records must be processed before application exit.
 
 ```kotlin
 val context = ColotokLoggerContext()
@@ -427,12 +421,32 @@ val logger = context.getLogger()
 
 // ... logging ...
 
-// Shutdown the context
+// Stops acceptance and suspends until providers flush and close.
 context.shutdown()
 
-// Or force shutdown if you want to close immediately
+// Cancels immediately. Queued records may be lost.
 context.forceShutdown()
 ```
+
+Calling `Provider.close()` only starts graceful closure; call `Provider.join()` to wait for it.
+`Provider.flush()` waits for records accepted before its flush marker while the provider remains
+open. Calling `flush()` after graceful or forced closure has started throws
+`ProviderClosedException`.
+
+The event timestamp, thread, caller where supported, attributes, and MDC are captured when the logging call creates
+the record. Delayed formatting or remote delivery therefore keeps the original event time, and later
+attribute/MDC mutation does not change output. All providers for one log call receive the same event instance.
+JavaScript currently leaves caller empty because no portable JS call-site implementation is provided.
+
+`AsyncProvider.bufferSize` is the publish threshold (`1..4096`). After a publish failure, records
+are retained up to four times that threshold, with an absolute cap of 4096. Once full, the newest
+record is dropped so older retained records remain available for retry. A failed publish retains the
+submitted records; a destination that accepted only part of a batch may therefore receive
+duplicates on retry. Remote consumers should tolerate at-least-once delivery.
+
+Automatic publish failures are recorded and retained for a later attempt. A failure during an
+explicit `flush()` is returned to the caller and makes the provider fail; `join()` then reports the
+same original failure.
 
 # Document
 https://milkcocoa0902.github.io/colotok/01-colotok-introduce.html

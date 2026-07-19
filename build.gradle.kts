@@ -1,19 +1,61 @@
+import kotlinx.validation.KotlinApiBuildTask
+import kotlinx.validation.KotlinApiCompareTask
+
 plugins {
     alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
-    alias(libs.plugins.androidLibrary) apply false
+    alias(libs.plugins.androidMultiplatformLibrary) apply false
     alias(libs.plugins.sonatypeCentralUpload) apply false
     id("maven-publish")
     id("signing")
     alias(libs.plugins.mavenPublish) apply false
     alias(libs.plugins.kover) apply false
+    alias(libs.plugins.binaryCompatibilityValidator)
     jacoco
+}
+
+apiValidation {
+    ignoredProjects.add("sample")
 }
 // ルート build.gradle.kts
 subprojects {
     group = "io.github.milkcocoa0902"
     version = "0.4.2"
+
+    val moduleName = name
+    pluginManager.withPlugin("kotlin-multiplatform") {
+        if (moduleName in setOf("colotok", "colotok-coroutines", "colotok-loki")) {
+            // BCV 0.18.1 does not discover AGP 9 external Android-KMP targets (BCV #312).
+            // Remove this bridge once BCV or KGP validates that target directly.
+            val androidKmpApiBuild = tasks.register<KotlinApiBuildTask>("androidKmpApiBuild") {
+                description = "Builds the public Android API dump for the AGP 9 Android-KMP target"
+                dependsOn("compileAndroidMain")
+                inputClassesDirs.from(layout.buildDirectory.dir("classes/kotlin/android/main"))
+                outputApiFile.set(layout.buildDirectory.file("api/android/$moduleName.api"))
+                runtimeClasspath.from(configurations.named("bcv-rt-jvm-cp-resolver"))
+            }
+            val androidKmpApiCheck = tasks.register<KotlinApiCompareTask>("androidKmpApiCheck") {
+                group = LifecycleBasePlugin.VERIFICATION_GROUP
+                description = "Checks the Android-KMP public API against the checked-in golden dump"
+                dependsOn(androidKmpApiBuild)
+                projectApiFile.set(layout.projectDirectory.file("api/android/$moduleName.api"))
+                generatedApiFile.set(androidKmpApiBuild.flatMap { it.outputApiFile })
+            }
+
+            tasks.named("apiCheck") {
+                dependsOn(androidKmpApiCheck)
+            }
+        }
+    }
+
+    tasks.withType<Sign>().configureEach {
+        onlyIf("publication signing is enabled") {
+            !providers.gradleProperty("colotok.skipPublicationSigning")
+                .map(String::toBoolean)
+                .getOrElse(false)
+        }
+    }
 }
 
 

@@ -34,14 +34,15 @@ class ColotokLogger(
         msg: String
     ) {
         val p = providers
-        val a = attrs
+        if (p.none { level.isEnabledFor(it.config.level) }) return
+        val record = LogRecord.PlainText(
+            name = name,
+            msg = msg,
+            level = level,
+            attr = attrs.toMap()
+        )
         p.forEach {
-            it.write(LogRecord.PlainText(
-                name = name,
-                msg = msg,
-                level = level,
-                attr = a
-            ))
+            it.write(record)
         }
     }
 
@@ -57,14 +58,15 @@ class ColotokLogger(
         attr: Map<String, String>
     ) {
         val p = providers
-        val a = attrs.plus(attr)
+        if (p.none { level.isEnabledFor(it.config.level) }) return
+        val record = LogRecord.PlainText(
+            name = name,
+            msg = msg,
+            level = level,
+            attr = attrs.plus(attr)
+        )
         p.forEach {
-            it.write(LogRecord.PlainText(
-                name = name,
-                msg = msg,
-                level = level,
-                attr = a
-            ))
+            it.write(record)
         }
     }
 
@@ -78,15 +80,16 @@ class ColotokLogger(
         msg: T
     ) {
         val p = providers
-        val a = attrs
+        if (p.none { level.isEnabledFor(it.config.level) }) return
+        val record = LogRecord.StructuredText(
+            name = name,
+            msg = msg,
+            level = level,
+            serializer = serializer<T>(),
+            attr = attrs.toMap()
+        )
         p.forEach {
-            it.write(LogRecord.StructuredText(
-                name = name,
-                msg = msg,
-                level = level,
-                serializer = serializer<T>(),
-                attr = a
-            ))
+            it.write(record)
         }
     }
 
@@ -102,15 +105,16 @@ class ColotokLogger(
         attr: Map<String, String>
     ) {
         val p = providers
-        val a = attrs.plus(attr)
+        if (p.none { level.isEnabledFor(it.config.level) }) return
+        val record = LogRecord.StructuredText(
+            name = name,
+            msg = msg,
+            level = level,
+            serializer = serializer<T>(),
+            attr = attrs.plus(attr)
+        )
         p.forEach {
-            it.write(LogRecord.StructuredText(
-                name = name,
-                msg = msg,
-                level = level,
-                serializer = serializer<T>(),
-                attr = a
-            ))
+            it.write(record)
         }
     }
 
@@ -118,18 +122,30 @@ class ColotokLogger(
      * Shutdown the logger and wait for all providers to finish processing.
      */
     suspend fun shutdown() {
-        providers.forEach {
-            it.join()
+        var firstFailure: Throwable? = null
+        providers.forEach { provider ->
+            try {
+                provider.join()
+            } catch (throwable: Throwable) {
+                if (firstFailure == null) firstFailure = throwable
+            }
         }
+        firstFailure?.let { throw it }
     }
 
     /**
      * Shutdown the logger immediately.
      */
     fun forceShutdown() {
-        providers.forEach {
-            it.forceShutdown()
+        var firstFailure: Throwable? = null
+        providers.forEach { provider ->
+            try {
+                provider.forceShutdown()
+            } catch (throwable: Throwable) {
+                if (firstFailure == null) firstFailure = throwable
+            }
         }
+        firstFailure?.let { throw it }
     }
 
     /**
@@ -408,9 +424,11 @@ class ColotokLogger(
         level: Level,
         block: LevelScopedColotokLogger.() -> Unit
     ) {
+        val p = providers
+        if (p.none { level.isEnabledFor(it.config.level) }) return
         LevelScopedColotokLogger(
             name = name,
-            providers = providers,
+            providers = p,
             attrs = attrs,
             level = level
         ).block()

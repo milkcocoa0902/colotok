@@ -7,27 +7,27 @@ Define your formatter which you need.
 To used to embed the datetime when you print the log.   
 Formatted as `yyyy-MM-ddTHH:mm:ss.SSS`  
 
-> Your application locale is used. NOT UTC
+> The event timestamp captured at the log call is formatted in UTC.
 {style="note"}
 
 ### `Element.DATE`
 To used to embed the date when you print the log.  
 Formatted as `yyyy-MM-dd`
 
-> when structured logging, ignored if `DATETIME` is also specified,  
-> and if used with `TIME`, would be work like `DATETIME`
-{style=warning}
+> For structured logging, `DATETIME` takes precedence. `DATE` plus `TIME` is treated as
+> `DATETIME`; a single `DATE` emits only the date. Duplicate time fields are normalized silently.
+{style="note"}
 
 ### `Element.TIME`
 To used to embed the time when you print the log.  
 Formatted as `HH:mm:ss.SSS`
 
-> Your application locale is used. NOT UTC
+> The event timestamp captured at the log call is formatted in UTC.
 {style="note"}
 
-> when structured logging, ignored if `DATETIME` is also specified,  
-> and if used with `DATE`, would be work like `DATETIME`
-{style=warning}
+> For structured logging, `DATETIME` takes precedence. `DATE` plus `TIME` is treated as
+> `DATETIME`; a single `TIME` emits only the time. Duplicate time fields are normalized silently.
+{style="note"}
 
 ### `Element.LEVEL` ...  
 To used to embed the log level.
@@ -108,4 +108,3 @@ val logger = ColotokLoggerContext()
 
 ### Field masking
 Structured Formatter will replace by `*` which provided by `mask` field. 
-

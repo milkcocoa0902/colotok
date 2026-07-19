@@ -1,0 +1,759 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, macosArm64, macosX64]
+// Alias: apple => [iosArm64, iosSimulatorArm64, iosX64, macosArm64, macosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.milkcocoa0902:colotok>
+final enum class com.milkcocoa.info.colotok.util.color/AnsiColor : kotlin/Enum<com.milkcocoa.info.colotok.util.color/AnsiColor> { // com.milkcocoa.info.colotok.util.color/AnsiColor|null[0]
+    enum entry BLACK // com.milkcocoa.info.colotok.util.color/AnsiColor.BLACK|null[0]
+    enum entry BLUE // com.milkcocoa.info.colotok.util.color/AnsiColor.BLUE|null[0]
+    enum entry CYAN // com.milkcocoa.info.colotok.util.color/AnsiColor.CYAN|null[0]
+    enum entry GREEN // com.milkcocoa.info.colotok.util.color/AnsiColor.GREEN|null[0]
+    enum entry MAGENTA // com.milkcocoa.info.colotok.util.color/AnsiColor.MAGENTA|null[0]
+    enum entry RED // com.milkcocoa.info.colotok.util.color/AnsiColor.RED|null[0]
+    enum entry WHITE // com.milkcocoa.info.colotok.util.color/AnsiColor.WHITE|null[0]
+    enum entry YELLOW // com.milkcocoa.info.colotok.util.color/AnsiColor.YELLOW|null[0]
+
+    final val code // com.milkcocoa.info.colotok.util.color/AnsiColor.code|{}code[0]
+        final fun <get-code>(): kotlin/Int // com.milkcocoa.info.colotok.util.color/AnsiColor.code.<get-code>|<get-code>(){}[0]
+    final val entries // com.milkcocoa.info.colotok.util.color/AnsiColor.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<com.milkcocoa.info.colotok.util.color/AnsiColor> // com.milkcocoa.info.colotok.util.color/AnsiColor.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.util.color/AnsiColor.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<com.milkcocoa.info.colotok.util.color/AnsiColor> // com.milkcocoa.info.colotok.util.color/AnsiColor.values|values#static(){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.formatter.details/Formatter { // com.milkcocoa.info.colotok.core.formatter.details/Formatter|null[0]
+    abstract fun <#A1: com.milkcocoa.info.colotok.core.formatter.details/LogStructure> format(com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText<#A1>): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/Formatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.StructuredText<0:0>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    abstract fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/Formatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics){}[0]
+    abstract fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/Formatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.PlainText){}[0]
+    open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/Formatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+    open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.Pin): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/Formatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.Pin){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.formatter.details/LogStructure { // com.milkcocoa.info.colotok.core.formatter.details/LogStructure|null[0]
+    open fun stringify(): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/LogStructure.stringify|stringify(){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.metrics/MetricsCollector { // com.milkcocoa.info.colotok.core.metrics/MetricsCollector|null[0]
+    abstract fun incrementErrorCount(kotlin/String, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/MetricsCollector.incrementErrorCount|incrementErrorCount(kotlin.String;kotlin.String){}[0]
+    abstract fun incrementLogCount(com.milkcocoa.info.colotok.core.level/Level, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/MetricsCollector.incrementLogCount|incrementLogCount(com.milkcocoa.info.colotok.core.level.Level;kotlin.String){}[0]
+    abstract fun recordWriteDuration(kotlin/String, kotlin/Long) // com.milkcocoa.info.colotok.core.metrics/MetricsCollector.recordWriteDuration|recordWriteDuration(kotlin.String;kotlin.Long){}[0]
+    abstract fun updateBufferSize(kotlin/String, kotlin/Int) // com.milkcocoa.info.colotok.core.metrics/MetricsCollector.updateBufferSize|updateBufferSize(kotlin.String;kotlin.Int){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.provider.details/IProvider : kotlin/AutoCloseable { // com.milkcocoa.info.colotok.core.provider.details/IProvider|null[0]
+    abstract val channel // com.milkcocoa.info.colotok.core.provider.details/IProvider.channel|{}channel[0]
+        abstract fun <get-channel>(): kotlinx.coroutines.channels/Channel<com.milkcocoa.info.colotok.core.logger/LogRecord> // com.milkcocoa.info.colotok.core.provider.details/IProvider.channel.<get-channel>|<get-channel>(){}[0]
+    abstract val config // com.milkcocoa.info.colotok.core.provider.details/IProvider.config|{}config[0]
+        abstract fun <get-config>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig // com.milkcocoa.info.colotok.core.provider.details/IProvider.config.<get-config>|<get-config>(){}[0]
+    abstract val coroutineScope // com.milkcocoa.info.colotok.core.provider.details/IProvider.coroutineScope|{}coroutineScope[0]
+        abstract fun <get-coroutineScope>(): kotlinx.coroutines/CoroutineScope // com.milkcocoa.info.colotok.core.provider.details/IProvider.coroutineScope.<get-coroutineScope>|<get-coroutineScope>(){}[0]
+    abstract val job // com.milkcocoa.info.colotok.core.provider.details/IProvider.job|{}job[0]
+        abstract fun <get-job>(): kotlinx.coroutines/Job // com.milkcocoa.info.colotok.core.provider.details/IProvider.job.<get-job>|<get-job>(){}[0]
+
+    abstract fun write(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.details/IProvider.write|write(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+    abstract suspend fun flush(kotlin.time/Duration = ...) // com.milkcocoa.info.colotok.core.provider.details/IProvider.flush|flush(kotlin.time.Duration){}[0]
+    abstract suspend fun onMessage(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.details/IProvider.onMessage|onMessage(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+    open fun forceShutdown() // com.milkcocoa.info.colotok.core.provider.details/IProvider.forceShutdown|forceShutdown(){}[0]
+    open fun onClosed() // com.milkcocoa.info.colotok.core.provider.details/IProvider.onClosed|onClosed(){}[0]
+    open suspend fun onFlush() // com.milkcocoa.info.colotok.core.provider.details/IProvider.onFlush|onFlush(){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig { // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig|null[0]
+    abstract var colorize // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.colorize|{}colorize[0]
+        abstract fun <get-colorize>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.colorize.<get-colorize>|<get-colorize>(){}[0]
+        abstract fun <set-colorize>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.colorize.<set-colorize>|<set-colorize>(kotlin.Boolean){}[0]
+    abstract var debugLevelColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.debugLevelColor|{}debugLevelColor[0]
+        abstract fun <get-debugLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.debugLevelColor.<get-debugLevelColor>|<get-debugLevelColor>(){}[0]
+        abstract fun <set-debugLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.debugLevelColor.<set-debugLevelColor>|<set-debugLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    abstract var errorLevelColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.errorLevelColor|{}errorLevelColor[0]
+        abstract fun <get-errorLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.errorLevelColor.<get-errorLevelColor>|<get-errorLevelColor>(){}[0]
+        abstract fun <set-errorLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.errorLevelColor.<set-errorLevelColor>|<set-errorLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    abstract var infoLevelColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.infoLevelColor|{}infoLevelColor[0]
+        abstract fun <get-infoLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.infoLevelColor.<get-infoLevelColor>|<get-infoLevelColor>(){}[0]
+        abstract fun <set-infoLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.infoLevelColor.<set-infoLevelColor>|<set-infoLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    abstract var traceLevelColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.traceLevelColor|{}traceLevelColor[0]
+        abstract fun <get-traceLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.traceLevelColor.<get-traceLevelColor>|<get-traceLevelColor>(){}[0]
+        abstract fun <set-traceLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.traceLevelColor.<set-traceLevelColor>|<set-traceLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    abstract var warnLevelColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.warnLevelColor|{}warnLevelColor[0]
+        abstract fun <get-warnLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.warnLevelColor.<get-warnLevelColor>|<get-warnLevelColor>(){}[0]
+        abstract fun <set-warnLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.warnLevelColor.<set-warnLevelColor>|<set-warnLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+
+    open fun getColorForLevel(com.milkcocoa.info.colotok.core.level/Level): com.milkcocoa.info.colotok.util.color/AnsiColor? // com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig.getColorForLevel|getColorForLevel(com.milkcocoa.info.colotok.core.level.Level){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig|null[0]
+    abstract var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
+        abstract fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
+        abstract fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
+    abstract var formatter // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.formatter|{}formatter[0]
+        abstract fun <get-formatter>(): com.milkcocoa.info.colotok.core.formatter.details/Formatter // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.formatter.<get-formatter>|<get-formatter>(){}[0]
+        abstract fun <set-formatter>(com.milkcocoa.info.colotok.core.formatter.details/Formatter) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.formatter.<set-formatter>|<set-formatter>(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+    abstract var level // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.level|{}level[0]
+        abstract fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.level.<get-level>|<get-level>(){}[0]
+        abstract fun <set-level>(com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.level.<set-level>|<set-level>(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    abstract var metricsSpec // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.metricsSpec|{}metricsSpec[0]
+        abstract fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
+        abstract fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+}
+
+abstract interface com.milkcocoa.info.colotok.core.provider.rotation/Rotation { // com.milkcocoa.info.colotok.core.provider.rotation/Rotation|null[0]
+    abstract fun doRotate(okio/Path) // com.milkcocoa.info.colotok.core.provider.rotation/Rotation.doRotate|doRotate(okio.Path){}[0]
+    abstract fun isRotateNeeded(okio/Path): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.rotation/Rotation.isRotateNeeded|isRotateNeeded(okio.Path){}[0]
+}
+
+sealed interface com.milkcocoa.info.colotok.core.logger/LogRecord { // com.milkcocoa.info.colotok.core.logger/LogRecord|null[0]
+    abstract val attr // com.milkcocoa.info.colotok.core.logger/LogRecord.attr|{}attr[0]
+        abstract fun <get-attr>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.attr.<get-attr>|<get-attr>(){}[0]
+    abstract val level // com.milkcocoa.info.colotok.core.logger/LogRecord.level|{}level[0]
+        abstract fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.level.<get-level>|<get-level>(){}[0]
+    abstract val mdcContextDataSnapshot // com.milkcocoa.info.colotok.core.logger/LogRecord.mdcContextDataSnapshot|{}mdcContextDataSnapshot[0]
+        abstract fun <get-mdcContextDataSnapshot>(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/LogRecord.mdcContextDataSnapshot.<get-mdcContextDataSnapshot>|<get-mdcContextDataSnapshot>(){}[0]
+    abstract val name // com.milkcocoa.info.colotok.core.logger/LogRecord.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.name.<get-name>|<get-name>(){}[0]
+    abstract val threadName // com.milkcocoa.info.colotok.core.logger/LogRecord.threadName|{}threadName[0]
+        abstract fun <get-threadName>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.threadName.<get-threadName>|<get-threadName>(){}[0]
+
+    abstract fun format(com.milkcocoa.info.colotok.core.formatter.details/Formatter): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.format|format(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+
+    final class <#A1: com.milkcocoa.info.colotok.core.formatter.details/LogStructure> StructuredText : com.milkcocoa.info.colotok.core.logger/LogRecord { // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText|null[0]
+        constructor <init>(kotlin/String, #A1, com.milkcocoa.info.colotok.core.level/Level, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlinx.serialization/KSerializer<#A1>, kotlin.time/Instant = ...) // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.<init>|<init>(kotlin.String;1:0;com.milkcocoa.info.colotok.core.level.Level;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlinx.serialization.KSerializer<1:0>;kotlin.time.Instant){}[0]
+
+        final val attr // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.attr|{}attr[0]
+            final fun <get-attr>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.attr.<get-attr>|<get-attr>(){}[0]
+        final val eventTimestamp // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.eventTimestamp|{}eventTimestamp[0]
+            final fun <get-eventTimestamp>(): kotlin.time/Instant // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.eventTimestamp.<get-eventTimestamp>|<get-eventTimestamp>(){}[0]
+        final val level // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.level|{}level[0]
+            final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.level.<get-level>|<get-level>(){}[0]
+        final val mdcContextDataSnapshot // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.mdcContextDataSnapshot|{}mdcContextDataSnapshot[0]
+            final fun <get-mdcContextDataSnapshot>(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.mdcContextDataSnapshot.<get-mdcContextDataSnapshot>|<get-mdcContextDataSnapshot>(){}[0]
+        final val msg // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.msg|{}msg[0]
+            final fun <get-msg>(): #A1 // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.msg.<get-msg>|<get-msg>(){}[0]
+        final val name // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.name|{}name[0]
+            final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.name.<get-name>|<get-name>(){}[0]
+        final val serializer // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.serializer|{}serializer[0]
+            final fun <get-serializer>(): kotlinx.serialization/KSerializer<#A1> // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.serializer.<get-serializer>|<get-serializer>(){}[0]
+        final val threadName // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.threadName|{}threadName[0]
+            final fun <get-threadName>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.threadName.<get-threadName>|<get-threadName>(){}[0]
+
+        final fun component1(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.component1|component1(){}[0]
+        final fun component2(): #A1 // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.component2|component2(){}[0]
+        final fun component3(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.component3|component3(){}[0]
+        final fun component4(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.component4|component4(){}[0]
+        final fun component5(): kotlinx.serialization/KSerializer<#A1> // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.component5|component5(){}[0]
+        final fun component6(): kotlin.time/Instant // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.component6|component6(){}[0]
+        final fun copy(kotlin/String = ..., #A1 = ..., com.milkcocoa.info.colotok.core.level/Level = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlinx.serialization/KSerializer<#A1> = ..., kotlin.time/Instant = ...): com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText<#A1> // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.copy|copy(kotlin.String;1:0;com.milkcocoa.info.colotok.core.level.Level;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlinx.serialization.KSerializer<1:0>;kotlin.time.Instant){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.equals|equals(kotlin.Any?){}[0]
+        final fun format(com.milkcocoa.info.colotok.core.formatter.details/Formatter): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.format|format(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+        final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText.toString|toString(){}[0]
+    }
+
+    final class Metrics : com.milkcocoa.info.colotok.core.logger/LogRecord { // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics|null[0]
+        constructor <init>(kotlin/String, kotlin/String, com.milkcocoa.info.colotok.core.level/Level, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin.time/Instant = ...) // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.<init>|<init>(kotlin.String;kotlin.String;com.milkcocoa.info.colotok.core.level.Level;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.time.Instant){}[0]
+
+        final val attr // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.attr|{}attr[0]
+            final fun <get-attr>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.attr.<get-attr>|<get-attr>(){}[0]
+        final val eventTimestamp // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.eventTimestamp|{}eventTimestamp[0]
+            final fun <get-eventTimestamp>(): kotlin.time/Instant // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.eventTimestamp.<get-eventTimestamp>|<get-eventTimestamp>(){}[0]
+        final val level // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.level|{}level[0]
+            final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.level.<get-level>|<get-level>(){}[0]
+        final val mdcContextDataSnapshot // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.mdcContextDataSnapshot|{}mdcContextDataSnapshot[0]
+            final fun <get-mdcContextDataSnapshot>(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.mdcContextDataSnapshot.<get-mdcContextDataSnapshot>|<get-mdcContextDataSnapshot>(){}[0]
+        final val msg // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.msg|{}msg[0]
+            final fun <get-msg>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.msg.<get-msg>|<get-msg>(){}[0]
+        final val name // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.name|{}name[0]
+            final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.name.<get-name>|<get-name>(){}[0]
+        final val threadName // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.threadName|{}threadName[0]
+            final fun <get-threadName>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.threadName.<get-threadName>|<get-threadName>(){}[0]
+
+        final fun component1(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.component1|component1(){}[0]
+        final fun component2(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.component2|component2(){}[0]
+        final fun component3(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.component3|component3(){}[0]
+        final fun component4(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.component4|component4(){}[0]
+        final fun component5(): kotlin.time/Instant // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.component5|component5(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/String = ..., com.milkcocoa.info.colotok.core.level/Level = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin.time/Instant = ...): com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.copy|copy(kotlin.String;kotlin.String;com.milkcocoa.info.colotok.core.level.Level;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.time.Instant){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.equals|equals(kotlin.Any?){}[0]
+        final fun format(com.milkcocoa.info.colotok.core.formatter.details/Formatter): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.format|format(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+        final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics.toString|toString(){}[0]
+    }
+
+    final class Pin : com.milkcocoa.info.colotok.core.logger/LogRecord { // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin|null[0]
+        constructor <init>(kotlinx.coroutines/CompletableDeferred<kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.<init>|<init>(kotlinx.coroutines.CompletableDeferred<kotlin.Unit>){}[0]
+
+        final val attr // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.attr|{}attr[0]
+            final fun <get-attr>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.attr.<get-attr>|<get-attr>(){}[0]
+        final val deferred // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.deferred|{}deferred[0]
+            final fun <get-deferred>(): kotlinx.coroutines/CompletableDeferred<kotlin/Unit> // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.deferred.<get-deferred>|<get-deferred>(){}[0]
+        final val level // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.level|{}level[0]
+            final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.level.<get-level>|<get-level>(){}[0]
+        final val mdcContextDataSnapshot // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.mdcContextDataSnapshot|{}mdcContextDataSnapshot[0]
+            final fun <get-mdcContextDataSnapshot>(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.mdcContextDataSnapshot.<get-mdcContextDataSnapshot>|<get-mdcContextDataSnapshot>(){}[0]
+        final val name // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.name|{}name[0]
+            final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.name.<get-name>|<get-name>(){}[0]
+        final val threadName // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.threadName|{}threadName[0]
+            final fun <get-threadName>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.threadName.<get-threadName>|<get-threadName>(){}[0]
+
+        final fun component1(): kotlinx.coroutines/CompletableDeferred<kotlin/Unit> // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.component1|component1(){}[0]
+        final fun copy(kotlinx.coroutines/CompletableDeferred<kotlin/Unit> = ...): com.milkcocoa.info.colotok.core.logger/LogRecord.Pin // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.copy|copy(kotlinx.coroutines.CompletableDeferred<kotlin.Unit>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.equals|equals(kotlin.Any?){}[0]
+        final fun format(com.milkcocoa.info.colotok.core.formatter.details/Formatter): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.format|format(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+        final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.Pin.toString|toString(){}[0]
+    }
+
+    final class PlainText : com.milkcocoa.info.colotok.core.logger/LogRecord { // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText|null[0]
+        constructor <init>(kotlin/String, kotlin/String, com.milkcocoa.info.colotok.core.level/Level, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin.time/Instant = ...) // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.<init>|<init>(kotlin.String;kotlin.String;com.milkcocoa.info.colotok.core.level.Level;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.time.Instant){}[0]
+
+        final val attr // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.attr|{}attr[0]
+            final fun <get-attr>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.attr.<get-attr>|<get-attr>(){}[0]
+        final val eventTimestamp // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.eventTimestamp|{}eventTimestamp[0]
+            final fun <get-eventTimestamp>(): kotlin.time/Instant // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.eventTimestamp.<get-eventTimestamp>|<get-eventTimestamp>(){}[0]
+        final val level // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.level|{}level[0]
+            final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.level.<get-level>|<get-level>(){}[0]
+        final val mdcContextDataSnapshot // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.mdcContextDataSnapshot|{}mdcContextDataSnapshot[0]
+            final fun <get-mdcContextDataSnapshot>(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.mdcContextDataSnapshot.<get-mdcContextDataSnapshot>|<get-mdcContextDataSnapshot>(){}[0]
+        final val msg // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.msg|{}msg[0]
+            final fun <get-msg>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.msg.<get-msg>|<get-msg>(){}[0]
+        final val name // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.name|{}name[0]
+            final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.name.<get-name>|<get-name>(){}[0]
+        final val threadName // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.threadName|{}threadName[0]
+            final fun <get-threadName>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.threadName.<get-threadName>|<get-threadName>(){}[0]
+
+        final fun component1(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.component1|component1(){}[0]
+        final fun component2(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.component2|component2(){}[0]
+        final fun component3(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.component3|component3(){}[0]
+        final fun component4(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.component4|component4(){}[0]
+        final fun component5(): kotlin.time/Instant // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.component5|component5(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/String = ..., com.milkcocoa.info.colotok.core.level/Level = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin.time/Instant = ...): com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.copy|copy(kotlin.String;kotlin.String;com.milkcocoa.info.colotok.core.level.Level;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.time.Instant){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.equals|equals(kotlin.Any?){}[0]
+        final fun format(com.milkcocoa.info.colotok.core.formatter.details/Formatter): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.format|format(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+        final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText.toString|toString(){}[0]
+    }
+}
+
+abstract class com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter : com.milkcocoa.info.colotok.core.formatter.details/Formatter { // com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter|null[0]
+    constructor <init>(kotlin.collections/List<com.milkcocoa.info.colotok.core.formatter/Element>, kotlin.collections/List<kotlin/String> = ...) // com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter.<init>|<init>(kotlin.collections.List<com.milkcocoa.info.colotok.core.formatter.Element>;kotlin.collections.List<kotlin.String>){}[0]
+
+    open fun <#A1: com.milkcocoa.info.colotok.core.formatter.details/LogStructure> format(com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText<#A1>): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.StructuredText<0:0>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics){}[0]
+    open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.PlainText){}[0]
+}
+
+abstract class com.milkcocoa.info.colotok.core.formatter.details/TextFormatter : com.milkcocoa.info.colotok.core.formatter.details/Formatter { // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter|null[0]
+    constructor <init>(kotlin/String) // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.<init>|<init>(kotlin.String){}[0]
+
+    open fun <#A1: com.milkcocoa.info.colotok.core.formatter.details/LogStructure> format(com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText<#A1>): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.StructuredText<0:0>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics){}[0]
+    open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.PlainText){}[0]
+}
+
+abstract class com.milkcocoa.info.colotok.core.level/Level { // com.milkcocoa.info.colotok.core.level/Level|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.level/Level.<init>|<init>(kotlin.Int;kotlin.String;com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+
+    final val color // com.milkcocoa.info.colotok.core.level/Level.color|{}color[0]
+        final fun <get-color>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.level/Level.color.<get-color>|<get-color>(){}[0]
+    final val levelInt // com.milkcocoa.info.colotok.core.level/Level.levelInt|{}levelInt[0]
+        final fun <get-levelInt>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/Level.levelInt.<get-levelInt>|<get-levelInt>(){}[0]
+    final val name // com.milkcocoa.info.colotok.core.level/Level.name|{}name[0]
+        final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.level/Level.name.<get-name>|<get-name>(){}[0]
+
+    final fun isEnabledFor(com.milkcocoa.info.colotok.core.level/Level): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/Level.isEnabledFor|isEnabledFor(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    final fun toInt(): kotlin/Int // com.milkcocoa.info.colotok.core.level/Level.toInt|toInt(){}[0]
+    final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.level/Level.toString|toString(){}[0]
+}
+
+abstract class com.milkcocoa.info.colotok.core.provider.details/Provider : com.milkcocoa.info.colotok.core.provider.details/IProvider { // com.milkcocoa.info.colotok.core.provider.details/Provider|null[0]
+    constructor <init>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig, kotlinx.coroutines.channels/BufferOverflow = ...) // com.milkcocoa.info.colotok.core.provider.details/Provider.<init>|<init>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig;kotlinx.coroutines.channels.BufferOverflow){}[0]
+
+    open val channel // com.milkcocoa.info.colotok.core.provider.details/Provider.channel|{}channel[0]
+        open fun <get-channel>(): kotlinx.coroutines.channels/Channel<com.milkcocoa.info.colotok.core.logger/LogRecord> // com.milkcocoa.info.colotok.core.provider.details/Provider.channel.<get-channel>|<get-channel>(){}[0]
+    open val config // com.milkcocoa.info.colotok.core.provider.details/Provider.config|{}config[0]
+        open fun <get-config>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig // com.milkcocoa.info.colotok.core.provider.details/Provider.config.<get-config>|<get-config>(){}[0]
+    open val coroutineScope // com.milkcocoa.info.colotok.core.provider.details/Provider.coroutineScope|{}coroutineScope[0]
+        open fun <get-coroutineScope>(): kotlinx.coroutines/CoroutineScope // com.milkcocoa.info.colotok.core.provider.details/Provider.coroutineScope.<get-coroutineScope>|<get-coroutineScope>(){}[0]
+    open val job // com.milkcocoa.info.colotok.core.provider.details/Provider.job|{}job[0]
+        open fun <get-job>(): kotlinx.coroutines/Job // com.milkcocoa.info.colotok.core.provider.details/Provider.job.<get-job>|<get-job>(){}[0]
+
+    final var effectiveMetricsCollector // com.milkcocoa.info.colotok.core.provider.details/Provider.effectiveMetricsCollector|{}effectiveMetricsCollector[0]
+        final fun <get-effectiveMetricsCollector>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollector // com.milkcocoa.info.colotok.core.provider.details/Provider.effectiveMetricsCollector.<get-effectiveMetricsCollector>|<get-effectiveMetricsCollector>(){}[0]
+        final fun <set-effectiveMetricsCollector>(com.milkcocoa.info.colotok.core.metrics/MetricsCollector) // com.milkcocoa.info.colotok.core.provider.details/Provider.effectiveMetricsCollector.<set-effectiveMetricsCollector>|<set-effectiveMetricsCollector>(com.milkcocoa.info.colotok.core.metrics.MetricsCollector){}[0]
+
+    final suspend fun join() // com.milkcocoa.info.colotok.core.provider.details/Provider.join|join(){}[0]
+    open fun close() // com.milkcocoa.info.colotok.core.provider.details/Provider.close|close(){}[0]
+    open fun forceShutdown() // com.milkcocoa.info.colotok.core.provider.details/Provider.forceShutdown|forceShutdown(){}[0]
+    open fun write(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.details/Provider.write|write(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+    open suspend fun flush(kotlin.time/Duration) // com.milkcocoa.info.colotok.core.provider.details/Provider.flush|flush(kotlin.time.Duration){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.logger/ColotokConfig { // com.milkcocoa.info.colotok.core.logger/ColotokConfig|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.logger/ColotokConfig.<init>|<init>(){}[0]
+
+    final var defaultAttrs // com.milkcocoa.info.colotok.core.logger/ColotokConfig.defaultAttrs|{}defaultAttrs[0]
+        final fun <get-defaultAttrs>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/ColotokConfig.defaultAttrs.<get-defaultAttrs>|<get-defaultAttrs>(){}[0]
+        final fun <set-defaultAttrs>(kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokConfig.defaultAttrs.<set-defaultAttrs>|<set-defaultAttrs>(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final var providers // com.milkcocoa.info.colotok.core.logger/ColotokConfig.providers|{}providers[0]
+        final fun <get-providers>(): kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider> // com.milkcocoa.info.colotok.core.logger/ColotokConfig.providers.<get-providers>|<get-providers>(){}[0]
+        final fun <set-providers>(kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider>) // com.milkcocoa.info.colotok.core.logger/ColotokConfig.providers.<set-providers>|<set-providers>(kotlin.collections.List<com.milkcocoa.info.colotok.core.provider.details.Provider>){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.logger/ColotokLogger { // com.milkcocoa.info.colotok.core.logger/ColotokLogger|null[0]
+    constructor <init>(kotlin/String, com.milkcocoa.info.colotok.core.logger/ColotokConfig) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.<init>|<init>(kotlin.String;com.milkcocoa.info.colotok.core.logger.ColotokConfig){}[0]
+    constructor <init>(kotlin/String, kotlin/Function0<kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider>>, kotlin/Function0<kotlin.collections/Map<kotlin/String, kotlin/String>>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.<init>|<init>(kotlin.String;kotlin.Function0<kotlin.collections.List<com.milkcocoa.info.colotok.core.provider.details.Provider>>;kotlin.Function0<kotlin.collections.Map<kotlin.String,kotlin.String>>){}[0]
+    constructor <init>(kotlin/String, kotlin/Function1<com.milkcocoa.info.colotok.core.logger/ColotokConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.<init>|<init>(kotlin.String;kotlin.Function1<com.milkcocoa.info.colotok.core.logger.ColotokConfig,kotlin.Unit>){}[0]
+
+    final val attrs // com.milkcocoa.info.colotok.core.logger/ColotokLogger.attrs|{}attrs[0]
+        final fun <get-attrs>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/ColotokLogger.attrs.<get-attrs>|<get-attrs>(){}[0]
+    final val name // com.milkcocoa.info.colotok.core.logger/ColotokLogger.name|{}name[0]
+        final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/ColotokLogger.name.<get-name>|<get-name>(){}[0]
+    final val providers // com.milkcocoa.info.colotok.core.logger/ColotokLogger.providers|{}providers[0]
+        final fun <get-providers>(): kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider> // com.milkcocoa.info.colotok.core.logger/ColotokLogger.providers.<get-providers>|<get-providers>(){}[0]
+
+    final fun at(com.milkcocoa.info.colotok.core.level/Level, kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.at|at(com.milkcocoa.info.colotok.core.level.Level;kotlin.String){}[0]
+    final fun at(com.milkcocoa.info.colotok.core.level/Level, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.at|at(com.milkcocoa.info.colotok.core.level.Level;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun debug(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.debug|debug(kotlin.String){}[0]
+    final fun debug(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.debug|debug(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun error(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.error|error(kotlin.String){}[0]
+    final fun error(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.error|error(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun forceShutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLogger.forceShutdown|forceShutdown(){}[0]
+    final fun info(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.info|info(kotlin.String){}[0]
+    final fun info(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.info|info(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun trace(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.trace|trace(kotlin.String){}[0]
+    final fun trace(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.trace|trace(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun warn(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.warn|warn(kotlin.String){}[0]
+    final fun warn(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.warn|warn(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> at(com.milkcocoa.info.colotok.core.level/Level, #A1) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.at|at(com.milkcocoa.info.colotok.core.level.Level;0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> at(com.milkcocoa.info.colotok.core.level/Level, #A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.at|at(com.milkcocoa.info.colotok.core.level.Level;0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> debug(#A1) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.debug|debug(0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> debug(#A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.debug|debug(0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> error(#A1) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.error|error(0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> error(#A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.error|error(0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> info(#A1) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.info|info(0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> info(#A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.info|info(0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> trace(#A1) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.trace|trace(0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> trace(#A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.trace|trace(0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> warn(#A1) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.warn|warn(0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> warn(#A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.warn|warn(0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun at(com.milkcocoa.info.colotok.core.level/Level, kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.at|at(com.milkcocoa.info.colotok.core.level.Level;kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
+    final inline fun atDebug(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atDebug|atDebug(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
+    final inline fun atError(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atError|atError(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
+    final inline fun atInfo(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atInfo|atInfo(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
+    final inline fun atTrace(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atTrace|atTrace(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
+    final inline fun atWarn(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atWarn|atWarn(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
+    final suspend fun shutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLogger.shutdown|shutdown(){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext { // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.<init>|<init>(){}[0]
+
+    final fun addProvider(com.milkcocoa.info.colotok.core.provider.details/Provider): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.addProvider|addProvider(com.milkcocoa.info.colotok.core.provider.details.Provider){}[0]
+    final fun forceShutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.forceShutdown|forceShutdown(){}[0]
+    final fun freeze() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.freeze|freeze(){}[0]
+    final fun getLogger(): com.milkcocoa.info.colotok.core.logger/ColotokLogger // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.getLogger|getLogger(){}[0]
+    final fun getLogger(kotlin/String): com.milkcocoa.info.colotok.core.logger/ColotokLogger // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.getLogger|getLogger(kotlin.String){}[0]
+    final fun putAttrs(kotlin.collections/Map<kotlin/String, kotlin/String>): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.putAttrs|putAttrs(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun shallowCopy(): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.shallowCopy|shallowCopy(){}[0]
+    final fun withAttrs(kotlin.collections/Map<kotlin/String, kotlin/String>): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.withAttrs|withAttrs(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun withMetrics(com.milkcocoa.info.colotok.core.metrics/MetricsCollector): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.withMetrics|withMetrics(com.milkcocoa.info.colotok.core.metrics.MetricsCollector){}[0]
+    final suspend fun shutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.shutdown|shutdown(){}[0]
+
+    final class FrozenContextException : kotlin/IllegalStateException { // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.FrozenContextException|null[0]
+        constructor <init>() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.FrozenContextException.<init>|<init>(){}[0]
+    }
+
+    final object Companion { // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.Companion|null[0]
+        final val DEFAULT // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.Companion.DEFAULT|{}DEFAULT[0]
+            final fun <get-DEFAULT>(): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+        final val default // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.Companion.default|{}default[0]
+            final fun <get-default>(): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.Companion.default.<get-default>|<get-default>(){}[0]
+
+        final fun setDefault(com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext) // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.Companion.setDefault|setDefault(com.milkcocoa.info.colotok.core.logger.ColotokLoggerContext){}[0]
+    }
+}
+
+final class com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger { // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider>, kotlin.collections/Map<kotlin/String, kotlin/String>, com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.<init>|<init>(kotlin.String;kotlin.collections.List<com.milkcocoa.info.colotok.core.provider.details.Provider>;kotlin.collections.Map<kotlin.String,kotlin.String>;com.milkcocoa.info.colotok.core.level.Level){}[0]
+
+    final val attrs // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.attrs|{}attrs[0]
+        final fun <get-attrs>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.attrs.<get-attrs>|<get-attrs>(){}[0]
+    final val level // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.level|{}level[0]
+        final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.level.<get-level>|<get-level>(){}[0]
+    final val name // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.name|{}name[0]
+        final fun <get-name>(): kotlin/String // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.name.<get-name>|<get-name>(){}[0]
+    final val providers // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.providers|{}providers[0]
+        final fun <get-providers>(): kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider> // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.providers.<get-providers>|<get-providers>(){}[0]
+
+    final fun print(kotlin/String) // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.print|print(kotlin.String){}[0]
+    final fun print(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.print|print(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> print(#A1) // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.print|print(0:0){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+    final inline fun <#A1: reified com.milkcocoa.info.colotok.core.formatter.details/LogStructure> print(#A1, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger.print|print(0:0;kotlin.collections.Map<kotlin.String,kotlin.String>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.logger/MDCContextData { // com.milkcocoa.info.colotok.core.logger/MDCContextData|null[0]
+    constructor <init>(kotlin.collections/MutableMap<kotlin/String, kotlin/String> = ..., kotlin.collections/MutableMap<kotlin/String, kotlin.collections/ArrayDeque<kotlin/String>> = ...) // com.milkcocoa.info.colotok.core.logger/MDCContextData.<init>|<init>(kotlin.collections.MutableMap<kotlin.String,kotlin.String>;kotlin.collections.MutableMap<kotlin.String,kotlin.collections.ArrayDeque<kotlin.String>>){}[0]
+
+    final val data // com.milkcocoa.info.colotok.core.logger/MDCContextData.data|{}data[0]
+        final fun <get-data>(): kotlin.collections/MutableMap<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/MDCContextData.data.<get-data>|<get-data>(){}[0]
+    final val dequeData // com.milkcocoa.info.colotok.core.logger/MDCContextData.dequeData|{}dequeData[0]
+        final fun <get-dequeData>(): kotlin.collections/MutableMap<kotlin/String, kotlin.collections/ArrayDeque<kotlin/String>> // com.milkcocoa.info.colotok.core.logger/MDCContextData.dequeData.<get-dequeData>|<get-dequeData>(){}[0]
+
+    final fun component1(): kotlin.collections/MutableMap<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/MDCContextData.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/MutableMap<kotlin/String, kotlin.collections/ArrayDeque<kotlin/String>> // com.milkcocoa.info.colotok.core.logger/MDCContextData.component2|component2(){}[0]
+    final fun copy(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/MDCContextData.copy|copy(){}[0]
+    final fun copy(kotlin.collections/MutableMap<kotlin/String, kotlin/String> = ..., kotlin.collections/MutableMap<kotlin/String, kotlin.collections/ArrayDeque<kotlin/String>> = ...): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/MDCContextData.copy|copy(kotlin.collections.MutableMap<kotlin.String,kotlin.String>;kotlin.collections.MutableMap<kotlin.String,kotlin.collections.ArrayDeque<kotlin.String>>){}[0]
+    final fun deepCopy(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/MDCContextData.deepCopy|deepCopy(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.logger/MDCContextData.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.logger/MDCContextData.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.logger/MDCContextData.toString|toString(){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector : com.milkcocoa.info.colotok.core.metrics/MetricsCollector { // com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector|null[0]
+    constructor <init>(kotlin.collections/List<com.milkcocoa.info.colotok.core.metrics/MetricsCollector>) // com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector.<init>|<init>(kotlin.collections.List<com.milkcocoa.info.colotok.core.metrics.MetricsCollector>){}[0]
+
+    final fun incrementErrorCount(kotlin/String, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector.incrementErrorCount|incrementErrorCount(kotlin.String;kotlin.String){}[0]
+    final fun incrementLogCount(com.milkcocoa.info.colotok.core.level/Level, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector.incrementLogCount|incrementLogCount(com.milkcocoa.info.colotok.core.level.Level;kotlin.String){}[0]
+    final fun recordWriteDuration(kotlin/String, kotlin/Long) // com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector.recordWriteDuration|recordWriteDuration(kotlin.String;kotlin.Long){}[0]
+    final fun updateBufferSize(kotlin/String, kotlin/Int) // com.milkcocoa.info.colotok.core.metrics/CompositeMetricsCollector.updateBufferSize|updateBufferSize(kotlin.String;kotlin.Int){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector : com.milkcocoa.info.colotok.core.metrics/MetricsCollector { // com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector|null[0]
+    constructor <init>(com.milkcocoa.info.colotok.core.provider.details/Provider) // com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector.<init>|<init>(com.milkcocoa.info.colotok.core.provider.details.Provider){}[0]
+
+    final fun incrementErrorCount(kotlin/String, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector.incrementErrorCount|incrementErrorCount(kotlin.String;kotlin.String){}[0]
+    final fun incrementLogCount(com.milkcocoa.info.colotok.core.level/Level, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector.incrementLogCount|incrementLogCount(com.milkcocoa.info.colotok.core.level.Level;kotlin.String){}[0]
+    final fun recordWriteDuration(kotlin/String, kotlin/Long) // com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector.recordWriteDuration|recordWriteDuration(kotlin.String;kotlin.Long){}[0]
+    final fun updateBufferSize(kotlin/String, kotlin/Int) // com.milkcocoa.info.colotok.core.metrics/InternalLoggingMetricsCollector.updateBufferSize|updateBufferSize(kotlin.String;kotlin.Int){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProvider : com.milkcocoa.info.colotok.core.provider.details/Provider { // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProvider|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProvider.<init>|<init>(){}[0]
+    constructor <init>(com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProvider.<init>|<init>(com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig){}[0]
+    constructor <init>(kotlin/Function1<com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProvider.<init>|<init>(kotlin.Function1<com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig,kotlin.Unit>){}[0]
+
+    final suspend fun onMessage(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProvider.onMessage|onMessage(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider : com.milkcocoa.info.colotok.core.provider.details/Provider { // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider|null[0]
+    constructor <init>(okio/Path) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.<init>|<init>(okio.Path){}[0]
+    constructor <init>(okio/Path, com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.<init>|<init>(okio.Path;com.milkcocoa.info.colotok.core.provider.builtin.file.FileProviderConfig){}[0]
+    constructor <init>(okio/Path, kotlin/Function1<com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.<init>|<init>(okio.Path;kotlin.Function1<com.milkcocoa.info.colotok.core.provider.builtin.file.FileProviderConfig,kotlin.Unit>){}[0]
+
+    final suspend fun onFlush() // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.onFlush|onFlush(){}[0]
+    final suspend fun onMessage(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.onMessage|onMessage(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.<init>|<init>(){}[0]
+
+    final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
+        final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
+        final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
+    final var formatter // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.formatter|{}formatter[0]
+        final fun <get-formatter>(): com.milkcocoa.info.colotok.core.formatter.details/Formatter // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.formatter.<get-formatter>|<get-formatter>(){}[0]
+        final fun <set-formatter>(com.milkcocoa.info.colotok.core.formatter.details/Formatter) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.formatter.<set-formatter>|<set-formatter>(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+    final var level // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.level|{}level[0]
+        final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.level.<get-level>|<get-level>(){}[0]
+        final fun <set-level>(com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.level.<set-level>|<set-level>(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    final var metricsSpec // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.metricsSpec|{}metricsSpec[0]
+        final fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
+        final fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+    final var rotation // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.rotation|{}rotation[0]
+        final fun <get-rotation>(): com.milkcocoa.info.colotok.core.provider.rotation/Rotation? // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.rotation.<get-rotation>|<get-rotation>(){}[0]
+        final fun <set-rotation>(com.milkcocoa.info.colotok.core.provider.rotation/Rotation?) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.rotation.<set-rotation>|<set-rotation>(com.milkcocoa.info.colotok.core.provider.rotation.Rotation?){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider : com.milkcocoa.info.colotok.core.provider.details/Provider { // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider.<init>|<init>(){}[0]
+    constructor <init>(com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider.<init>|<init>(com.milkcocoa.info.colotok.core.provider.builtin.stream.StreamProviderConfig){}[0]
+    constructor <init>(kotlin/Function1<com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider.<init>|<init>(kotlin.Function1<com.milkcocoa.info.colotok.core.provider.builtin.stream.StreamProviderConfig,kotlin.Unit>){}[0]
+
+    final suspend fun onFlush() // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider.onFlush|onFlush(){}[0]
+    final suspend fun onMessage(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvider.onMessage|onMessage(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.<init>|<init>(){}[0]
+
+    final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
+        final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
+        final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
+    final var formatter // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.formatter|{}formatter[0]
+        final fun <get-formatter>(): com.milkcocoa.info.colotok.core.formatter.details/Formatter // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.formatter.<get-formatter>|<get-formatter>(){}[0]
+        final fun <set-formatter>(com.milkcocoa.info.colotok.core.formatter.details/Formatter) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.formatter.<set-formatter>|<set-formatter>(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+    final var level // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.level|{}level[0]
+        final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.level.<get-level>|<get-level>(){}[0]
+        final fun <set-level>(com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.level.<set-level>|<set-level>(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    final var metricsSpec // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.metricsSpec|{}metricsSpec[0]
+        final fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
+        final fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+    final var outputStreamBuilder // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.outputStreamBuilder|{}outputStreamBuilder[0]
+        final fun <get-outputStreamBuilder>(): kotlin/Function0<okio/Sink> // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.outputStreamBuilder.<get-outputStreamBuilder>|<get-outputStreamBuilder>(){}[0]
+        final fun <set-outputStreamBuilder>(kotlin/Function0<okio/Sink>) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.outputStreamBuilder.<set-outputStreamBuilder>|<set-outputStreamBuilder>(kotlin.Function0<okio.Sink>){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.details/ProviderClosedException : kotlin/IllegalStateException { // com.milkcocoa.info.colotok.core.provider.details/ProviderClosedException|null[0]
+    constructor <init>(kotlin/String = ...) // com.milkcocoa.info.colotok.core.provider.details/ProviderClosedException.<init>|<init>(kotlin.String){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.rotation/DateBaseRotation : com.milkcocoa.info.colotok.core.provider.rotation/Rotation { // com.milkcocoa.info.colotok.core.provider.rotation/DateBaseRotation|null[0]
+    constructor <init>(kotlin.time/Duration = ...) // com.milkcocoa.info.colotok.core.provider.rotation/DateBaseRotation.<init>|<init>(kotlin.time.Duration){}[0]
+
+    final fun doRotate(okio/Path) // com.milkcocoa.info.colotok.core.provider.rotation/DateBaseRotation.doRotate|doRotate(okio.Path){}[0]
+    final fun isRotateNeeded(okio/Path): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.rotation/DateBaseRotation.isRotateNeeded|isRotateNeeded(okio.Path){}[0]
+}
+
+final class com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation : com.milkcocoa.info.colotok.core.provider.rotation/Rotation { // com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation|null[0]
+    constructor <init>(kotlin/Long = ...) // com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation.<init>|<init>(kotlin.Long){}[0]
+
+    final val size // com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation.size|{}size[0]
+        final fun <get-size>(): kotlin/Long // com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation.size.<get-size>|<get-size>(){}[0]
+
+    final fun doRotate(okio/Path) // com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation.doRotate|doRotate(okio.Path){}[0]
+    final fun isRotateNeeded(okio/Path): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.rotation/SizeBaseRotation.isRotateNeeded|isRotateNeeded(okio.Path){}[0]
+}
+
+sealed class com.milkcocoa.info.colotok.core.formatter/Element { // com.milkcocoa.info.colotok.core.formatter/Element|null[0]
+    open fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.formatter/Element.toString|toString(){}[0]
+
+    final class CUSTOM : com.milkcocoa.info.colotok.core.formatter/Element { // com.milkcocoa.info.colotok.core.formatter/Element.CUSTOM|null[0]
+        constructor <init>(kotlin/String) // com.milkcocoa.info.colotok.core.formatter/Element.CUSTOM.<init>|<init>(kotlin.String){}[0]
+
+        final val raw // com.milkcocoa.info.colotok.core.formatter/Element.CUSTOM.raw|{}raw[0]
+            final fun <get-raw>(): kotlin/String // com.milkcocoa.info.colotok.core.formatter/Element.CUSTOM.raw.<get-raw>|<get-raw>(){}[0]
+    }
+
+    final object ATTR : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.ATTR|null[0]
+
+    final object CALLER : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.CALLER|null[0]
+
+    final object DATE : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.DATE|null[0]
+
+    final object DATETIME : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.DATETIME|null[0]
+
+    final object LEVEL : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.LEVEL|null[0]
+
+    final object MESSAGE : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.MESSAGE|null[0]
+
+    final object NAME : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.NAME|null[0]
+
+    final object THREAD : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.THREAD|null[0]
+
+    final object TIME : com.milkcocoa.info.colotok.core.formatter/Element // com.milkcocoa.info.colotok.core.formatter/Element.TIME|null[0]
+}
+
+sealed class com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec { // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec|null[0]
+    final class Explicit : com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec { // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit|null[0]
+        constructor <init>(com.milkcocoa.info.colotok.core.metrics/MetricsCollector, kotlin/Boolean = ...) // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.<init>|<init>(com.milkcocoa.info.colotok.core.metrics.MetricsCollector;kotlin.Boolean){}[0]
+
+        final val collector // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.collector|{}collector[0]
+            final fun <get-collector>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollector // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.collector.<get-collector>|<get-collector>(){}[0]
+        final val inheritParent // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.inheritParent|{}inheritParent[0]
+            final fun <get-inheritParent>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.inheritParent.<get-inheritParent>|<get-inheritParent>(){}[0]
+
+        final fun component1(): com.milkcocoa.info.colotok.core.metrics/MetricsCollector // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.component2|component2(){}[0]
+        final fun copy(com.milkcocoa.info.colotok.core.metrics/MetricsCollector = ..., kotlin/Boolean = ...): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.copy|copy(com.milkcocoa.info.colotok.core.metrics.MetricsCollector;kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Explicit.toString|toString(){}[0]
+    }
+
+    final object Inherit : com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.Inherit|null[0]
+
+    final object NoOp : com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec.NoOp|null[0]
+}
+
+final object com.milkcocoa.info.colotok.core.formatter.builtin.structure/DetailStructureFormatter : com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter // com.milkcocoa.info.colotok.core.formatter.builtin.structure/DetailStructureFormatter|null[0]
+
+final object com.milkcocoa.info.colotok.core.formatter.builtin.structure/SimpleStructureFormatter : com.milkcocoa.info.colotok.core.formatter.details/StructuredFormatter // com.milkcocoa.info.colotok.core.formatter.builtin.structure/SimpleStructureFormatter|null[0]
+
+final object com.milkcocoa.info.colotok.core.formatter.builtin.text/DetailTextFormatter : com.milkcocoa.info.colotok.core.formatter.details/TextFormatter // com.milkcocoa.info.colotok.core.formatter.builtin.text/DetailTextFormatter|null[0]
+
+final object com.milkcocoa.info.colotok.core.formatter.builtin.text/PlainTextFormatter : com.milkcocoa.info.colotok.core.formatter.details/TextFormatter // com.milkcocoa.info.colotok.core.formatter.builtin.text/PlainTextFormatter|null[0]
+
+final object com.milkcocoa.info.colotok.core.formatter.builtin.text/SimpleTextFormatter : com.milkcocoa.info.colotok.core.formatter.details/TextFormatter // com.milkcocoa.info.colotok.core.formatter.builtin.text/SimpleTextFormatter|null[0]
+
+final object com.milkcocoa.info.colotok.core.level/LevelInt { // com.milkcocoa.info.colotok.core.level/LevelInt|null[0]
+    final const val DEBUG_INT // com.milkcocoa.info.colotok.core.level/LevelInt.DEBUG_INT|{}DEBUG_INT[0]
+        final fun <get-DEBUG_INT>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/LevelInt.DEBUG_INT.<get-DEBUG_INT>|<get-DEBUG_INT>(){}[0]
+    final const val ERROR_INT // com.milkcocoa.info.colotok.core.level/LevelInt.ERROR_INT|{}ERROR_INT[0]
+        final fun <get-ERROR_INT>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/LevelInt.ERROR_INT.<get-ERROR_INT>|<get-ERROR_INT>(){}[0]
+    final const val INFO_INT // com.milkcocoa.info.colotok.core.level/LevelInt.INFO_INT|{}INFO_INT[0]
+        final fun <get-INFO_INT>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/LevelInt.INFO_INT.<get-INFO_INT>|<get-INFO_INT>(){}[0]
+    final const val OFF_INT // com.milkcocoa.info.colotok.core.level/LevelInt.OFF_INT|{}OFF_INT[0]
+        final fun <get-OFF_INT>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/LevelInt.OFF_INT.<get-OFF_INT>|<get-OFF_INT>(){}[0]
+    final const val TRACE_INT // com.milkcocoa.info.colotok.core.level/LevelInt.TRACE_INT|{}TRACE_INT[0]
+        final fun <get-TRACE_INT>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/LevelInt.TRACE_INT.<get-TRACE_INT>|<get-TRACE_INT>(){}[0]
+    final const val WARN_INT // com.milkcocoa.info.colotok.core.level/LevelInt.WARN_INT|{}WARN_INT[0]
+        final fun <get-WARN_INT>(): kotlin/Int // com.milkcocoa.info.colotok.core.level/LevelInt.WARN_INT.<get-WARN_INT>|<get-WARN_INT>(){}[0]
+
+    final fun intToLevel(kotlin/Int): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LevelInt.intToLevel|intToLevel(kotlin.Int){}[0]
+}
+
+final object com.milkcocoa.info.colotok.core.level/LogLevel { // com.milkcocoa.info.colotok.core.level/LogLevel|null[0]
+    final object DEBUG : com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LogLevel.DEBUG|null[0]
+
+    final object ERROR : com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LogLevel.ERROR|null[0]
+
+    final object INFO : com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LogLevel.INFO|null[0]
+
+    final object OFF : com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LogLevel.OFF|null[0]
+
+    final object TRACE : com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LogLevel.TRACE|null[0]
+
+    final object WARN : com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.level/LogLevel.WARN|null[0]
+}
+
+final object com.milkcocoa.info.colotok.core.logger/MDC { // com.milkcocoa.info.colotok.core.logger/MDC|null[0]
+    final fun clear() // com.milkcocoa.info.colotok.core.logger/MDC.clear|clear(){}[0]
+    final fun get(kotlin/String): kotlin/String? // com.milkcocoa.info.colotok.core.logger/MDC.get|get(kotlin.String){}[0]
+    final fun getThreadLocalContext(): com.milkcocoa.info.colotok.core.logger/MDCContextData // com.milkcocoa.info.colotok.core.logger/MDC.getThreadLocalContext|getThreadLocalContext(){}[0]
+    final fun put(kotlin/String, kotlin/String) // com.milkcocoa.info.colotok.core.logger/MDC.put|put(kotlin.String;kotlin.String){}[0]
+    final fun remove(kotlin/String): kotlin/String? // com.milkcocoa.info.colotok.core.logger/MDC.remove|remove(kotlin.String){}[0]
+    final fun setThreadLocalContext(com.milkcocoa.info.colotok.core.logger/MDCContextData) // com.milkcocoa.info.colotok.core.logger/MDC.setThreadLocalContext|setThreadLocalContext(com.milkcocoa.info.colotok.core.logger.MDCContextData){}[0]
+
+    // Targets: [js]
+    final fun <#A1: kotlin/Any?> withContext(kotlin/Function0<#A1>): #A1 // com.milkcocoa.info.colotok.core.logger/MDC.withContext|withContext(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
+}
+
+final object com.milkcocoa.info.colotok.core.metrics/NoOpMetricsCollector : com.milkcocoa.info.colotok.core.metrics/MetricsCollector { // com.milkcocoa.info.colotok.core.metrics/NoOpMetricsCollector|null[0]
+    final fun incrementErrorCount(kotlin/String, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/NoOpMetricsCollector.incrementErrorCount|incrementErrorCount(kotlin.String;kotlin.String){}[0]
+    final fun incrementLogCount(com.milkcocoa.info.colotok.core.level/Level, kotlin/String) // com.milkcocoa.info.colotok.core.metrics/NoOpMetricsCollector.incrementLogCount|incrementLogCount(com.milkcocoa.info.colotok.core.level.Level;kotlin.String){}[0]
+    final fun recordWriteDuration(kotlin/String, kotlin/Long) // com.milkcocoa.info.colotok.core.metrics/NoOpMetricsCollector.recordWriteDuration|recordWriteDuration(kotlin.String;kotlin.Long){}[0]
+    final fun updateBufferSize(kotlin/String, kotlin/Int) // com.milkcocoa.info.colotok.core.metrics/NoOpMetricsCollector.updateBufferSize|updateBufferSize(kotlin.String;kotlin.Int){}[0]
+}
+
+final object com.milkcocoa.info.colotok.util.color/Color { // com.milkcocoa.info.colotok.util.color/Color|null[0]
+    final fun foreground(kotlin/String, com.milkcocoa.info.colotok.util.color/AnsiColor): kotlin/String // com.milkcocoa.info.colotok.util.color/Color.foreground|foreground(kotlin.String;com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+}
+
+final object com.milkcocoa.info.colotok.util.color/ColorExtension { // com.milkcocoa.info.colotok.util.color/ColorExtension|null[0]
+    final fun (kotlin/String).black(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.black|black@kotlin.String(){}[0]
+    final fun (kotlin/String).blue(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.blue|blue@kotlin.String(){}[0]
+    final fun (kotlin/String).cyan(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.cyan|cyan@kotlin.String(){}[0]
+    final fun (kotlin/String).green(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.green|green@kotlin.String(){}[0]
+    final fun (kotlin/String).magenta(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.magenta|magenta@kotlin.String(){}[0]
+    final fun (kotlin/String).red(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.red|red@kotlin.String(){}[0]
+    final fun (kotlin/String).white(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.white|white@kotlin.String(){}[0]
+    final fun (kotlin/String).yellow(): kotlin/String // com.milkcocoa.info.colotok.util.color/ColorExtension.yellow|yellow@kotlin.String(){}[0]
+}
+
+final object com.milkcocoa.info.colotok.util.unit/Size { // com.milkcocoa.info.colotok.util.unit/Size|null[0]
+    final fun (kotlin/Double).GB(): kotlin/Double // com.milkcocoa.info.colotok.util.unit/Size.GB|GB@kotlin.Double(){}[0]
+    final fun (kotlin/Double).GiB(): kotlin/Double // com.milkcocoa.info.colotok.util.unit/Size.GiB|GiB@kotlin.Double(){}[0]
+    final fun (kotlin/Double).KB(): kotlin/Double // com.milkcocoa.info.colotok.util.unit/Size.KB|KB@kotlin.Double(){}[0]
+    final fun (kotlin/Double).KiB(): kotlin/Double // com.milkcocoa.info.colotok.util.unit/Size.KiB|KiB@kotlin.Double(){}[0]
+    final fun (kotlin/Double).MB(): kotlin/Double // com.milkcocoa.info.colotok.util.unit/Size.MB|MB@kotlin.Double(){}[0]
+    final fun (kotlin/Double).MiB(): kotlin/Double // com.milkcocoa.info.colotok.util.unit/Size.MiB|MiB@kotlin.Double(){}[0]
+    final fun (kotlin/Int).GB(): kotlin/Int // com.milkcocoa.info.colotok.util.unit/Size.GB|GB@kotlin.Int(){}[0]
+    final fun (kotlin/Int).GiB(): kotlin/Int // com.milkcocoa.info.colotok.util.unit/Size.GiB|GiB@kotlin.Int(){}[0]
+    final fun (kotlin/Int).KB(): kotlin/Int // com.milkcocoa.info.colotok.util.unit/Size.KB|KB@kotlin.Int(){}[0]
+    final fun (kotlin/Int).KiB(): kotlin/Int // com.milkcocoa.info.colotok.util.unit/Size.KiB|KiB@kotlin.Int(){}[0]
+    final fun (kotlin/Int).MB(): kotlin/Int // com.milkcocoa.info.colotok.util.unit/Size.MB|MB@kotlin.Int(){}[0]
+    final fun (kotlin/Int).MiB(): kotlin/Int // com.milkcocoa.info.colotok.util.unit/Size.MiB|MiB@kotlin.Int(){}[0]
+    final fun (kotlin/Long).GB(): kotlin/Long // com.milkcocoa.info.colotok.util.unit/Size.GB|GB@kotlin.Long(){}[0]
+    final fun (kotlin/Long).GiB(): kotlin/Long // com.milkcocoa.info.colotok.util.unit/Size.GiB|GiB@kotlin.Long(){}[0]
+    final fun (kotlin/Long).KB(): kotlin/Long // com.milkcocoa.info.colotok.util.unit/Size.KB|KB@kotlin.Long(){}[0]
+    final fun (kotlin/Long).KiB(): kotlin/Long // com.milkcocoa.info.colotok.util.unit/Size.KiB|KiB@kotlin.Long(){}[0]
+    final fun (kotlin/Long).MB(): kotlin/Long // com.milkcocoa.info.colotok.util.unit/Size.MB|MB@kotlin.Long(){}[0]
+    final fun (kotlin/Long).MiB(): kotlin/Long // com.milkcocoa.info.colotok.util.unit/Size.MiB|MiB@kotlin.Long(){}[0]
+}
+
+final object com.milkcocoa.info.colotok.util/SinkUtil { // com.milkcocoa.info.colotok.util/SinkUtil|null[0]
+    final fun (okio/Sink).write(kotlin/ByteArray) // com.milkcocoa.info.colotok.util/SinkUtil.write|write@okio.Sink(kotlin.ByteArray){}[0]
+}
+
+final object com.milkcocoa.info.colotok.util/ThreadWrapper { // com.milkcocoa.info.colotok.util/ThreadWrapper|null[0]
+    final fun getCurrentThreadName(): kotlin/String // com.milkcocoa.info.colotok.util/ThreadWrapper.getCurrentThreadName|getCurrentThreadName(){}[0]
+    final fun traceCallPoint(): kotlin/String // com.milkcocoa.info.colotok.util/ThreadWrapper.traceCallPoint|traceCallPoint(){}[0]
+}
+
+final val com.milkcocoa.info.colotok.core.logger/Colotok // com.milkcocoa.info.colotok.core.logger/Colotok|{}Colotok[0]
+    final fun <get-Colotok>(): com.milkcocoa.info.colotok.core.logger/ColotokLogger // com.milkcocoa.info.colotok.core.logger/Colotok.<get-Colotok>|<get-Colotok>(){}[0]
+
+final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForDebug(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForDebug|isEnabledForDebug@com.milkcocoa.info.colotok.core.level.Level(){}[0]
+final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForError(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForError|isEnabledForError@com.milkcocoa.info.colotok.core.level.Level(){}[0]
+final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForInfo(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForInfo|isEnabledForInfo@com.milkcocoa.info.colotok.core.level.Level(){}[0]
+final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForTrace(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForTrace|isEnabledForTrace@com.milkcocoa.info.colotok.core.level.Level(){}[0]
+final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForWarn(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForWarn|isEnabledForWarn@com.milkcocoa.info.colotok.core.level.Level(){}[0]
+final fun <#A: kotlin/Any?, #B: kotlin/Any?> com.milkcocoa.info.colotok.util/createThreadSafeMap(): kotlin.collections/MutableMap<#A, #B> // com.milkcocoa.info.colotok.util/createThreadSafeMap|createThreadSafeMap(){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> com.milkcocoa.info.colotok.util/runBlocking(kotlin.coroutines/CoroutineContext = ..., kotlin.coroutines/SuspendFunction1<kotlinx.coroutines/CoroutineScope, #A>): #A // com.milkcocoa.info.colotok.util/runBlocking|runBlocking(kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope,0:0>){0§<kotlin.Any?>}[0]
+final fun com.milkcocoa.info.colotok.core.provider.builtin.file/getFileSystem(): okio/FileSystem // com.milkcocoa.info.colotok.core.provider.builtin.file/getFileSystem|getFileSystem(){}[0]
+
+// Targets: [apple]
+final class com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig, com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.<init>|<init>(){}[0]
+
+    final var colorize // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.colorize|{}colorize[0]
+        final fun <get-colorize>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.colorize.<get-colorize>|<get-colorize>(){}[0]
+        final fun <set-colorize>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.colorize.<set-colorize>|<set-colorize>(kotlin.Boolean){}[0]
+    final var debugLevelColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.debugLevelColor|{}debugLevelColor[0]
+        final fun <get-debugLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.debugLevelColor.<get-debugLevelColor>|<get-debugLevelColor>(){}[0]
+        final fun <set-debugLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.debugLevelColor.<set-debugLevelColor>|<set-debugLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
+        final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
+        final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
+    final var errorLevelColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.errorLevelColor|{}errorLevelColor[0]
+        final fun <get-errorLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.errorLevelColor.<get-errorLevelColor>|<get-errorLevelColor>(){}[0]
+        final fun <set-errorLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.errorLevelColor.<set-errorLevelColor>|<set-errorLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    final var formatter // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.formatter|{}formatter[0]
+        final fun <get-formatter>(): com.milkcocoa.info.colotok.core.formatter.details/Formatter // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.formatter.<get-formatter>|<get-formatter>(){}[0]
+        final fun <set-formatter>(com.milkcocoa.info.colotok.core.formatter.details/Formatter) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.formatter.<set-formatter>|<set-formatter>(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+    final var infoLevelColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.infoLevelColor|{}infoLevelColor[0]
+        final fun <get-infoLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.infoLevelColor.<get-infoLevelColor>|<get-infoLevelColor>(){}[0]
+        final fun <set-infoLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.infoLevelColor.<set-infoLevelColor>|<set-infoLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    final var level // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.level|{}level[0]
+        final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.level.<get-level>|<get-level>(){}[0]
+        final fun <set-level>(com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.level.<set-level>|<set-level>(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    final var metricsSpec // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.metricsSpec|{}metricsSpec[0]
+        final fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
+        final fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+    final var traceLevelColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.traceLevelColor|{}traceLevelColor[0]
+        final fun <get-traceLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.traceLevelColor.<get-traceLevelColor>|<get-traceLevelColor>(){}[0]
+        final fun <set-traceLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.traceLevelColor.<set-traceLevelColor>|<set-traceLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+    final var warnLevelColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.warnLevelColor|{}warnLevelColor[0]
+        final fun <get-warnLevelColor>(): com.milkcocoa.info.colotok.util.color/AnsiColor // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.warnLevelColor.<get-warnLevelColor>|<get-warnLevelColor>(){}[0]
+        final fun <set-warnLevelColor>(com.milkcocoa.info.colotok.util.color/AnsiColor) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.warnLevelColor.<set-warnLevelColor>|<set-warnLevelColor>(com.milkcocoa.info.colotok.util.color.AnsiColor){}[0]
+}
+
+// Targets: [js]
+final class <#A: kotlin/Any?> com.milkcocoa.info.colotok.core.logger/AsyncLocalStorage { // com.milkcocoa.info.colotok.core.logger/AsyncLocalStorage|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.logger/AsyncLocalStorage.<init>|<init>(){}[0]
+
+    final fun <#A1: kotlin/Any?> run(#A, kotlin/Function0<#A1>): #A1 // com.milkcocoa.info.colotok.core.logger/AsyncLocalStorage.run|run(1:0;kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
+    final fun enterWith(#A) // com.milkcocoa.info.colotok.core.logger/AsyncLocalStorage.enterWith|enterWith(1:0){}[0]
+    final fun getStore(): #A? // com.milkcocoa.info.colotok.core.logger/AsyncLocalStorage.getStore|getStore(){}[0]
+}
+
+// Targets: [js]
+final class com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig|null[0]
+    constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.<init>|<init>(){}[0]
+
+    final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
+        final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
+        final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
+    final var formatter // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.formatter|{}formatter[0]
+        final fun <get-formatter>(): com.milkcocoa.info.colotok.core.formatter.details/Formatter // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.formatter.<get-formatter>|<get-formatter>(){}[0]
+        final fun <set-formatter>(com.milkcocoa.info.colotok.core.formatter.details/Formatter) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.formatter.<set-formatter>|<set-formatter>(com.milkcocoa.info.colotok.core.formatter.details.Formatter){}[0]
+    final var level // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.level|{}level[0]
+        final fun <get-level>(): com.milkcocoa.info.colotok.core.level/Level // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.level.<get-level>|<get-level>(){}[0]
+        final fun <set-level>(com.milkcocoa.info.colotok.core.level/Level) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.level.<set-level>|<set-level>(com.milkcocoa.info.colotok.core.level.Level){}[0]
+    final var metricsSpec // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.metricsSpec|{}metricsSpec[0]
+        final fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
+        final fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+}
+
+// Targets: [js]
+final object com.milkcocoa.info.colotok.util/process { // com.milkcocoa.info.colotok.util/process|null[0]
+    final val pid // com.milkcocoa.info.colotok.util/process.pid|{}pid[0]
+        final fun <get-pid>(): kotlin/Int // com.milkcocoa.info.colotok.util/process.pid.<get-pid>|<get-pid>(){}[0]
+}
+
+// Targets: [js]
+final inline fun <#A: kotlin/Any?> com.milkcocoa.info.colotok.core.logger/withMdcScope(crossinline kotlin/Function0<#A>): #A // com.milkcocoa.info.colotok.core.logger/withMdcScope|withMdcScope(kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]

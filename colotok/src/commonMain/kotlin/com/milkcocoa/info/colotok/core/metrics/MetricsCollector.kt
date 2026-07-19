@@ -36,6 +36,17 @@ interface MetricsCollector {
 }
 
 /**
+ * Metrics are diagnostic and must never become a failure path for logging.
+ */
+internal inline fun MetricsCollector.collectBestEffort(block: MetricsCollector.() -> Unit) {
+    try {
+        block()
+    } catch (_: Throwable) {
+        // A collector cannot safely report its own failure through this pipeline.
+    }
+}
+
+/**
  * A No-Op implementation of [MetricsCollector].
  */
 object NoOpMetricsCollector : MetricsCollector {
@@ -73,18 +84,26 @@ sealed class MetricsCollectorSpec {
 class CompositeMetricsCollector(private val collectors: List<MetricsCollector>) : MetricsCollector {
 
     override fun incrementLogCount(level: Level, providerName: String) {
-        collectors.forEach { it.incrementLogCount(level, providerName) }
+        collectors.forEach { collector ->
+            collector.collectBestEffort { incrementLogCount(level, providerName) }
+        }
     }
 
     override fun incrementErrorCount(providerName: String, errorType: String) {
-        collectors.forEach { it.incrementErrorCount(providerName, errorType) }
+        collectors.forEach { collector ->
+            collector.collectBestEffort { incrementErrorCount(providerName, errorType) }
+        }
     }
 
     override fun updateBufferSize(providerName: String, size: Int) {
-        collectors.forEach { it.updateBufferSize(providerName, size) }
+        collectors.forEach { collector ->
+            collector.collectBestEffort { updateBufferSize(providerName, size) }
+        }
     }
 
     override fun recordWriteDuration(providerName: String, durationMs: Long) {
-        collectors.forEach { it.recordWriteDuration(providerName, durationMs) }
+        collectors.forEach { collector ->
+            collector.collectBestEffort { recordWriteDuration(providerName, durationMs) }
+        }
     }
 }

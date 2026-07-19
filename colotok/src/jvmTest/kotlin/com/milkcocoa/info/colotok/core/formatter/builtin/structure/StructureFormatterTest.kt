@@ -1,6 +1,8 @@
 package com.milkcocoa.info.colotok.core.formatter.builtin.structure
 
+import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
+import com.milkcocoa.info.colotok.core.formatter.details.StructuredFormatter
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.util.ThreadWrapper
@@ -11,6 +13,9 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.serializer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -22,8 +27,10 @@ import kotlin.time.Instant
 class StructureFormatterTest {
     private val stdIn = StdIn()
     private val stdOut = StdOut()
+    private val stdErr = StdOut()
     private var originalIn = System.`in`
     private var originalOut = System.out
+    private var originalErr = System.err
 
     @BeforeEach
     public fun before() {
@@ -31,14 +38,17 @@ class StructureFormatterTest {
         every { kotlin.time.Clock.System.now() } returns Instant.parse("2023-12-31T12:34:56Z")
         originalIn = System.`in`
         originalOut = System.out
+        originalErr = System.err
         System.setIn(stdIn)
         System.setOut(stdOut)
+        System.setErr(stdErr)
     }
 
     @AfterEach
     public fun after() {
         System.setIn(originalIn)
         System.setOut(originalOut)
+        System.setErr(originalErr)
 
         unmockkAll()
     }
@@ -145,9 +155,7 @@ class StructureFormatterTest {
                     level = LogLevel.ERROR,
                     attr = emptyMap()
                 )
-            ).also {
-                println(it)
-            }
+            )
         )
     }
 
@@ -263,5 +271,34 @@ class StructureFormatterTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun duplicate_date_fields_keep_datetime_precedence_without_console_output() {
+        val record = LogRecord.PlainText(
+            name = "test",
+            msg = "message",
+            level = LogLevel.INFO,
+            attr = emptyMap(),
+        )
+        val fieldOrders = listOf(
+            listOf(Element.MESSAGE, Element.DATETIME, Element.DATE, Element.TIME),
+            listOf(Element.TIME, Element.MESSAGE, Element.DATE, Element.DATETIME),
+            listOf(Element.DATE, Element.DATETIME, Element.MESSAGE, Element.TIME),
+        )
+
+        val outputs = fieldOrders.map { fields ->
+            Json.parseToJsonElement(
+                object : StructuredFormatter(fields) {}.format(record)
+            ).jsonObject
+        }
+
+        val expected = Json.parseToJsonElement(
+            """{"message":"message","date":"2023-12-31T12:34:56"}"""
+        ).jsonObject
+        Assertions.assertTrue(outputs.all { it == expected })
+        Assertions.assertEquals(JsonPrimitive("2023-12-31T12:34:56"), outputs.first()["date"])
+        Assertions.assertNull(stdOut.readLine())
+        Assertions.assertNull(stdErr.readLine())
     }
 }

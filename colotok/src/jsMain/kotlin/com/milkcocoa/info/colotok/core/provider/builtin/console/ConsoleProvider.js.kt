@@ -18,15 +18,13 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
 
 
     actual override suspend fun onMessage(record: LogRecord) {
-        runCatching {
-            when(record.level){
-                LogLevel.TRACE -> console.log(record.format(config.formatter))
-                LogLevel.DEBUG -> console.log(record.format(config.formatter))
-                LogLevel.INFO -> console.info(record.format(config.formatter))
-                LogLevel.WARN -> console.warn(record.format(config.formatter))
-                LogLevel.ERROR -> console.error(record.format(config.formatter))
-                else -> console.log(record.format(config.formatter))
-            }
+        when(record.level){
+            LogLevel.TRACE -> console.log(record.format(config.formatter))
+            LogLevel.DEBUG -> console.log(record.format(config.formatter))
+            LogLevel.INFO -> console.info(record.format(config.formatter))
+            LogLevel.WARN -> console.warn(record.format(config.formatter))
+            LogLevel.ERROR -> console.error(record.format(config.formatter))
+            else -> console.log(record.format(config.formatter))
         }
     }
 }

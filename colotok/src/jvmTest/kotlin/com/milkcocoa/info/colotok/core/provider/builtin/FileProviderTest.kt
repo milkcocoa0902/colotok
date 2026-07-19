@@ -8,6 +8,8 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatte
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.file.FileProvider
+import com.milkcocoa.info.colotok.core.provider.builtin.file.FileProviderConfig
+import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.rotation.SizeBaseRotation
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.unit.Size.KiB
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createFile
@@ -37,6 +40,10 @@ import kotlin.time.Instant
 object FileProviderTest {
     val logFilesDir = java.nio.file.Path.of("./log-dir/")
     val testLogFile = java.nio.file.Path.of(logFilesDir.pathString, "junit-test-log.log")
+    private val providersToClose = mutableListOf<Provider>()
+
+    private fun fileProvider(configure: FileProviderConfig.() -> Unit): FileProvider =
+        FileProvider(testLogFile.toOkioPath(), configure).also(providersToClose::add)
 
     @BeforeEach
     fun before() {
@@ -54,6 +61,11 @@ object FileProviderTest {
     @OptIn(ExperimentalPathApi::class)
     @AfterEach
     fun after() {
+        providersToClose.forEach { provider ->
+            runCatching { provider.forceShutdown() }
+        }
+        providersToClose.clear()
+
         logFilesDir.deleteRecursively()
         unmockkAll()
     }
@@ -61,7 +73,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest01() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = SimpleTextFormatter
             }
@@ -86,7 +98,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest02() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = SimpleTextFormatter
             }
@@ -110,7 +122,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest03() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = SimpleTextFormatter
             }
@@ -134,7 +146,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest04() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = SimpleTextFormatter
             }
@@ -158,7 +170,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest05() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = DetailTextFormatter
             }
@@ -183,7 +195,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest06() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = DetailTextFormatter
                 rotation = SizeBaseRotation(16)
@@ -216,7 +228,7 @@ object FileProviderTest {
     @Disabled
     fun fileProviderTest07() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = DetailTextFormatter
                 rotation = SizeBaseRotation(16)
@@ -253,7 +265,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest08() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = SimpleStructureFormatter
             }
@@ -283,7 +295,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest09() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = DetailStructureFormatter
             }
@@ -330,7 +342,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest10() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = DetailStructureFormatter
             }
@@ -377,7 +389,7 @@ object FileProviderTest {
     @Test
     fun fileProviderTest11() {
         val provider =
-            FileProvider(testLogFile.toOkioPath()) {
+            fileProvider {
                 level = LogLevel.DEBUG
                 formatter = DetailStructureFormatter
             }
@@ -419,5 +431,36 @@ object FileProviderTest {
             """.trimMargin().replace("\n", ""),
             testLogFile.readLines(Charsets.UTF_8).getOrNull(0) ?: ""
         )
+    }
+
+    @Test
+    fun flush_exposes_file_write_failure() {
+        val missingParent = logFilesDir.resolve("missing").resolve("application.log")
+        val provider = FileProvider(missingParent.toOkioPath())
+
+        provider.write(
+            LogRecord.PlainText("default logger", "message", LogLevel.INFO, emptyMap())
+        )
+
+        Assertions.assertThrows(IOException::class.java) {
+            runBlocking { provider.flush() }
+        }
+    }
+
+    @Test
+    fun repeated_writes_close_sink_before_file_move() {
+        val provider = FileProvider(testLogFile.toOkioPath())
+        repeat(3) { index ->
+            provider.write(
+                LogRecord.PlainText("default logger", "message $index", LogLevel.INFO, emptyMap())
+            )
+        }
+        runBlocking { provider.flush() }
+        val moved = logFilesDir.resolve("moved.log")
+
+        Files.move(testLogFile, moved)
+
+        Assertions.assertEquals(3, moved.readLines(Charsets.UTF_8).size)
+        runBlocking { provider.join() }
     }
 }

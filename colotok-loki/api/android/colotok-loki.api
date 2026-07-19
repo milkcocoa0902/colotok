@@ -1,0 +1,46 @@
+public abstract class com/milkcocoa/info/colotok/core/provider/loki/Credential {
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/loki/Credential$Basic : com/milkcocoa/info/colotok/core/provider/loki/Credential {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/provider/loki/Credential$Basic;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/provider/loki/Credential$Basic;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/provider/loki/Credential$Basic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPassword ()Ljava/lang/String;
+	public final fun getUsername ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/loki/LokiProvider : com/milkcocoa/info/colotok/core/provider/details/AsyncProvider {
+	public fun <init> ()V
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/loki/LokiProviderConfig;)V
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun onClosed ()V
+	public fun onPublish (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/loki/LokiProviderConfig : com/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig {
+	public fun <init> ()V
+	public fun getBufferSize ()I
+	public final fun getCredential ()Lcom/milkcocoa/info/colotok/core/provider/loki/Credential;
+	public fun getEnableInternalMetricsLogging ()Z
+	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getHttpClient ()Lio/ktor/client/HttpClient;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public final fun getLogStream ()Ljava/util/Map;
+	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public fun setBufferSize (I)V
+	public final fun setCredential (Lcom/milkcocoa/info/colotok/core/provider/loki/Credential;)V
+	public fun setEnableInternalMetricsLogging (Z)V
+	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
+	public final fun setHost (Ljava/lang/String;)V
+	public final fun setHttpClient (Lio/ktor/client/HttpClient;)V
+	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public final fun setLogStream (Ljava/util/Map;)V
+	public fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+}
+

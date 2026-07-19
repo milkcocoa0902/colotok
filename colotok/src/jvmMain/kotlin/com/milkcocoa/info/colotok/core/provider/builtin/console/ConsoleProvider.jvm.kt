@@ -22,16 +22,14 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
     }
 
     actual override suspend fun onMessage(record: LogRecord) {
-        runCatching {
-            val color = when{
-                colorize.not() -> null
-                else -> getColor(record.level)
-            }
-            if(color != null){
-                println(Color.foreground(record.format(config.formatter), color))
-            }else{
-                println(record.format(config.formatter))
-            }
+        val color = when{
+            colorize.not() -> null
+            else -> getColor(record.level)
+        }
+        if(color != null){
+            println(Color.foreground(record.format(config.formatter), color))
+        }else{
+            println(record.format(config.formatter))
         }
     }
 }

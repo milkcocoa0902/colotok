@@ -16,16 +16,16 @@ suspend fun ColotokLogger.atAsync(
     msg: String
 ) {
     val p = providers
-    val a = attrs
+    val record = LogRecord.PlainText(
+        name = name,
+        msg = msg,
+        level = level,
+        attr = attrs.toMap(),
+    )
     withContext(Dispatchers.Default) {
         p.map {
             async {
-                it.writeAsync(LogRecord.PlainText(
-                    name = name,
-                    msg = msg,
-                    level = level,
-                    attr = a
-                ))
+                it.writeAsync(record)
             }
         }.awaitAll()
     }
@@ -38,16 +38,16 @@ suspend fun ColotokLogger.atAsync(
     attr: Map<String, String>
 ) {
     val p = providers
-    val a = attrs.plus(attr)
+    val record = LogRecord.PlainText(
+        name = name,
+        msg = msg,
+        level = level,
+        attr = attrs.plus(attr).toMap(),
+    )
     withContext(Dispatchers.Default) {
         p.map {
             async {
-                it.writeAsync(LogRecord.PlainText(
-                    name = name,
-                    msg = msg,
-                    level = level,
-                    attr = a
-                ))
+                it.writeAsync(record)
             }
         }.awaitAll()
     }
@@ -60,17 +60,17 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     msg: T
 ) {
     val p = providers
-    val a = attrs
+    val record = LogRecord.StructuredText(
+        name = name,
+        msg = msg,
+        level = level,
+        serializer = T::class.serializer(),
+        attr = attrs.toMap(),
+    )
     withContext(Dispatchers.Default) {
         p.map {
             async {
-                it.writeAsync(LogRecord.StructuredText(
-                    name = name,
-                    msg = msg,
-                    level = level,
-                    serializer = T::class.serializer(),
-                    attr = a
-                ))
+                it.writeAsync(record)
             }
         }.awaitAll()
     }
@@ -83,17 +83,17 @@ suspend inline fun <reified T : LogStructure> ColotokLogger.atAsync(
     attr: Map<String, String>
 ) {
     val p = providers
-    val a = attrs.plus(attr)
+    val record = LogRecord.StructuredText(
+        name = name,
+        msg = msg,
+        level = level,
+        serializer = T::class.serializer(),
+        attr = attrs.plus(attr).toMap(),
+    )
     withContext(Dispatchers.Default) {
         p.map {
             async {
-                it.writeAsync(LogRecord.StructuredText(
-                    name = name,
-                    msg = msg,
-                    level = level,
-                    serializer = T::class.serializer(),
-                    attr = a
-                ))
+                it.writeAsync(record)
             }
         }.awaitAll()
     }

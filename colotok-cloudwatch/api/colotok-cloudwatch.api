@@ -1,0 +1,82 @@
+public abstract interface class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential {
+	public abstract fun getRegion ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Default : com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Default;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Default;Ljava/lang/String;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Default;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getRegion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$FromEnvironments : com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$FromEnvironments;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$FromEnvironments;Ljava/lang/String;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$FromEnvironments;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getRegion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Profile : com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Profile;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Profile;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$Profile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProfileName ()Ljava/lang/String;
+	public fun getRegion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$StaticCredentials : com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$StaticCredentials;
+	public static synthetic fun copy$default (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$StaticCredentials;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential$StaticCredentials;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccessKeyId ()Ljava/lang/String;
+	public fun getRegion ()Ljava/lang/String;
+	public final fun getSecretAccessKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchProvider : com/milkcocoa/info/colotok/core/provider/details/AsyncProvider {
+	public fun <init> ()V
+	public fun <init> (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchProviderConfig;)V
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun onClosed ()V
+	public fun onPublish (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchProviderConfig : com/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig {
+	public fun <init> ()V
+	public fun getBufferSize ()I
+	public final fun getCredential ()Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential;
+	public fun getEnableInternalMetricsLogging ()Z
+	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
+	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
+	public final fun getLogGroup ()Ljava/lang/String;
+	public final fun getLogStream ()Ljava/lang/String;
+	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public fun setBufferSize (I)V
+	public final fun setCredential (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential;)V
+	public fun setEnableInternalMetricsLogging (Z)V
+	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
+	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
+	public final fun setLogGroup (Ljava/lang/String;)V
+	public final fun setLogStream (Ljava/lang/String;)V
+	public fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+}
+

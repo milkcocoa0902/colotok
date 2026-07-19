@@ -10,6 +10,7 @@ on:
 
 # Gives the workflow permissions to clone the repo and create a page deployment
 permissions:
+    contents: read
     id-token: write
     pages: write
 
@@ -31,7 +32,7 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Build Writerside docs using Docker
               uses: JetBrains/writerside-github-action@v4
@@ -51,7 +52,7 @@ jobs:
 
             # Add the step below to upload Algolia indexes
             # - name: Upload algolia-indexes
-            #  uses: actions/upload-artifact@v3
+            #  uses: actions/upload-artifact@v4
             #  with:
             #      name: algolia-indexes
             #      path: artifacts/${{ env.ALGOLIA_ARTIFACT }}

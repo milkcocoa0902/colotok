@@ -7,18 +7,22 @@ actual object MDC {
         key: String,
         value: String
     ) {
-        val currentData = threadLocalContext.getStore() ?: MDCContextData()
+        val currentData = threadLocalContext.getStore()?.deepCopy() ?: MDCContextData()
         currentData.data[key] = value
-
-        threadLocalContext.run(currentData) { }
+        threadLocalContext.enterWith(currentData)
     }
 
     actual fun get(key: String): String? = threadLocalContext.getStore()?.data?.get(key)
 
-    actual fun remove(key: String) = threadLocalContext.getStore()?.data?.remove(key)
+    actual fun remove(key: String): String? {
+        val currentData = threadLocalContext.getStore()?.deepCopy() ?: return null
+        val removed = currentData.data.remove(key)
+        threadLocalContext.enterWith(currentData)
+        return removed
+    }
 
     actual fun clear() {
-        threadLocalContext.run(MDCContextData()) { }
+        threadLocalContext.enterWith(MDCContextData())
     }
 
     actual fun getThreadLocalContext(): MDCContextData {
@@ -26,11 +30,11 @@ actual object MDC {
     }
 
     actual fun setThreadLocalContext(data: MDCContextData) {
-        threadLocalContext.run(data) { }
+        threadLocalContext.enterWith(data.deepCopy())
     }
 
     fun <R> withContext(block: () -> R): R {
-        val mdcData = MDCContextData()
+        val mdcData = getThreadLocalContext().deepCopy()
         return threadLocalContext.run(mdcData) {
             block()
         }

@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
     implementation(project(":colotok"))
-    compileOnly(libs.slf4j.api)
+    api(libs.slf4j.api)
     testImplementation(libs.slf4j.api)
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlin.serialization.core)
