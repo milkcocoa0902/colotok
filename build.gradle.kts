@@ -21,7 +21,7 @@ apiValidation {
 // ルート build.gradle.kts
 subprojects {
     group = "io.github.milkcocoa0902"
-    version = "0.4.2"
+    version = "0.4.3"
 
     val moduleName = name
     pluginManager.withPlugin("kotlin-multiplatform") {
