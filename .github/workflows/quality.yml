@@ -158,35 +158,25 @@ jobs:
                   ./gradlew
                   :colotok:compileTestKotlinIosArm64
                   :colotok:compileTestKotlinIosSimulatorArm64
-                  :colotok:compileTestKotlinIosX64
                   :colotok:compileTestKotlinMacosArm64
-                  :colotok:compileTestKotlinMacosX64
                   :colotok-coroutines:compileTestKotlinIosArm64
                   :colotok-coroutines:compileTestKotlinIosSimulatorArm64
-                  :colotok-coroutines:compileTestKotlinIosX64
                   :colotok-coroutines:compileTestKotlinMacosArm64
-                  :colotok-coroutines:compileTestKotlinMacosX64
                   :colotok-loki:compileTestKotlinIosArm64
                   :colotok-loki:compileTestKotlinIosSimulatorArm64
-                  :colotok-loki:compileTestKotlinIosX64
                   :colotok-loki:compileTestKotlinMacosArm64
-                  :colotok-loki:compileTestKotlinMacosX64
                   --no-configuration-cache
                   --max-workers=1
             - name: Run macOS tests
               shell: bash
               run: |
-                  if [[ "$(uname -m)" == "arm64" ]]; then
-                      target="macosArm64Test"
-                  else
-                      target="macosX64Test"
-                  fi
-                  ./gradlew \
-                      ":colotok:${target}" \
-                      ":colotok-coroutines:${target}" \
-                      ":colotok-loki:${target}" \
-                      --no-configuration-cache \
-                      --max-workers=1
+                target="macosArm64Test"
+                ./gradlew \
+                    ":colotok:${target}" \
+                    ":colotok-coroutines:${target}" \
+                    ":colotok-loki:${target}" \
+                    --no-configuration-cache \
+                    --max-workers=1
 
     docs:
         name: Documentation

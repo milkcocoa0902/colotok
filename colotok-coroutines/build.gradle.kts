@@ -36,9 +36,7 @@ kotlin {
         withHostTest {}
     }
 
-    iosX64()
     iosArm64()
-    macosX64()
     macosArm64()
     iosSimulatorArm64()
 
