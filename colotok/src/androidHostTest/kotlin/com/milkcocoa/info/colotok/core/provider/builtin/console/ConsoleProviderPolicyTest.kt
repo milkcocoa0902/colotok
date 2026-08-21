@@ -53,20 +53,25 @@ class ConsoleProviderPolicyTest {
     }
 
     @Test
-    fun formatter_failure_is_observable_through_flush_and_join() = runBlocking {
-        val expected = IllegalStateException("format failed")
-        val formatter = object : Formatter {
-            override fun format(record: LogRecord.PlainText): String = throw expected
-            override fun <T : LogStructure> format(record: LogRecord.StructuredText<T>): String = throw expected
-            override fun format(record: LogRecord.Metrics): String = throw expected
-        }
-        val provider = ConsoleProvider {
-            isEnabledForRelease = true
-            this.formatter = formatter
-        }
-        provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
+    fun formatter_failure_is_observable_through_flush_and_join() =
+        runBlocking {
+            val expected = IllegalStateException("format failed")
+            val formatter =
+                object : Formatter {
+                    override fun format(record: LogRecord.PlainText): String = throw expected
 
-        assertSame(expected, assertFailsWith<IllegalStateException> { provider.flush() })
-        assertSame(expected, assertFailsWith<IllegalStateException> { provider.join() })
-    }
+                    override fun <T : LogStructure> format(record: LogRecord.StructuredText<T>): String = throw expected
+
+                    override fun format(record: LogRecord.Metrics): String = throw expected
+                }
+            val provider =
+                ConsoleProvider {
+                    isEnabledForRelease = true
+                    this.formatter = formatter
+                }
+            provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
+
+            assertSame(expected, assertFailsWith<IllegalStateException> { provider.flush() })
+            assertSame(expected, assertFailsWith<IllegalStateException> { provider.join() })
+        }
 }

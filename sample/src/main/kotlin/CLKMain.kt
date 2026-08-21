@@ -26,9 +26,10 @@ class Credential(
 ) : LogStructure
 
 fun main() {
-    val logger = ColotokLoggerContext()
-        .addProvider(ConsoleProvider())
-        .getLogger()
+    val logger =
+        ColotokLoggerContext()
+            .addProvider(ConsoleProvider())
+            .getLogger()
 
     runBlocking {
         logger.infoAsync("test0001")

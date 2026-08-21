@@ -6,11 +6,12 @@ import com.milkcocoa.info.colotok.core.logger.LogEventMetadata
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 
 actual object ThreadWrapper {
-    private val loggingWrapperClassNames = setOf(
-        "com.milkcocoa.info.colotok.core.logger.ColotokLoggerExtensionKt",
-        "com.milkcocoa.info.colotok.core.logger.ColotokLogger4J",
-        "com.milkcocoa.info.colotok.core.logger.ColotokLogger4J2",
-    )
+    private val loggingWrapperClassNames =
+        setOf(
+            "com.milkcocoa.info.colotok.core.logger.ColotokLoggerExtensionKt",
+            "com.milkcocoa.info.colotok.core.logger.ColotokLogger4J",
+            "com.milkcocoa.info.colotok.core.logger.ColotokLogger4J2"
+        )
 
     actual fun getCurrentThreadName() = Thread.currentThread().name
 

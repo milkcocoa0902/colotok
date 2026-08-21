@@ -6,7 +6,7 @@ import org.slf4j.helpers.BasicMarkerFactory
 import org.slf4j.spi.MDCAdapter
 import org.slf4j.spi.SLF4JServiceProvider
 
-class ColotokSlf4j2ServiceProvider: SLF4JServiceProvider {
+class ColotokSlf4j2ServiceProvider : SLF4JServiceProvider {
     private val markerFactory by lazy { BasicMarkerFactory() }
     private val mdcAdapter by lazy { ColotokMDCAdapter() }
     private val loggerFactory by lazy {
@@ -15,7 +15,6 @@ class ColotokSlf4j2ServiceProvider: SLF4JServiceProvider {
             mdcAdapter = mdcAdapter
         )
     }
-
 
     override fun getLoggerFactory(): ILoggerFactory = loggerFactory
 

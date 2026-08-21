@@ -13,10 +13,11 @@ class MDCContractTest {
 
     @Test
     fun clear_removes_map_and_deque() {
-        val context = MDCContextData(
-            data = mutableMapOf("key" to "value"),
-            dequeData = mutableMapOf("key" to ArrayDeque(listOf("first", "second")))
-        )
+        val context =
+            MDCContextData(
+                data = mutableMapOf("key" to "value"),
+                dequeData = mutableMapOf("key" to ArrayDeque(listOf("first", "second")))
+            )
         MDC.setThreadLocalContext(context)
 
         MDC.clear()

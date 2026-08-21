@@ -2,8 +2,9 @@ import org.gradle.api.initialization.resolve.RepositoriesMode
 
 rootProject.name = "colotok-slf4j2-consumer"
 
-val colotokRepository = providers.gradleProperty("colotokRepository").orNull
-    ?: error("Pass the isolated publication repository with -PcolotokRepository=<path>")
+val colotokRepository =
+    providers.gradleProperty("colotokRepository").orNull
+        ?: error("Pass the isolated publication repository with -PcolotokRepository=<path>")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

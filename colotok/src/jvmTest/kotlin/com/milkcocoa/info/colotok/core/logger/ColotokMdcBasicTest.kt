@@ -1,13 +1,12 @@
 package com.milkcocoa.info.colotok.core.logger
 
+import com.milkcocoa.info.colotok.core.level.LogLevel
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import com.milkcocoa.info.colotok.core.level.LogLevel
 import org.junit.jupiter.api.Test
 
 class ColotokMdcBasicTest {
-
     @AfterEach
     fun tearDown() {
         MDC.clear()

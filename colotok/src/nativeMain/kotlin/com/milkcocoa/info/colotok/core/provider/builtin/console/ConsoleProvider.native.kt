@@ -1,6 +1,5 @@
 package com.milkcocoa.info.colotok.core.provider.builtin.console
 
-import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
@@ -21,15 +20,15 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
         config.getColorForLevel(level = it)
     }
 
-
     actual override suspend fun onMessage(record: LogRecord) {
-        val color = when{
-            colorize.not() -> null
-            else -> getColor(record.level)
-        }
-        if(color != null){
+        val color =
+            when {
+                colorize.not() -> null
+                else -> getColor(record.level)
+            }
+        if (color != null) {
             println(Color.foreground(record.format(config.formatter), color))
-        }else{
+        } else {
             println(record.format(config.formatter))
         }
     }

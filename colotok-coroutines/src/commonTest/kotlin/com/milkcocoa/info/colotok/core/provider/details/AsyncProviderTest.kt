@@ -20,17 +20,17 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class AsyncProviderTest {
-
     private val providersToClose = mutableListOf<AsyncProvider>()
 
     @AfterTest
-    fun closeProviders() = runTest {
-        providersToClose.forEach {
-            runCatching { it.forceShutdown() }
-            it.job.join()
+    fun closeProviders() =
+        runTest {
+            providersToClose.forEach {
+                runCatching { it.forceShutdown() }
+                it.job.join()
+            }
+            providersToClose.clear()
         }
-        providersToClose.clear()
-    }
 
     private fun <T : AsyncProvider> T.track(): T = also(providersToClose::add)
 
@@ -67,7 +67,7 @@ class AsyncProviderTest {
 
     class ControlledAsyncProvider(
         config: TestAsyncProviderConfig,
-        private var failuresRemaining: Int = Int.MAX_VALUE,
+        private var failuresRemaining: Int = Int.MAX_VALUE
     ) : AsyncProvider(config) {
         val publishAttempts = mutableListOf<List<LogRecord>>()
         val processedRecords = mutableListOf<LogRecord>()
@@ -84,7 +84,7 @@ class AsyncProviderTest {
 
     class LifecycleAsyncProvider(
         config: TestAsyncProviderConfig,
-        private val publishFailure: Throwable? = null,
+        private val publishFailure: Throwable? = null
     ) : AsyncProvider(config) {
         val publishAttempts = mutableListOf<List<LogRecord>>()
         val processedRecords = mutableListOf<LogRecord>()
@@ -107,239 +107,293 @@ class AsyncProviderTest {
         var logCount = 0
         var durations = 0
 
-        override fun incrementLogCount(level: Level, providerName: String) {
+        override fun incrementLogCount(
+            level: Level,
+            providerName: String
+        ) {
             logCount++
         }
 
-        override fun incrementErrorCount(providerName: String, errorType: String) {
+        override fun incrementErrorCount(
+            providerName: String,
+            errorType: String
+        ) {
             errors.add(errorType)
         }
 
-        override fun updateBufferSize(providerName: String, size: Int) {
+        override fun updateBufferSize(
+            providerName: String,
+            size: Int
+        ) {
             bufferSizes.add(size)
         }
 
-        override fun recordWriteDuration(providerName: String, durationMs: Long) {
+        override fun recordWriteDuration(
+            providerName: String,
+            durationMs: Long
+        ) {
             durations++
         }
     }
 
     private object ThrowingMetricsCollector : MetricsCollector {
-        override fun incrementLogCount(level: Level, providerName: String) = error("metrics failed")
-        override fun incrementErrorCount(providerName: String, errorType: String) = error("metrics failed")
-        override fun updateBufferSize(providerName: String, size: Int) = error("metrics failed")
-        override fun recordWriteDuration(providerName: String, durationMs: Long) = error("metrics failed")
+        override fun incrementLogCount(
+            level: Level,
+            providerName: String
+        ) = error("metrics failed")
+
+        override fun incrementErrorCount(
+            providerName: String,
+            errorType: String
+        ) = error("metrics failed")
+
+        override fun updateBufferSize(
+            providerName: String,
+            size: Int
+        ) = error("metrics failed")
+
+        override fun recordWriteDuration(
+            providerName: String,
+            durationMs: Long
+        ) = error("metrics failed")
     }
 
     private class BufferSizeSignalMetricsCollector(
-        private val targetSize: Int,
+        private val targetSize: Int
     ) : MetricsCollector {
         val targetReached = CompletableDeferred<Unit>()
 
-        override fun incrementLogCount(level: Level, providerName: String) = Unit
-        override fun incrementErrorCount(providerName: String, errorType: String) = Unit
+        override fun incrementLogCount(
+            level: Level,
+            providerName: String
+        ) = Unit
 
-        override fun updateBufferSize(providerName: String, size: Int) {
+        override fun incrementErrorCount(
+            providerName: String,
+            errorType: String
+        ) = Unit
+
+        override fun updateBufferSize(
+            providerName: String,
+            size: Int
+        ) {
             if (size == targetSize) targetReached.complete(Unit)
         }
 
-        override fun recordWriteDuration(providerName: String, durationMs: Long) = Unit
+        override fun recordWriteDuration(
+            providerName: String,
+            durationMs: Long
+        ) = Unit
     }
 
     private class FinalPublishException : IllegalStateException("final publish failed")
 
-    private fun record(index: Int): LogRecord =
-        LogRecord.PlainText("test", "message $index", LogLevel.INFO, emptyMap())
+    private fun record(index: Int): LogRecord = LogRecord.PlainText("test", "message $index", LogLevel.INFO, emptyMap())
 
     @Test
-    fun graceful_close_publishes_sub_threshold_buffer_fifo_exactly_once_and_clears_it() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = LifecycleAsyncProvider(
-            TestAsyncProviderConfig().apply { bufferSize = 3 },
-        ).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-        val records = listOf(record(1), record(2))
+    fun graceful_close_publishes_sub_threshold_buffer_fifo_exactly_once_and_clears_it() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                LifecycleAsyncProvider(
+                    TestAsyncProviderConfig().apply { bufferSize = 3 }
+                ).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            val records = listOf(record(1), record(2))
 
-        records.forEach(provider::write)
-        provider.close()
-        provider.join()
+            records.forEach(provider::write)
+            provider.close()
+            provider.join()
 
-        assertEquals(listOf(records), provider.publishAttempts)
-        assertEquals(records, provider.processedRecords)
-        assertEquals(0, metrics.bufferSizes.last())
-        assertEquals(1, provider.closeCount)
-    }
-
-    @Test
-    fun final_publish_failure_is_rethrown_by_join_and_retains_the_attempted_batch() = runTest {
-        val expected = FinalPublishException()
-        val metrics = RecordingMetricsCollector()
-        val provider = LifecycleAsyncProvider(
-            config = TestAsyncProviderConfig().apply { bufferSize = 3 },
-            publishFailure = expected,
-        ).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-        val records = listOf(record(1), record(2))
-
-        records.forEach(provider::write)
-        provider.close()
-        val actual = assertFailsWith<FinalPublishException> { provider.join() }
-
-        assertSame(expected, actual)
-        assertEquals(listOf(records), provider.publishAttempts)
-        assertEquals(emptyList(), provider.processedRecords)
-        assertEquals(2, metrics.bufferSizes.last())
-        assertEquals(1, provider.closeCount)
-    }
-
-    @Test
-    fun force_shutdown_does_not_publish_remaining_buffer_and_closes_once() = runTest {
-        val metrics = BufferSizeSignalMetricsCollector(targetSize = 2)
-        val provider = LifecycleAsyncProvider(
-            TestAsyncProviderConfig().apply { bufferSize = 3 },
-        ).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-
-        provider.write(record(1))
-        provider.write(record(2))
-        withContext(Dispatchers.Default) {
-            withTimeout(5_000) { metrics.targetReached.await() }
+            assertEquals(listOf(records), provider.publishAttempts)
+            assertEquals(records, provider.processedRecords)
+            assertEquals(0, metrics.bufferSizes.last())
+            assertEquals(1, provider.closeCount)
         }
 
-        provider.forceShutdown()
-        provider.job.join()
-        provider.forceShutdown()
-        provider.job.join()
+    @Test
+    fun final_publish_failure_is_rethrown_by_join_and_retains_the_attempted_batch() =
+        runTest {
+            val expected = FinalPublishException()
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                LifecycleAsyncProvider(
+                    config = TestAsyncProviderConfig().apply { bufferSize = 3 },
+                    publishFailure = expected
+                ).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            val records = listOf(record(1), record(2))
 
-        assertEquals(emptyList(), provider.publishAttempts)
-        assertEquals(emptyList(), provider.processedRecords)
-        assertEquals(1, provider.closeCount)
-    }
+            records.forEach(provider::write)
+            provider.close()
+            val actual = assertFailsWith<FinalPublishException> { provider.join() }
+
+            assertSame(expected, actual)
+            assertEquals(listOf(records), provider.publishAttempts)
+            assertEquals(emptyList(), provider.processedRecords)
+            assertEquals(2, metrics.bufferSizes.last())
+            assertEquals(1, provider.closeCount)
+        }
 
     @Test
-    fun testAsyncLogging() = runTest {
-        val provider = TestAsyncProvider(TestAsyncProviderConfig()).track()
-        val record1: LogRecord = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
-        val record2: LogRecord = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
+    fun force_shutdown_does_not_publish_remaining_buffer_and_closes_once() =
+        runTest {
+            val metrics = BufferSizeSignalMetricsCollector(targetSize = 2)
+            val provider =
+                LifecycleAsyncProvider(
+                    TestAsyncProviderConfig().apply { bufferSize = 3 }
+                ).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
 
-        provider.write(record1)
-        provider.write(record2)
+            provider.write(record(1))
+            provider.write(record(2))
+            withContext(Dispatchers.Default) {
+                withTimeout(5_000) { metrics.targetReached.await() }
+            }
 
-        // Wait for processing to complete
-        provider.flush()
+            provider.forceShutdown()
+            provider.job.join()
+            provider.forceShutdown()
+            provider.job.join()
 
-        assertEquals(2, provider.processedRecords.size)
-        assertEquals(record1, provider.processedRecords[0])
-        assertEquals(record2, provider.processedRecords[1])
-
-        provider.join()
-    }
-
-    @Test
-    fun failedPublishRecordsAreRetainedForNextSendTrigger() = runTest {
-        val provider = FailingOnceAsyncProvider(TestAsyncProviderConfig()).track()
-        val record1: LogRecord = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
-        val record2: LogRecord = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
-
-        provider.write(record1)
-        provider.write(record2)
-        provider.flush()
-
-        assertEquals(listOf<LogRecord>(record1), provider.publishAttempts[0])
-        assertEquals(listOf<LogRecord>(record1, record2), provider.publishAttempts[1])
-        assertEquals(listOf<LogRecord>(record1, record2), provider.processedRecords)
-        assertTrue(provider.publishAttempts.size >= 2)
-
-        provider.join()
-    }
+            assertEquals(emptyList(), provider.publishAttempts)
+            assertEquals(emptyList(), provider.processedRecords)
+            assertEquals(1, provider.closeCount)
+        }
 
     @Test
-    fun failed_backlog_retries_only_at_threshold_multiples() = runTest {
-        val config = TestAsyncProviderConfig().apply { bufferSize = 2 }
-        val provider = ControlledAsyncProvider(config, failuresRemaining = 2).track()
+    fun testAsyncLogging() =
+        runTest {
+            val provider = TestAsyncProvider(TestAsyncProviderConfig()).track()
+            val record1: LogRecord = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
+            val record2: LogRecord = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
 
-        (1..6).forEach { provider.write(record(it)) }
-        provider.flush()
+            provider.write(record1)
+            provider.write(record2)
 
-        assertEquals(listOf(2, 4, 6), provider.publishAttempts.map { it.size })
-        assertEquals(
-            (1..6).map { "message $it" },
-            provider.processedRecords.map { (it as LogRecord.PlainText).msg },
-        )
-        provider.join()
-    }
+            // Wait for processing to complete
+            provider.flush()
 
-    @Test
-    fun failed_backlog_can_expand_to_four_times_buffer_size_and_keeps_fifo() = runTest {
-        val config = TestAsyncProviderConfig().apply { bufferSize = 2 }
-        val provider = ControlledAsyncProvider(config).track()
+            assertEquals(2, provider.processedRecords.size)
+            assertEquals(record1, provider.processedRecords[0])
+            assertEquals(record2, provider.processedRecords[1])
 
-        (1..8).forEach { provider.write(record(it)) }
-        assertFailsWith<IllegalStateException> { provider.flush() }
-
-        assertEquals(listOf(2, 4, 6, 8, 8), provider.publishAttempts.map { it.size })
-        assertEquals(
-            (1..8).map { "message $it" },
-            provider.publishAttempts.last().map { (it as LogRecord.PlainText).msg },
-        )
-        runCatching { provider.forceShutdown() }
-    }
+            provider.join()
+        }
 
     @Test
-    fun newest_record_is_dropped_after_retention_capacity() = runTest {
-        val config = TestAsyncProviderConfig().apply { bufferSize = 1 }
-        val metrics = RecordingMetricsCollector()
-        val provider = ControlledAsyncProvider(config).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
+    fun failedPublishRecordsAreRetainedForNextSendTrigger() =
+        runTest {
+            val provider = FailingOnceAsyncProvider(TestAsyncProviderConfig()).track()
+            val record1: LogRecord = LogRecord.PlainText("test", "message 1", LogLevel.INFO, emptyMap())
+            val record2: LogRecord = LogRecord.PlainText("test", "message 2", LogLevel.INFO, emptyMap())
 
-        (1..5).forEach { provider.write(record(it)) }
-        assertFailsWith<IllegalStateException> { provider.flush() }
+            provider.write(record1)
+            provider.write(record2)
+            provider.flush()
 
-        assertEquals(listOf(1, 2, 3, 4, 4), provider.publishAttempts.map { it.size })
-        assertEquals(
-            (1..4).map { "message $it" },
-            provider.publishAttempts.last().map { (it as LogRecord.PlainText).msg },
-        )
-        assertEquals(1, metrics.errors.count { it == "retention_limit_reached" })
-        assertEquals(4, metrics.bufferSizes.last())
-        runCatching { provider.forceShutdown() }
-    }
+            assertEquals(listOf<LogRecord>(record1), provider.publishAttempts[0])
+            assertEquals(listOf<LogRecord>(record1, record2), provider.publishAttempts[1])
+            assertEquals(listOf<LogRecord>(record1, record2), provider.processedRecords)
+            assertTrue(provider.publishAttempts.size >= 2)
+
+            provider.join()
+        }
 
     @Test
-    fun retention_capacity_is_capped_at_4096_records() = runTest {
-        val config = TestAsyncProviderConfig().apply { bufferSize = 2_000 }
-        val metrics = RecordingMetricsCollector()
-        val provider = ControlledAsyncProvider(config).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
+    fun failed_backlog_retries_only_at_threshold_multiples() =
+        runTest {
+            val config = TestAsyncProviderConfig().apply { bufferSize = 2 }
+            val provider = ControlledAsyncProvider(config, failuresRemaining = 2).track()
 
-        (1..4_097).forEach { provider.writeAsync(record(it)) }
-        assertFailsWith<IllegalStateException> { provider.flush() }
+            (1..6).forEach { provider.write(record(it)) }
+            provider.flush()
 
-        assertEquals(listOf(2_000, 4_000, 4_096, 4_096), provider.publishAttempts.map { it.size })
-        assertEquals(1, metrics.errors.count { it == "retention_limit_reached" })
-        runCatching { provider.forceShutdown() }
-    }
+            assertEquals(listOf(2, 4, 6), provider.publishAttempts.map { it.size })
+            assertEquals(
+                (1..6).map { "message $it" },
+                provider.processedRecords.map { (it as LogRecord.PlainText).msg }
+            )
+            provider.join()
+        }
 
     @Test
-    fun manual_flush_failure_retains_batch_and_throws() = runTest {
-        val config = TestAsyncProviderConfig().apply { bufferSize = 4 }
-        val provider = ControlledAsyncProvider(config).track()
-        provider.write(record(1))
+    fun failed_backlog_can_expand_to_four_times_buffer_size_and_keeps_fifo() =
+        runTest {
+            val config = TestAsyncProviderConfig().apply { bufferSize = 2 }
+            val provider = ControlledAsyncProvider(config).track()
 
-        val failure = assertFailsWith<IllegalStateException> { provider.flush() }
+            (1..8).forEach { provider.write(record(it)) }
+            assertFailsWith<IllegalStateException> { provider.flush() }
 
-        assertEquals("publish failed", failure.message)
-        assertEquals(
-            listOf("message 1"),
-            provider.publishAttempts.single().map { (it as LogRecord.PlainText).msg },
-        )
-        runCatching { provider.forceShutdown() }
-    }
+            assertEquals(listOf(2, 4, 6, 8, 8), provider.publishAttempts.map { it.size })
+            assertEquals(
+                (1..8).map { "message $it" },
+                provider.publishAttempts.last().map { (it as LogRecord.PlainText).msg }
+            )
+            runCatching { provider.forceShutdown() }
+        }
+
+    @Test
+    fun newest_record_is_dropped_after_retention_capacity() =
+        runTest {
+            val config = TestAsyncProviderConfig().apply { bufferSize = 1 }
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(config).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+
+            (1..5).forEach { provider.write(record(it)) }
+            assertFailsWith<IllegalStateException> { provider.flush() }
+
+            assertEquals(listOf(1, 2, 3, 4, 4), provider.publishAttempts.map { it.size })
+            assertEquals(
+                (1..4).map { "message $it" },
+                provider.publishAttempts.last().map { (it as LogRecord.PlainText).msg }
+            )
+            assertEquals(1, metrics.errors.count { it == "retention_limit_reached" })
+            assertEquals(4, metrics.bufferSizes.last())
+            runCatching { provider.forceShutdown() }
+        }
+
+    @Test
+    fun retention_capacity_is_capped_at_4096_records() =
+        runTest {
+            val config = TestAsyncProviderConfig().apply { bufferSize = 2_000 }
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(config).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+
+            (1..4_097).forEach { provider.writeAsync(record(it)) }
+            assertFailsWith<IllegalStateException> { provider.flush() }
+
+            assertEquals(listOf(2_000, 4_000, 4_096, 4_096), provider.publishAttempts.map { it.size })
+            assertEquals(1, metrics.errors.count { it == "retention_limit_reached" })
+            runCatching { provider.forceShutdown() }
+        }
+
+    @Test
+    fun manual_flush_failure_retains_batch_and_throws() =
+        runTest {
+            val config = TestAsyncProviderConfig().apply { bufferSize = 4 }
+            val provider = ControlledAsyncProvider(config).track()
+            provider.write(record(1))
+
+            val failure = assertFailsWith<IllegalStateException> { provider.flush() }
+
+            assertEquals("publish failed", failure.message)
+            assertEquals(
+                listOf("message 1"),
+                provider.publishAttempts.single().map { (it as LogRecord.PlainText).msg }
+            )
+            runCatching { provider.forceShutdown() }
+        }
 
     @Test
     fun invalid_buffer_size_fails_before_worker_start() {
@@ -351,175 +405,197 @@ class AsyncProviderTest {
     }
 
     @Test
-    fun metrics_record_does_not_generate_metrics() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-        val metricsRecord = LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap())
+    fun metrics_record_does_not_generate_metrics() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                TestAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            val metricsRecord = LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap())
 
-        provider.write(metricsRecord)
-        provider.flush()
+            provider.write(metricsRecord)
+            provider.flush()
 
-        assertEquals(0, metrics.logCount)
-        assertEquals(emptyList(), metrics.errors)
-        assertEquals(emptyList(), metrics.bufferSizes)
-        assertEquals(0, metrics.durations)
-        provider.join()
-    }
-
-    @Test
-    fun metrics_record_publish_failure_does_not_generate_error_metric() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = ControlledAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-
-        provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
-        assertFailsWith<IllegalStateException> { provider.flush() }
-
-        assertEquals(0, metrics.logCount)
-        assertEquals(emptyList(), metrics.errors)
-        assertEquals(emptyList(), metrics.bufferSizes)
-        assertEquals(0, metrics.durations)
-        runCatching { provider.forceShutdown() }
-    }
-
-    @Test
-    fun mixed_batch_publish_failure_reports_normal_record_metrics() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = ControlledAsyncProvider(
-            TestAsyncProviderConfig().apply { bufferSize = 2 }
-        ).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-
-        provider.write(record(1))
-        provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
-        assertFailsWith<IllegalStateException> { provider.flush() }
-
-        assertEquals(1, metrics.logCount)
-        assertEquals(2, metrics.errors.count { it == "publish_failed" })
-        assertEquals(listOf(1), metrics.bufferSizes)
-        runCatching { provider.forceShutdown() }
-    }
-
-    @Test
-    fun mixed_batch_publish_success_reports_cleared_buffer() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = ControlledAsyncProvider(
-            TestAsyncProviderConfig().apply { bufferSize = 2 },
-            failuresRemaining = 0,
-        ).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-
-        provider.write(record(1))
-        provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
-        provider.flush()
-
-        assertEquals(1, metrics.logCount)
-        assertEquals(emptyList(), metrics.errors)
-        assertEquals(listOf(1, 0), metrics.bufferSizes)
-        provider.join()
-    }
-
-    @Test
-    fun dropped_metrics_record_does_not_report_retention_error() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = ControlledAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-
-        (1..4).forEach { provider.write(record(it)) }
-        provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
-        assertFailsWith<IllegalStateException> { provider.flush() }
-
-        assertEquals(0, metrics.errors.count { it == "retention_limit_reached" })
-        runCatching { provider.forceShutdown() }
-    }
-
-    @Test
-    fun collector_failure_does_not_break_async_worker_or_flush() = runTest {
-        val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = ThrowingMetricsCollector
-        }.track()
-
-        provider.write(record(1))
-        provider.flush()
-
-        assertEquals(listOf("message 1"), provider.processedRecords.map { (it as LogRecord.PlainText).msg })
-        provider.join()
-    }
-
-    @Test
-    fun write_async_reports_acceptance_metrics_without_metrics_recursion() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = TestAsyncProvider(TestAsyncProviderConfig().apply { bufferSize = 2 }).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-
-        provider.writeAsync(record(1))
-        provider.writeAsync(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
-        provider.flush()
-
-        assertEquals(1, metrics.logCount)
-        assertEquals(emptyList(), metrics.errors)
-        provider.join()
-    }
-
-    @Test
-    fun write_async_after_close_is_rejected_and_reported() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-        provider.close()
-
-        provider.writeAsync(record(1))
-        provider.join()
-
-        assertEquals(0, metrics.logCount)
-        assertEquals(listOf("provider_closed"), metrics.errors)
-    }
-
-    @Test
-    fun write_async_after_failed_channel_reports_failure_and_rethrows_it() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val expected = IllegalStateException("channel failed")
-        val provider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-        provider.channel.close(expected)
-
-        val actual = assertFailsWith<IllegalStateException> {
-            provider.writeAsync(record(1))
+            assertEquals(0, metrics.logCount)
+            assertEquals(emptyList(), metrics.errors)
+            assertEquals(emptyList(), metrics.bufferSizes)
+            assertEquals(0, metrics.durations)
+            provider.join()
         }
-        provider.job.join()
-
-        assertEquals(expected.message, actual.message)
-        assertEquals(0, metrics.logCount)
-        assertEquals(listOf("provider_failed"), metrics.errors)
-    }
 
     @Test
-    fun rejected_metrics_record_and_throwing_collector_do_not_change_terminal_behavior() = runTest {
-        val metrics = RecordingMetricsCollector()
-        val metricsProvider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = metrics
-        }.track()
-        metricsProvider.close()
+    fun metrics_record_publish_failure_does_not_generate_error_metric() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
 
-        metricsProvider.writeAsync(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
-        metricsProvider.join()
-        assertEquals(emptyList(), metrics.errors)
+            provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+            assertFailsWith<IllegalStateException> { provider.flush() }
 
-        val throwingProvider = TestAsyncProvider(TestAsyncProviderConfig()).apply {
-            effectiveMetricsCollector = ThrowingMetricsCollector
-        }.track()
-        throwingProvider.close()
+            assertEquals(0, metrics.logCount)
+            assertEquals(emptyList(), metrics.errors)
+            assertEquals(emptyList(), metrics.bufferSizes)
+            assertEquals(0, metrics.durations)
+            runCatching { provider.forceShutdown() }
+        }
 
-        throwingProvider.writeAsync(record(1))
-        throwingProvider.join()
-    }
+    @Test
+    fun mixed_batch_publish_failure_reports_normal_record_metrics() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(
+                    TestAsyncProviderConfig().apply { bufferSize = 2 }
+                ).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+
+            provider.write(record(1))
+            provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+            assertFailsWith<IllegalStateException> { provider.flush() }
+
+            assertEquals(1, metrics.logCount)
+            assertEquals(2, metrics.errors.count { it == "publish_failed" })
+            assertEquals(listOf(1), metrics.bufferSizes)
+            runCatching { provider.forceShutdown() }
+        }
+
+    @Test
+    fun mixed_batch_publish_success_reports_cleared_buffer() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(
+                    TestAsyncProviderConfig().apply { bufferSize = 2 },
+                    failuresRemaining = 0
+                ).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+
+            provider.write(record(1))
+            provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+            provider.flush()
+
+            assertEquals(1, metrics.logCount)
+            assertEquals(emptyList(), metrics.errors)
+            assertEquals(listOf(1, 0), metrics.bufferSizes)
+            provider.join()
+        }
+
+    @Test
+    fun dropped_metrics_record_does_not_report_retention_error() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+
+            (1..4).forEach { provider.write(record(it)) }
+            provider.write(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+            assertFailsWith<IllegalStateException> { provider.flush() }
+
+            assertEquals(0, metrics.errors.count { it == "retention_limit_reached" })
+            runCatching { provider.forceShutdown() }
+        }
+
+    @Test
+    fun collector_failure_does_not_break_async_worker_or_flush() =
+        runTest {
+            val provider =
+                TestAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = ThrowingMetricsCollector
+                }.track()
+
+            provider.write(record(1))
+            provider.flush()
+
+            assertEquals(listOf("message 1"), provider.processedRecords.map { (it as LogRecord.PlainText).msg })
+            provider.join()
+        }
+
+    @Test
+    fun write_async_reports_acceptance_metrics_without_metrics_recursion() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                TestAsyncProvider(TestAsyncProviderConfig().apply { bufferSize = 2 }).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+
+            provider.writeAsync(record(1))
+            provider.writeAsync(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+            provider.flush()
+
+            assertEquals(1, metrics.logCount)
+            assertEquals(emptyList(), metrics.errors)
+            provider.join()
+        }
+
+    @Test
+    fun write_async_after_close_is_rejected_and_reported() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                TestAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            provider.close()
+
+            provider.writeAsync(record(1))
+            provider.join()
+
+            assertEquals(0, metrics.logCount)
+            assertEquals(listOf("provider_closed"), metrics.errors)
+        }
+
+    @Test
+    fun write_async_after_failed_channel_reports_failure_and_rethrows_it() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val expected = IllegalStateException("channel failed")
+            val provider =
+                TestAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            provider.channel.close(expected)
+
+            val actual =
+                assertFailsWith<IllegalStateException> {
+                    provider.writeAsync(record(1))
+                }
+            provider.job.join()
+
+            assertEquals(expected.message, actual.message)
+            assertEquals(0, metrics.logCount)
+            assertEquals(listOf("provider_failed"), metrics.errors)
+        }
+
+    @Test
+    fun rejected_metrics_record_and_throwing_collector_do_not_change_terminal_behavior() =
+        runTest {
+            val metrics = RecordingMetricsCollector()
+            val metricsProvider =
+                TestAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            metricsProvider.close()
+
+            metricsProvider.writeAsync(LogRecord.Metrics("metrics", "value", LogLevel.INFO, emptyMap()))
+            metricsProvider.join()
+            assertEquals(emptyList(), metrics.errors)
+
+            val throwingProvider =
+                TestAsyncProvider(TestAsyncProviderConfig()).apply {
+                    effectiveMetricsCollector = ThrowingMetricsCollector
+                }.track()
+            throwingProvider.close()
+
+            throwingProvider.writeAsync(record(1))
+            throwingProvider.join()
+        }
 }

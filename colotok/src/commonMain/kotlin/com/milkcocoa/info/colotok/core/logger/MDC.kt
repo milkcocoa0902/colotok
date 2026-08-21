@@ -3,7 +3,7 @@ package com.milkcocoa.info.colotok.core.logger
 data class MDCContextData(
     val data: MutableMap<String, String> = mutableMapOf(),
     val dequeData: MutableMap<String, ArrayDeque<String>> = mutableMapOf()
-){
+) {
     fun deepCopy(): MDCContextData {
         val copiedData = data.toMutableMap()
 

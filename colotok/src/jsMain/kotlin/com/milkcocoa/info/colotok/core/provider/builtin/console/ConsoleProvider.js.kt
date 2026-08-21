@@ -1,7 +1,5 @@
 package com.milkcocoa.info.colotok.core.provider.builtin.console
 
-import com.milkcocoa.info.colotok.core.formatter.details.Formatter
-import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
@@ -16,9 +14,8 @@ public actual class ConsoleProvider actual constructor(config: ConsoleProviderCo
      */
     constructor() : this(ConsoleProviderConfig())
 
-
     actual override suspend fun onMessage(record: LogRecord) {
-        when(record.level){
+        when (record.level) {
             LogLevel.TRACE -> console.log(record.format(config.formatter))
             LogLevel.DEBUG -> console.log(record.format(config.formatter))
             LogLevel.INFO -> console.info(record.format(config.formatter))

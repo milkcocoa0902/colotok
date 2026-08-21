@@ -88,14 +88,15 @@ class ColotokLogger4JTest {
     }
 
     @Test
-    fun caller_points_to_the_slf4j_user_call_site() = runBlocking {
-        val logger = LoggerFactory.getLogger("caller-test")
+    fun caller_points_to_the_slf4j_user_call_site() =
+        runBlocking {
+            val logger = LoggerFactory.getLogger("caller-test")
 
-        logger.info("message")
-        provider.flush()
+            logger.info("message")
+            provider.flush()
 
-        assertTrue(provider.lastCaller!!.contains("caller_points_to_the_slf4j_user_call_site"), provider.lastCaller)
-    }
+            assertTrue(provider.lastCaller!!.contains("caller_points_to_the_slf4j_user_call_site"), provider.lastCaller)
+        }
 
     @Test
     fun format_overloads_work_with_slf4j_placeholders() {
@@ -365,7 +366,7 @@ class ColotokLogger4JTest {
         DEBUG(LogLevel.DEBUG),
         INFO(LogLevel.INFO),
         WARN(LogLevel.WARN),
-        ERROR(LogLevel.ERROR),
+        ERROR(LogLevel.ERROR)
     }
 
     private fun logPlain(
@@ -458,7 +459,10 @@ class ColotokLogger4JTest {
         }
     }
 
-    private fun assertFullStackTrace(actual: String, throwable: Throwable) {
+    private fun assertFullStackTrace(
+        actual: String,
+        throwable: Throwable
+    ) {
         assertTrue(actual.contains(throwable::class.simpleName!!))
         assertTrue(actual.contains("at "))
         assertTrue(actual.contains("Caused by:"))

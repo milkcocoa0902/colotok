@@ -1,18 +1,17 @@
 package com.milkcocoa.info.colotok.core.provider.builtin
 
-import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.DetailStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.structure.SimpleStructureFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.DetailTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.builtin.file.FileProvider
 import com.milkcocoa.info.colotok.core.provider.builtin.file.FileProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.rotation.SizeBaseRotation
 import com.milkcocoa.info.colotok.util.ThreadWrapper
-import com.milkcocoa.info.colotok.util.unit.Size.KiB
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll

@@ -82,7 +82,7 @@ class DateBaseRotationTest {
                 createdAtMillis = createdAt.toEpochMilliseconds(),
                 lastModifiedAtMillis = lastModifiedAt.toEpochMilliseconds(),
                 period = 7.days,
-                now = lastModifiedAt.plus(7.days),
+                now = lastModifiedAt.plus(7.days)
             )
         )
     }
@@ -96,7 +96,7 @@ class DateBaseRotationTest {
                 createdAtMillis = null,
                 lastModifiedAtMillis = lastModifiedAt.toEpochMilliseconds(),
                 period = 7.days,
-                now = lastModifiedAt.plus(7.days),
+                now = lastModifiedAt.plus(7.days)
             )
         )
     }
@@ -108,7 +108,7 @@ class DateBaseRotationTest {
                 createdAtMillis = null,
                 lastModifiedAtMillis = null,
                 period = 7.days,
-                now = Instant.parse("2024-01-08T00:00:00Z"),
+                now = Instant.parse("2024-01-08T00:00:00Z")
             )
         )
     }
@@ -129,9 +129,10 @@ class DateBaseRotationTest {
         every { getFileSystem() } returns fileSystem
         every { fileSystem.metadataOrNull(logFile.toOkioPath()) } throws failure
 
-        val thrown = assertFailsWith<java.io.IOException> {
-            DateBaseRotation(period = 7.days).isRotateNeeded(logFile.toOkioPath())
-        }
+        val thrown =
+            assertFailsWith<java.io.IOException> {
+                DateBaseRotation(period = 7.days).isRotateNeeded(logFile.toOkioPath())
+            }
 
         assertSame(failure, thrown)
     }

@@ -1,8 +1,8 @@
 package com.milkcocoa.info.colotok.core.logger
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.promise
@@ -47,40 +47,44 @@ class MDCJsContractTest {
 
     @OptIn(DelicateCoroutinesApi::class)
     @Test
-    fun put_then_await_retains_value() = withMdcScope {
-        GlobalScope.promise {
-            MDC.put("key", "value")
-            yield()
-            assertEquals("value", MDC.get("key"))
+    fun put_then_await_retains_value() =
+        withMdcScope {
+            GlobalScope.promise {
+                MDC.put("key", "value")
+                yield()
+                assertEquals("value", MDC.get("key"))
+            }
         }
-    }
 
     @OptIn(DelicateCoroutinesApi::class)
     @Ignore
     @Test
-    fun child_inherits_creation_snapshot_and_siblings_are_isolated() = withMdcScope {
-        MDC.put("key", "parent")
-        GlobalScope.promise {
-            coroutineScope {
-                val firstReady = CompletableDeferred<Unit>()
-                val secondReady = CompletableDeferred<Unit>()
-                val first = async {
-                    MDC.put("key", "first")
-                    firstReady.complete(Unit)
-                    secondReady.await()
-                    MDC.get("key")
-                }
-                val second = async {
-                    firstReady.await()
-                    MDC.put("key", "second")
-                    secondReady.complete(Unit)
-                    MDC.get("key")
-                }
+    fun child_inherits_creation_snapshot_and_siblings_are_isolated() =
+        withMdcScope {
+            MDC.put("key", "parent")
+            GlobalScope.promise {
+                coroutineScope {
+                    val firstReady = CompletableDeferred<Unit>()
+                    val secondReady = CompletableDeferred<Unit>()
+                    val first =
+                        async {
+                            MDC.put("key", "first")
+                            firstReady.complete(Unit)
+                            secondReady.await()
+                            MDC.get("key")
+                        }
+                    val second =
+                        async {
+                            firstReady.await()
+                            MDC.put("key", "second")
+                            secondReady.complete(Unit)
+                            MDC.get("key")
+                        }
 
-                assertEquals("first", first.await())
-                assertEquals("second", second.await())
-                assertEquals("parent", MDC.get("key"))
+                    assertEquals("first", first.await())
+                    assertEquals("second", second.await())
+                    assertEquals("parent", MDC.get("key"))
+                }
             }
         }
-    }
 }

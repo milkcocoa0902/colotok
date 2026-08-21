@@ -6,7 +6,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Executes a suspending function in a blocking way.
- * 
+ *
  * This function has platform-specific implementations:
  * - On JVM, Android, and Native platforms: Uses `runBlocking` to provide true synchronous behavior
  * - On JS platform: Cannot use `runBlocking` (not supported), so it launches a coroutine without blocking

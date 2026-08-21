@@ -13,33 +13,37 @@ import kotlin.test.assertSame
 class ConsoleProviderFailureJsTest {
     @OptIn(DelicateCoroutinesApi::class)
     @Test
-    fun formatter_failure_is_observable_from_flush_and_join() = GlobalScope.promise {
-        val failure = IllegalStateException("format failed")
-        val config = ConsoleProviderConfig().apply {
-            formatter = ThrowingFormatter(failure)
-        }
-        val provider = ConsoleProvider(config)
-        provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
+    fun formatter_failure_is_observable_from_flush_and_join() =
+        GlobalScope.promise {
+            val failure = IllegalStateException("format failed")
+            val config =
+                ConsoleProviderConfig().apply {
+                    formatter = ThrowingFormatter(failure)
+                }
+            val provider = ConsoleProvider(config)
+            provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
 
-        val flushFailure = try {
-            provider.flush()
-            null
-        } catch (throwable: Throwable) {
-            throwable
-        }
-        val joinFailure = try {
-            provider.join()
-            null
-        } catch (throwable: Throwable) {
-            throwable
-        }
+            val flushFailure =
+                try {
+                    provider.flush()
+                    null
+                } catch (throwable: Throwable) {
+                    throwable
+                }
+            val joinFailure =
+                try {
+                    provider.join()
+                    null
+                } catch (throwable: Throwable) {
+                    throwable
+                }
 
-        assertSame(failure, flushFailure)
-        assertSame(failure, joinFailure)
-    }
+            assertSame(failure, flushFailure)
+            assertSame(failure, joinFailure)
+        }
 
     private class ThrowingFormatter(
-        private val failure: IllegalStateException,
+        private val failure: IllegalStateException
     ) : Formatter {
         override fun format(record: LogRecord.PlainText): String = throw failure
 

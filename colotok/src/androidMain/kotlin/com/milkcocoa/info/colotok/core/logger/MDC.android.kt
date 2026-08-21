@@ -12,6 +12,7 @@ class MDCContext(
     contextData: MDCContextData
 ) : CopyableThreadContextElement<MDCContextData> {
     private var contextData = contextData.deepCopy()
+
     companion object Key : CoroutineContext.Key<MDCContext>
 
     override val key: CoroutineContext.Key<*> get() = Key
@@ -32,8 +33,7 @@ class MDCContext(
 
     override fun copyForChild(): MDCContext = MDCContext(contextData)
 
-    override fun mergeForChild(overwritingElement: CoroutineContext.Element): CoroutineContext =
-        overwritingElement
+    override fun mergeForChild(overwritingElement: CoroutineContext.Element): CoroutineContext = overwritingElement
 }
 
 actual object MDC {

@@ -3,8 +3,8 @@ package com.milkcocoa.info.colotok.core.formatter.builtin.structure
 import com.milkcocoa.info.colotok.core.formatter.Element
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.formatter.details.StructuredFormatter
-import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.util.ThreadWrapper
 import com.milkcocoa.info.colotok.util.std.StdIn
 import com.milkcocoa.info.colotok.util.std.StdOut
@@ -64,7 +64,9 @@ class StructureFormatterTest {
             "date":"2023-12-31"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.INFO, attr = emptyMap()))
+            formatter.format(
+                LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.INFO, attr = emptyMap())
+            )
         )
     }
 
@@ -79,7 +81,9 @@ class StructureFormatterTest {
             "date":"2023-12-31"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.WARN, attr = emptyMap()))
+            formatter.format(
+                LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.WARN, attr = emptyMap())
+            )
         )
     }
 
@@ -95,7 +99,9 @@ class StructureFormatterTest {
             "date":"2023-12-31T12:34:56"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap()))
+            formatter.format(
+                LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = emptyMap())
+            )
         )
     }
 
@@ -112,7 +118,14 @@ class StructureFormatterTest {
             "date":"2023-12-31T12:34:56"
             }
             """.trimIndent().replace("\n", ""),
-            formatter.format(LogRecord.PlainText(name = "test", msg = "message", level = LogLevel.ERROR, attr = mapOf("attr" to "attribute")))
+            formatter.format(
+                LogRecord.PlainText(
+                    name = "test",
+                    msg = "message",
+                    level = LogLevel.ERROR,
+                    attr = mapOf("attr" to "attribute")
+                )
+            )
         )
     }
 
@@ -275,27 +288,31 @@ class StructureFormatterTest {
 
     @Test
     fun duplicate_date_fields_keep_datetime_precedence_without_console_output() {
-        val record = LogRecord.PlainText(
-            name = "test",
-            msg = "message",
-            level = LogLevel.INFO,
-            attr = emptyMap(),
-        )
-        val fieldOrders = listOf(
-            listOf(Element.MESSAGE, Element.DATETIME, Element.DATE, Element.TIME),
-            listOf(Element.TIME, Element.MESSAGE, Element.DATE, Element.DATETIME),
-            listOf(Element.DATE, Element.DATETIME, Element.MESSAGE, Element.TIME),
-        )
+        val record =
+            LogRecord.PlainText(
+                name = "test",
+                msg = "message",
+                level = LogLevel.INFO,
+                attr = emptyMap()
+            )
+        val fieldOrders =
+            listOf(
+                listOf(Element.MESSAGE, Element.DATETIME, Element.DATE, Element.TIME),
+                listOf(Element.TIME, Element.MESSAGE, Element.DATE, Element.DATETIME),
+                listOf(Element.DATE, Element.DATETIME, Element.MESSAGE, Element.TIME)
+            )
 
-        val outputs = fieldOrders.map { fields ->
+        val outputs =
+            fieldOrders.map { fields ->
+                Json.parseToJsonElement(
+                    object : StructuredFormatter(fields) {}.format(record)
+                ).jsonObject
+            }
+
+        val expected =
             Json.parseToJsonElement(
-                object : StructuredFormatter(fields) {}.format(record)
+                """{"message":"message","date":"2023-12-31T12:34:56"}"""
             ).jsonObject
-        }
-
-        val expected = Json.parseToJsonElement(
-            """{"message":"message","date":"2023-12-31T12:34:56"}"""
-        ).jsonObject
         Assertions.assertTrue(outputs.all { it == expected })
         Assertions.assertEquals(JsonPrimitive("2023-12-31T12:34:56"), outputs.first()["date"])
         Assertions.assertNull(stdOut.readLine())

@@ -7,25 +7,27 @@ import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.builtin.stream.StreamProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlin.test.assertSame
 import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 
 class StreamProviderFailureTest {
     @Test
-    fun formatter_failure_is_observable_from_flush_and_join() = runTest {
-        val failure = IllegalStateException("format failed")
-        val provider = StreamProvider {
-            formatter = ThrowingFormatter(failure)
+    fun formatter_failure_is_observable_from_flush_and_join() =
+        runTest {
+            val failure = IllegalStateException("format failed")
+            val provider =
+                StreamProvider {
+                    formatter = ThrowingFormatter(failure)
+                }
+
+            provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
+
+            assertSame(failure, assertFailsWith<IllegalStateException> { provider.flush() })
+            assertSame(failure, assertFailsWith<IllegalStateException> { provider.join() })
         }
 
-        provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
-
-        assertSame(failure, assertFailsWith<IllegalStateException> { provider.flush() })
-        assertSame(failure, assertFailsWith<IllegalStateException> { provider.join() })
-    }
-
     private class ThrowingFormatter(
-        private val failure: IllegalStateException,
+        private val failure: IllegalStateException
     ) : Formatter {
         override fun format(record: LogRecord.PlainText): String = throw failure
 

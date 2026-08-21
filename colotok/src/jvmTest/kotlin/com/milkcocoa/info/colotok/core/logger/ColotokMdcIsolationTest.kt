@@ -9,27 +9,29 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ColotokMdcIsolationTest {
-
     @AfterEach
     fun tearDown() {
         MDC.clear()
     }
 
     @Test
-    fun parallel_scopes_do_not_leak() = runTest {
-        val a = async {
-            val data = MDCContextData()
-            data.data["k"] = "A"
-            withContext(MDCContext(data)) { MDC.get("k") }
-        }
+    fun parallel_scopes_do_not_leak() =
+        runTest {
+            val a =
+                async {
+                    val data = MDCContextData()
+                    data.data["k"] = "A"
+                    withContext(MDCContext(data)) { MDC.get("k") }
+                }
 
-        val b = async(Dispatchers.Default) {
-            val data = MDCContextData()
-            data.data["k"] = "B"
-            withContext(MDCContext(data)) { MDC.get("k") }
-        }
+            val b =
+                async(Dispatchers.Default) {
+                    val data = MDCContextData()
+                    data.data["k"] = "B"
+                    withContext(MDCContext(data)) { MDC.get("k") }
+                }
 
-        assertEquals("A", a.await())
-        assertEquals("B", b.await())
-    }
+            assertEquals("A", a.await())
+            assertEquals("B", b.await())
+        }
 }

@@ -7,7 +7,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class LokiPushPayloadTest {
-
     @OptIn(ExperimentalTime::class)
     @Test
     fun testLokiStreamSerialization() {
@@ -15,10 +14,11 @@ class LokiPushPayloadTest {
         val timestamp1 = Instant.fromEpochSeconds(1721224800, 0) // 2024-07-17T12:00:00Z
         val timestamp2 = Instant.fromEpochSeconds(1721224801, 0) // 2024-07-17T12:00:01Z
         val stream = mapOf("app" to "test-app", "level" to "info")
-        val values = listOf(
-            LokiValue(timestamp1, "log message 1"),
-            LokiValue(timestamp2, "log message 2")
-        )
+        val values =
+            listOf(
+                LokiValue(timestamp1, "log message 1"),
+                LokiValue(timestamp2, "log message 2")
+            )
 
         val lokiStream = LokiStream(stream, values)
 
@@ -43,19 +43,22 @@ class LokiPushPayloadTest {
         // Create a LokiPushPayload with specific values
         val timestamp = Instant.fromEpochSeconds(1721224800, 0) // 2024-07-17T12:00:00Z
         val stream1 = mapOf("app" to "test-app", "level" to "info")
-        val values1 = listOf(
-            LokiValue(timestamp, "info log message")
-        )
+        val values1 =
+            listOf(
+                LokiValue(timestamp, "info log message")
+            )
 
         val stream2 = mapOf("app" to "test-app", "level" to "error")
-        val values2 = listOf(
-            LokiValue(timestamp, "error log message")
-        )
+        val values2 =
+            listOf(
+                LokiValue(timestamp, "error log message")
+            )
 
-        val lokiStreams = listOf(
-            LokiStream(stream1, values1),
-            LokiStream(stream2, values2)
-        )
+        val lokiStreams =
+            listOf(
+                LokiStream(stream1, values1),
+                LokiStream(stream2, values2)
+            )
 
         val lokiPushPayload = LokiPushPayload(lokiStreams)
 
@@ -83,7 +86,8 @@ class LokiPushPayloadTest {
     @Test
     fun testLokiPushPayloadDeserialization() {
         // JSON representing a LokiPushPayload
-        val json = """
+        val json =
+            """
             {
                 "streams": [
                     {
@@ -97,7 +101,7 @@ class LokiPushPayloadTest {
                     }
                 ]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // Deserialize to LokiPushPayload
         val lokiPushPayload = Json.decodeFromString(LokiPushPayload.serializer(), json)

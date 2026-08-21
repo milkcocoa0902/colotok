@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class Slf4j2MdcDequeTest {
-
     private val adapter = ColotokMDCAdapter()
 
     @AfterEach

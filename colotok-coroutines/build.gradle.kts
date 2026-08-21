@@ -29,14 +29,12 @@ kotlin {
         }
     }
 
-
     android {
         compileSdk = 36
         namespace = "com.milkcocoa.info.colotok"
         compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
         withHostTest {}
     }
-
 
     iosX64()
     iosArm64()
@@ -66,7 +64,6 @@ kotlin {
     }
 }
 
-
 val CORE_LIBRARY_DESCRIPTION: String by project
 val PROJECT_URL: String by project
 val LICENSE_TYPE: String by project
@@ -77,12 +74,11 @@ val DEVELOPER_NAME: String by project
 val DEVELOPER_EMAIL: String by project
 val REPOSITORY_URL: String by project
 
-
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
     coordinates(
-        artifactId = "colotok-coroutines",
+        artifactId = "colotok-coroutines"
     )
 
     pom {

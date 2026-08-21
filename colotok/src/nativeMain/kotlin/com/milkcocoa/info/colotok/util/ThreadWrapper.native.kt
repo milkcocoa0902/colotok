@@ -14,21 +14,24 @@ actual object ThreadWrapper {
 
     @OptIn(ExperimentalNativeApi::class)
     actual fun traceCallPoint(): String {
-        val loggingFrameNames = listOfNotNull(
-            ThreadWrapper::class.simpleName,
-            LogEventMetadata::class.simpleName,
-            LogRecord::class.simpleName,
-            ColotokLogger::class.simpleName,
-            LevelScopedColotokLogger::class.simpleName,
-            "ColotokLoggerExtensionKt",
-        )
+        val loggingFrameNames =
+            listOfNotNull(
+                ThreadWrapper::class.simpleName,
+                LogEventMetadata::class.simpleName,
+                LogRecord::class.simpleName,
+                ColotokLogger::class.simpleName,
+                LevelScopedColotokLogger::class.simpleName,
+                "ColotokLoggerExtensionKt"
+            )
 
         return Throwable().getStackTrace().asSequence()
             .dropWhile {
-                frame -> loggingFrameNames.none { frame.containsLoggingOwner(it) }
+                    frame ->
+                loggingFrameNames.none { frame.containsLoggingOwner(it) }
             }
             .dropWhile {
-                frame -> loggingFrameNames.any { frame.containsLoggingOwner(it) }
+                    frame ->
+                loggingFrameNames.any { frame.containsLoggingOwner(it) }
             }
             .firstOrNull() ?: ""
     }

@@ -30,4 +30,3 @@ interface ProviderConfig {
      */
     var enableInternalMetricsLogging: Boolean
 }
-

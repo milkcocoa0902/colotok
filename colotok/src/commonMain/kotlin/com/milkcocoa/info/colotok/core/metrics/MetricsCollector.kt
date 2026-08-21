@@ -11,28 +11,40 @@ interface MetricsCollector {
      * @param level The level of the log record.
      * @param providerName The simple name of the provider.
      */
-    fun incrementLogCount(level: Level, providerName: String)
+    fun incrementLogCount(
+        level: Level,
+        providerName: String
+    )
 
     /**
      * Increment the count of errors occurred.
      * @param providerName The simple name of the provider.
      * @param errorType A string representing the type of error (e.g., "buffer_full", "network_error").
      */
-    fun incrementErrorCount(providerName: String, errorType: String)
+    fun incrementErrorCount(
+        providerName: String,
+        errorType: String
+    )
 
     /**
      * Update the current buffer size.
      * @param providerName The simple name of the provider.
      * @param size The current number of items in the buffer.
      */
-    fun updateBufferSize(providerName: String, size: Int)
+    fun updateBufferSize(
+        providerName: String,
+        size: Int
+    )
 
     /**
      * Record the duration of a write operation.
      * @param providerName The simple name of the provider.
      * @param durationMs The duration in milliseconds.
      */
-    fun recordWriteDuration(providerName: String, durationMs: Long)
+    fun recordWriteDuration(
+        providerName: String,
+        durationMs: Long
+    )
 }
 
 /**
@@ -50,10 +62,25 @@ internal inline fun MetricsCollector.collectBestEffort(block: MetricsCollector.(
  * A No-Op implementation of [MetricsCollector].
  */
 object NoOpMetricsCollector : MetricsCollector {
-    override fun incrementLogCount(level: Level, providerName: String) {}
-    override fun incrementErrorCount(providerName: String, errorType: String) {}
-    override fun updateBufferSize(providerName: String, size: Int) {}
-    override fun recordWriteDuration(providerName: String, durationMs: Long) {}
+    override fun incrementLogCount(
+        level: Level,
+        providerName: String
+    ) {}
+
+    override fun incrementErrorCount(
+        providerName: String,
+        errorType: String
+    ) {}
+
+    override fun updateBufferSize(
+        providerName: String,
+        size: Int
+    ) {}
+
+    override fun recordWriteDuration(
+        providerName: String,
+        durationMs: Long
+    ) {}
 }
 
 /**
@@ -82,26 +109,37 @@ sealed class MetricsCollectorSpec {
  * A [MetricsCollector] that delegates to multiple collectors.
  */
 class CompositeMetricsCollector(private val collectors: List<MetricsCollector>) : MetricsCollector {
-
-    override fun incrementLogCount(level: Level, providerName: String) {
+    override fun incrementLogCount(
+        level: Level,
+        providerName: String
+    ) {
         collectors.forEach { collector ->
             collector.collectBestEffort { incrementLogCount(level, providerName) }
         }
     }
 
-    override fun incrementErrorCount(providerName: String, errorType: String) {
+    override fun incrementErrorCount(
+        providerName: String,
+        errorType: String
+    ) {
         collectors.forEach { collector ->
             collector.collectBestEffort { incrementErrorCount(providerName, errorType) }
         }
     }
 
-    override fun updateBufferSize(providerName: String, size: Int) {
+    override fun updateBufferSize(
+        providerName: String,
+        size: Int
+    ) {
         collectors.forEach { collector ->
             collector.collectBestEffort { updateBufferSize(providerName, size) }
         }
     }
 
-    override fun recordWriteDuration(providerName: String, durationMs: Long) {
+    override fun recordWriteDuration(
+        providerName: String,
+        durationMs: Long
+    ) {
         collectors.forEach { collector ->
             collector.collectBestEffort { recordWriteDuration(providerName, durationMs) }
         }

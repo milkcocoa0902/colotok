@@ -1,26 +1,22 @@
 package com.milkcocoa.info.colotok.core.logger
 
-import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.KSerializer
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.AfterTest
-import kotlin.test.assertIs
-import kotlin.test.assertSame
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import java.util.concurrent.atomic.AtomicInteger
 
 class ColotokLoggerContextTest {
     private val providersToClose = mutableListOf<RecordingProvider>()
 
-    private fun recordingProvider(): RecordingProvider =
-        RecordingProvider().also(providersToClose::add)
+    private fun recordingProvider(): RecordingProvider = RecordingProvider().also(providersToClose::add)
 
     @AfterTest
     fun tearDown() {
@@ -56,10 +52,11 @@ class ColotokLoggerContextTest {
         config = ConsoleProviderConfig()
     ) {
         data class Record(val name: String, val msg: String, val level: Level, val attr: Map<String, String>)
+
         val records = mutableListOf<Record>()
 
         override suspend fun onMessage(record: LogRecord) {
-            when(record){
+            when (record) {
                 is LogRecord.PlainText -> {
                     records += Record(record.name, record.msg, record.level, record.attr)
                 }
@@ -77,9 +74,10 @@ class ColotokLoggerContextTest {
     @Test
     fun shallowCopy_copies_providers_and_attrs_snapshot() {
         val provider = recordingProvider()
-        val original = ColotokLoggerContext()
-            .addProvider(provider)
-            .withAttrs(mapOf("base" to "A"))
+        val original =
+            ColotokLoggerContext()
+                .addProvider(provider)
+                .withAttrs(mapOf("base" to "A"))
 
         val copy = original.shallowCopy()
 
@@ -110,9 +108,10 @@ class ColotokLoggerContextTest {
     @Test
     fun withAttrs_replaces_attrs_and_freeze_blocks_mutation() {
         val provider = recordingProvider()
-        val ctx = ColotokLoggerContext()
-            .addProvider(provider)
-            .withAttrs(mapOf("k1" to "v1"))
+        val ctx =
+            ColotokLoggerContext()
+                .addProvider(provider)
+                .withAttrs(mapOf("k1" to "v1"))
 
         val logger = ctx.getLogger("L1")
         logger.info("m1")
@@ -129,9 +128,10 @@ class ColotokLoggerContextTest {
     @Test
     fun putAttrs_merges_with_default_attrs() {
         val provider = recordingProvider()
-        val ctx = ColotokLoggerContext()
-            .addProvider(provider)
-            .withAttrs(mapOf("a" to "1"))
+        val ctx =
+            ColotokLoggerContext()
+                .addProvider(provider)
+                .withAttrs(mapOf("a" to "1"))
 
         val logger = ctx.getLogger("L2")
         logger.info("m2", mapOf("b" to "2"))
@@ -151,30 +151,41 @@ class ColotokLoggerContextTest {
     }
 
     @Test
-    fun context_shutdown_closes_all_providers_before_rethrowing_first_failure() = runBlocking {
-        val expected = IllegalStateException("first close failed")
-        val secondClosed = AtomicInteger(0)
-        val first = object : Provider(ConsoleProviderConfig()) {
-            override suspend fun onMessage(record: LogRecord) = Unit
-            override fun onClosed() = throw expected
-        }
-        val second = object : Provider(ConsoleProviderConfig()) {
-            override suspend fun onMessage(record: LogRecord) = Unit
-            override fun onClosed() { secondClosed.incrementAndGet() }
-        }
-        val context = ColotokLoggerContext().addProvider(first).addProvider(second)
+    fun context_shutdown_closes_all_providers_before_rethrowing_first_failure() =
+        runBlocking {
+            val expected = IllegalStateException("first close failed")
+            val secondClosed = AtomicInteger(0)
+            val first =
+                object : Provider(ConsoleProviderConfig()) {
+                    override suspend fun onMessage(record: LogRecord) = Unit
 
-        assertSame(expected, assertFailsWith<IllegalStateException> { context.shutdown() })
-        assertEquals(1, secondClosed.get())
-    }
+                    override fun onClosed() = throw expected
+                }
+            val second =
+                object : Provider(ConsoleProviderConfig()) {
+                    override suspend fun onMessage(record: LogRecord) = Unit
+
+                    override fun onClosed() {
+                        secondClosed.incrementAndGet()
+                    }
+                }
+            val context = ColotokLoggerContext().addProvider(first).addProvider(second)
+
+            assertSame(expected, assertFailsWith<IllegalStateException> { context.shutdown() })
+            assertEquals(1, secondClosed.get())
+        }
 
     @Test
     fun context_force_shutdown_closes_registered_providers_without_active_logger() {
         val closed = AtomicInteger(0)
-        val provider = object : Provider(ConsoleProviderConfig()) {
-            override suspend fun onMessage(record: LogRecord) = Unit
-            override fun onClosed() { closed.incrementAndGet() }
-        }
+        val provider =
+            object : Provider(ConsoleProviderConfig()) {
+                override suspend fun onMessage(record: LogRecord) = Unit
+
+                override fun onClosed() {
+                    closed.incrementAndGet()
+                }
+            }
         val context = ColotokLoggerContext().addProvider(provider)
 
         context.forceShutdown()
@@ -186,14 +197,20 @@ class ColotokLoggerContextTest {
     fun logger_force_shutdown_closes_later_provider_after_first_failure() {
         val expected = IllegalArgumentException("first force close failed")
         val secondClosed = AtomicInteger(0)
-        val first = object : Provider(ConsoleProviderConfig()) {
-            override suspend fun onMessage(record: LogRecord) = Unit
-            override fun onClosed() = throw expected
-        }
-        val second = object : Provider(ConsoleProviderConfig()) {
-            override suspend fun onMessage(record: LogRecord) = Unit
-            override fun onClosed() { secondClosed.incrementAndGet() }
-        }
+        val first =
+            object : Provider(ConsoleProviderConfig()) {
+                override suspend fun onMessage(record: LogRecord) = Unit
+
+                override fun onClosed() = throw expected
+            }
+        val second =
+            object : Provider(ConsoleProviderConfig()) {
+                override suspend fun onMessage(record: LogRecord) = Unit
+
+                override fun onClosed() {
+                    secondClosed.incrementAndGet()
+                }
+            }
         val logger = ColotokLogger("test") { providers = listOf(first, second) }
 
         assertSame(expected, assertFailsWith<IllegalArgumentException> { logger.forceShutdown() })
