@@ -17,7 +17,7 @@ The `colotok-coroutines` plugin provides coroutine support for Colotok, allowing
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-coroutines:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-coroutines:0.5.0")
 ```
 
 **Usage**: The plugin provides async versions of all standard logging methods:
@@ -65,7 +65,7 @@ The `colotok-cloudwatch` plugin provides integration with Amazon CloudWatch Logs
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.5.0")
 ```
 
 **Usage**: Configure the CloudWatch provider with your AWS credentials and log group/stream information:
@@ -145,10 +145,10 @@ The `colotok-slf4j` and `colotok-slf4j2` plugin allows Colotok to be used as an 
 // Gradle Kotlin DSL
 
 // For SLF4J 1.7.x
-implementation("io.github.milkcocoa0902:colotok-slf4j:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-slf4j:0.5.0")
 
 // For SLF4J 2.x
-implementation("io.github.milkcocoa0902:colotok-slf4j2:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-slf4j2:0.5.0")
 ```
 
 Each binding exposes its matching `slf4j-api` major as a transitive compile dependency. Do not add
@@ -199,7 +199,7 @@ The `colotok-loki` plugin provides integration with Grafana Loki, allowing you t
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-loki:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-loki:0.5.0")
 ```
 
 **Usage**: Configure the Loki provider with your Loki server information:
