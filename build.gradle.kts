@@ -18,10 +18,14 @@ plugins {
 apiValidation {
     ignoredProjects.add("sample")
 }
+
+val publicationGroup = providers.gradleProperty("GROUP").get()
+val publicationVersion = providers.gradleProperty("VERSION").get()
+
 // ルート build.gradle.kts
 subprojects {
-    group = "io.github.milkcocoa0902"
-    version = "0.4.3"
+    group = publicationGroup
+    version = publicationVersion
 
     val moduleName = name
     pluginManager.withPlugin("kotlin-multiplatform") {
