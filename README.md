@@ -1,7 +1,7 @@
 # COLOTOK
 COLOTOK; Code-Base Logging Runtime  for Kotlin  
 
-![](https://img.shields.io/static/v1?label=kotlin&message=2.1.20&color=magenta)
+![](https://img.shields.io/static/v1?label=kotlin&message=2.3.21&color=magenta)
 ![](https://img.shields.io/static/v1?label=jdk&message=11&color=magenta)
 [![](https://jitpack.io/v/milkcocoa0902/colotok.svg)](https://jitpack.io/#milkcocoa0902/colotok)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.milkcocoa0902/colotok.svg)](https://search.maven.org/artifact/io.github.milkcocoa0902/colotok)
@@ -18,16 +18,16 @@ COLOTOK; Code-Base Logging Runtime  for Kotlin
 　🌟 StreamProvider  
 ✅ Log Rotation  
 　🌟 SizeBaseRotation  
-　🌟 DateBaseRotation(; DurationBase)    
+　🌟 DateBaseRotation (duration-based)  
 ✅ Customize output location  
 　🌟 example [print log into slack](https://github.com/milkcocoa0902/colotok_slack_integration_sample)  
-✅ Structure Logging  
+✅ Structured Logging  
 ✅ MDC (Mapped Diagnostic Context)  
-✅ Metrics Collection
-　🌟 Built-in metrics (Accepted enqueue count, Error count, AsyncProvider buffer size)
-　🌟 Write-duration extension point (Not emitted automatically by the runtime)
-　🌟 Multiple collection strategies (Inherit, Explicit, Internal Logging)
-　🌟 Composite metrics (Collect to multiple destinations simultaneously)
+✅ Metrics Collection  
+　🌟 Built-in metrics (Accepted enqueue count, Error count, AsyncProvider buffer size)  
+　🌟 Write-duration extension point (Not emitted automatically by the runtime)   
+　🌟 Multiple collection strategies (Inherit, Explicit, Internal Logging)  
+　🌟 Composite metrics (Collect to multiple destinations simultaneously)  
 
 
 # Integration
@@ -36,29 +36,27 @@ basic dependency
 ```kotlin
 dependencies {
     // add this line
-    implementation("io.github.milkcocoa0902:colotok:0.4.3")
+    implementation("io.github.milkcocoa0902:colotok:0.5.0")
 }
 ```
 
-or when you use kotlin multiplatform(;KMP)
+For a Kotlin Multiplatform project, depend on the root module from `commonMain`.
+Gradle module metadata selects the matching target artifact automatically; do not add
+`-jvm`, `-android`, or `-js` coordinates manually.
 
 ```kotlin
-commonMain.dependncies{
-    implementation("io.github.milkcocoa0902:colotok:0.4.3")
-}
-
-jvmMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-jvm:0.4.3")
-}
-
-androidMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-android:0.4.3")
-}
-
-jsMain.dependencies{
-    implementation("io.github.milkcocoa0902:colotok-js:0.4.3")
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("io.github.milkcocoa0902:colotok:0.5.0")
+        }
+    }
 }
 ```
+
+The core module, `colotok-coroutines`, and `colotok-loki` support JVM, Android, JS/Node,
+iOS Arm64, iOS Simulator Arm64, and macOS Arm64. Apple x86 targets (`iosX64` and
+`macosX64`) are not published in 0.5.0.
 
 # Plugins
 
@@ -66,25 +64,26 @@ Colotok provides several plugins to extend its functionality:
 
 |       plugin       |                      artifact                      |             feature             |    Platform    |
 |:------------------:|:--------------------------------------------------:|:-------------------------------:|:--------------:|
-| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.4.3` |        coroutine support        | Multi Platform |
-|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.4.3`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
-|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.4.3`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
-| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.4.3` |   send logs to AWS CloudWatch   |      JVM       |
-|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.4.3`    |    send logs to Grafana Loki    | Multi Platform |
+| colotok-coroutines | `io.github.milkcocoa0902:colotok-coroutines:0.5.0` |        coroutine support        | Multi Platform |
+|   colotok-slf4j    |   `io.github.milkcocoa0902:colotok-slf4j:0.5.0`    | SLF4J 1.7.x bindings (JVM only) |      JVM       |
+|   colotok-slf4j2   |   `io.github.milkcocoa0902:colotok-slf4j2:0.5.0`   |  SLF4J 2.x bindings (JVM only)  |      JVM       |
+| colotok-cloudwatch | `io.github.milkcocoa0902:colotok-cloudwatch:0.5.0` |   send logs to AWS CloudWatch   |      JVM       |
+|    colotok-loki    |    `io.github.milkcocoa0902:colotok-loki:0.5.0`    |    send logs to Grafana Loki    | Multi Platform |
 
 Each SLF4J binding publishes the matching `slf4j-api` major as a transitive compile dependency.
 Applications only need the selected Colotok binding unless they intentionally manage the SLF4J API version themselves.
 
 # Dependencies
 
-If you want to use **Structured Logging** or **Internal Metrics Logging**, you need to enable the Kotlin Serialization plugin in your project. 
+If your structured message types use `@Serializable`, enable the Kotlin serialization compiler plugin in your project.
 
 Colotok already includes the necessary serialization libraries, so you generally don't need to add them manually unless you want to use a specific version.
 
 ```kotlin
 plugins {
     // Required for @Serializable
-    kotlin("plugin.serialization") version "2.1.10" 
+    // Use the same version as your Kotlin Gradle plugin.
+    kotlin("plugin.serialization") version "2.3.21"
 }
 ```
 
@@ -97,7 +96,7 @@ see below.
 
 ```kotlin
 val logger = ColotokLoggerContext()
-    .addProvider(ConsoleProvider())
+    .addProvider(ConsoleProvider(ConsoleProviderConfig()))
     .getLogger()
 
 ```
@@ -124,21 +123,23 @@ val logger = ColotokLoggerContext()
 Colotok deliberately does not infer `BuildConfig.DEBUG`. Set `isOutputEnabled = false` when
 output must remain disabled regardless of the other gates.
 
-more details config
+More detailed configuration (the `FileProvider` path below uses Okio and works from common code):
 ```Kotlin
-val fileProvider: FileProvider
+import okio.Path.Companion.toPath
+
+val fileProvider = FileProvider("test.log".toPath()) {
+    level = LogLevel.INFO
+    // use size-based rotation
+    rotation = SizeBaseRotation(size = 4096L)
+}
+
 val logger = ColotokLoggerContext()
     .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
         // show above info level in console
         level = LogLevel.INFO
     }))
-    .addProvider(FileProvider(File("test.log").toOkioPath()){
-        level = LogLevel.INFO
-        // use size base rotation
-        rotation = SizeBaseRotation(size = 4096L)
-    }.apply {
-        fileProvider = this
-    }).getLogger()
+    .addProvider(fileProvider)
+    .getLogger()
 
 logger.trace("TRACE LEVEL LOG")
 logger.debug("DEBUG LEVEL LOG")
@@ -172,62 +173,86 @@ colotok has builtin text formatter.
 2. SimpleTextFormatter
 3. DetailTextFormatter
 
-### 1. PlainFormatter
-this formatter shows as below style's log
+### 1. PlainTextFormatter
+This formatter outputs only the message.
 
 ```
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        formatter = PlainTextFormatter
+    }))
+    .getLogger()
+
 logger.info("message what happen")
 
 // message what happen
 ```
 
-### 2. SimpleFormatter
-this formatter shows as below style's log
+### 2. SimpleTextFormatter
+This formatter outputs a timestamp, level, and message.
 
 ```Kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        formatter = SimpleTextFormatter
+    }))
+    .getLogger()
+
 logger.info("message what happen")
 
 // 2023-12-29 12:23:14.220383  [INFO] - message what happen
 ```
 
-### 3. DetailFormatter
-this formatter shows as below style's log
+### 3. DetailTextFormatter
+This formatter also includes the logging thread and attributes.
 
 ```Kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        formatter = DetailTextFormatter
+    }))
+    .getLogger()
+
 logger.info("message what happen", mapOf("param1" to "a custom attribute"))
 
-// 2023-12-29T12:21:13.354328+09:00 (main)[INFO] - message what happen, additional = {param1=a custom attribute}
+// 2023-12-29T12:21:13.354328 (main)[INFO] - message what happen, additional = {param1=a custom attribute}
 ```
 
-## Formatter(Structure)
-colotok has builtin structured formatter.
+## Formatter(Structured)
+Colotok has built-in structured formatters.
 1. SimpleStructureFormatter
 2. DetailStructureFormatter
 
-if you has a class
+For a structured message type:
 ```kotlin
 @Serializable
-class LogDetail(val scope: String, val message: String): LogStructure
+data class LogDetail(val scope: String, val message: String) : LogStructure
 
 @Serializable
-class Log(val name: String, val logDetail: LogDetail): LogStructure
+data class Log(val name: String, val logDetail: LogDetail) : LogStructure
 ```
 
 ### 1. SimpleStructureFormatter
-this formatter shows bellow style's log
+Configure a provider with `SimpleStructureFormatter` to emit the message, level, and UTC date.
 
 ```Kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        formatter = SimpleStructureFormatter
+    }))
+    .getLogger()
+
 logger.info(
     Log(
         name = "illegal state",
-        LogDetail(
-            "args",
-            "argument must be greater than zero"
+        logDetail = LogDetail(
+            scope = "args",
+            message = "argument must be greater than zero"
         )
     )
 )
 
-// // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29"}
 
 
 logger.info("message what happen")
@@ -235,22 +260,28 @@ logger.info("message what happen")
 // {"message":"message what happen","level":"INFO","date":"2023-12-29"}
 ```
 ### 2. DetailStructureFormatter
-this formatter shows bellow style's log
+Configure a provider with `DetailStructureFormatter` to also emit the thread and attributes.
 
 ```Kotlin
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        formatter = DetailStructureFormatter
+    }))
+    .getLogger()
+
 logger.info(
     Log(
         name = "illegal state",
-        LogDetail(
-            "args",
-            "argument must be greater than zero"
+        logDetail = LogDetail(
+            scope = "args",
+            message = "argument must be greater than zero"
         )
     ),
     // you can pass additional attrs
     mapOf("additional" to "additional param")
 )
 
-// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","additional":"additional param","date":"2023-12-29T12:34:56"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","thread":"main","additional":"additional param","date":"2023-12-29T12:34:56"}
 
 
 logger.info("message what happen")
@@ -272,7 +303,8 @@ colotok has builtin provider. Provider is used for output log.
 3. StreamProvider
 
 ### 1. ConsoleProvider
-this provider outputs log into console with ansi-color
+This provider writes to the platform console. JVM and Native targets support ANSI color
+configuration; Android writes to Logcat and JavaScript writes to the JavaScript console.
 
 ### 2. FileProvider
 this provider output log into file without ansi-color.
@@ -305,7 +337,7 @@ the same non-blocking `write()` path.
 
 ## MDC (Mapped Diagnostic Context)
 Colotok supports MDC functionality since version 0.3.0, which allows you to add contextual information to your logs. MDC is designed to be coroutine-friendly.  
-MDC replace the `Element.CUSTOM` when formatting.
+Custom formatters can render an MDC value with `Element.CUSTOM`.
 
 
 ```kotlin
@@ -314,7 +346,7 @@ MDC.put("requestId", "12345")
 MDC.put("userId", "user-abc")
 
 // Log with MDC context
-logger.info("Processing request") // MDC values will be included automatically
+logger.info("Processing request") // The record captures the current MDC values.
 
 // Clear specific MDC value
 MDC.remove("userId")
@@ -323,9 +355,9 @@ MDC.remove("userId")
 MDC.clear()
 
 // Using MDC with coroutines
-// On JVM platform
+// On JVM
 suspend fun processRequest() {
-    withMdcScope(Dispatchers.IO) {
+    withMdcScope {
         MDC.put("requestId", "12345")
         // MDC context is preserved across coroutine boundaries
         someAsyncOperation()
@@ -366,10 +398,10 @@ Colotok can collect metrics about its operation.
 ```kotlin
 val logger = ColotokLoggerContext()
     .withMetrics(CustomMetricsCollector()) // Global metrics collector
-    .addProvider(ConsoleProvider {
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
         // This provider will inherit the global collector
         metricsSpec = MetricsCollectorSpec.Inherit 
-    })
+    }))
     .addProvider(LokiProvider {
         // This provider logs metrics to itself as LogRecord.Metrics
         enableInternalMetricsLogging = true
@@ -414,17 +446,21 @@ collector; internal metrics logging can still be enabled separately.
 Use graceful shutdown when queued records must be processed before application exit.
 
 ```kotlin
+import okio.Path.Companion.toPath
+
 val context = ColotokLoggerContext()
-    .addProvider(FileProvider(path))
+    .addProvider(FileProvider("application.log".toPath()))
     
 val logger = context.getLogger()
 
 // ... logging ...
 
-// Stops acceptance and suspends until providers flush and close.
-context.shutdown()
+// Invoke after application logging has stopped: gracefully closes providers and waits.
+suspend fun stopLogging() {
+    context.shutdown()
+}
 
-// Cancels immediately. Queued records may be lost.
+// This synchronous alternative cancels immediately; queued records may be lost.
 context.forceShutdown()
 ```
 

@@ -4,20 +4,20 @@ Colotok provides several official plugins to extend its functionality for differ
 
 ## colotok-coroutines
 
-The `colotok-coroutines` plugin provides coroutine support for Colotok, allowing you to log asynchronously in coroutine contexts.
+The `colotok-coroutines` plugin provides suspending logging extensions for use from coroutine contexts, as well as the `AsyncProvider` base class for batched providers.
 
-**Description**: As a default, Colotok is not coroutines-friendly. This plugin adds async versions of all logging methods.
+**Description**: The extensions create the log record once and dispatch writes to the configured providers concurrently. For an `AsyncProvider`, they suspend until its channel accepts the record. A regular `Provider` keeps the same best-effort, non-blocking enqueue behavior as its synchronous `write()` method. Use `AsyncProvider` for a channel-backed, batched remote provider.
 
 **When to Use**: Use this plugin when your application uses Kotlin coroutines and you want to:
-- Log asynchronously without blocking the current coroutine
+- Use suspending logging calls from coroutine code
 - Integrate logging with your coroutine-based application flow
-- Avoid blocking I/O operations during logging
+- Wait for channel capacity when writing to an `AsyncProvider`
 
 **Setup**: Add the dependency to your project:
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-coroutines:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-coroutines:0.5.0")
 ```
 
 **Usage**: The plugin provides async versions of all standard logging methods:
@@ -35,9 +35,6 @@ runBlocking {
     // With attributes
     logger.infoAsync("Info with attributes", mapOf("key" to "value"))
 
-    // With structured logging
-    logger.infoAsync(YourLogStructure())
-
     // Scoped logging
     logger.atInfoAsync {
         // All logs in this block are at INFO level
@@ -47,7 +44,7 @@ runBlocking {
 }
 ```
 
-**Platform Support**: This plugin is available for all platforms supported by Kotlin Multiplatform.
+**Platform Support**: This plugin is published for the same targets as the core library: JVM, Android, JavaScript, iOS arm64, iOS Simulator arm64, and macOS arm64.
 
 ## colotok-cloudwatch (JVM only)
 
@@ -65,7 +62,7 @@ The `colotok-cloudwatch` plugin provides integration with Amazon CloudWatch Logs
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.5.0")
 ```
 
 **Usage**: Configure the CloudWatch provider with your AWS credentials and log group/stream information:
@@ -75,6 +72,8 @@ implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.4.2")
 | `logGroup` | CloudWatch log group name | `null` |
 | `logStream` | CloudWatch log stream name | `null` |
 | `credential` | CloudWatch credentials | `null` |
+| `level` | Minimum log level to publish | `DEBUG` |
+| `formatter` | Formatter used for CloudWatch event messages | `SimpleStructureFormatter` |
 | `bufferSize` | Publish threshold; retained failures may grow to `min(bufferSize * 4, 4096)` | `50` |
 
 
@@ -101,7 +100,7 @@ val logger = ColotokLoggerContext()
         // credential = CloudwatchCredential.FromEnvironments(region = "us-west-2")
 
         // Configure buffer size (optional)
-        bufferSize = 50 // Default: logs are sent when buffer reaches this size
+        bufferSize = 50 // Default: publication is attempted at this threshold
     })
     .getLogger()
 
@@ -109,9 +108,7 @@ val logger = ColotokLoggerContext()
 logger.info("This log will be sent to CloudWatch")
 ```
 
-**Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Logs are sent to CloudWatch when:
-1. The buffer reaches the configured size (`bufferSize`)
-2. You explicitly call `flush()` on the provider
+**Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, at the retention limit, or on a flush.
 
 ```kotlin
 // Get a reference to the provider
@@ -130,7 +127,7 @@ runBlocking {
 
 ## colotok-slf4j, colotok-slf4j2 (JVM only)
 
-The `colotok-slf4j` and `colotok-slf4j2` plugin allows Colotok to be used as an SLF4J implementation.
+The `colotok-slf4j` and `colotok-slf4j2` plugins allow Colotok to be used as an SLF4J backend.
 
 **Description**: This plugin enables applications that use SLF4J for logging to use Colotok as the logging backend.
 
@@ -145,10 +142,10 @@ The `colotok-slf4j` and `colotok-slf4j2` plugin allows Colotok to be used as an 
 // Gradle Kotlin DSL
 
 // For SLF4J 1.7.x
-implementation("io.github.milkcocoa0902:colotok-slf4j:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-slf4j:0.5.0")
 
 // For SLF4J 2.x
-implementation("io.github.milkcocoa0902:colotok-slf4j2:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-slf4j2:0.5.0")
 ```
 
 Each binding exposes its matching `slf4j-api` major as a transitive compile dependency. Do not add
@@ -199,7 +196,7 @@ The `colotok-loki` plugin provides integration with Grafana Loki, allowing you t
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-loki:0.4.2")
+implementation("io.github.milkcocoa0902:colotok-loki:0.5.0")
 ```
 
 **Usage**: Configure the Loki provider with your Loki server information:
@@ -210,6 +207,8 @@ implementation("io.github.milkcocoa0902:colotok-loki:0.4.2")
 | `host` | Loki host URL | `null` |
 | `logStream` | Labels for Loki stream | `null` |
 | `credential` | Loki credentials | `null` |
+| `level` | Minimum log level to publish | `INFO` |
+| `formatter` | Formatter used for Loki values | `SimpleTextFormatter` |
 | `bufferSize` | Publish threshold; retained failures may grow to `min(bufferSize * 4, 4096)` | `50` |
 | `httpClient` | Ktor HTTP client. The lazy default is provider-owned; an injected client is caller-owned | lazy `HttpClient(CIO)` |
 
@@ -236,7 +235,7 @@ val logger = ColotokLoggerContext()
         )
 
         // Configure buffer size (optional)
-        bufferSize = 50 // Default: logs are sent when buffer reaches this size
+        bufferSize = 50 // Default: publication is attempted at this threshold
     })
     .getLogger()
 
@@ -247,9 +246,7 @@ logger.info("This log will be sent to Loki")
 Loki and CloudWatch use the timestamp captured by the original logging call, not the later publish time.
 Injected Loki clients are not closed by the provider; the caller must close them after provider shutdown.
 
-**Buffering and Flushing**: The Loki provider buffers logs to improve performance. Logs are sent to Loki when:
-1. The buffer reaches the configured size (`bufferSize`)
-2. You explicitly call `flush()` on the provider
+**Buffering and Flushing**: The Loki provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, at the retention limit, or on a flush.
 
 ```kotlin
 // Get a reference to the provider
@@ -264,4 +261,4 @@ runBlocking {
 }
 ```
 
-**Platform Support**: This plugin is available for all platforms supported by Kotlin Multiplatform.
+**Platform Support**: This plugin is published for the same targets as the core library: JVM, Android, JavaScript, iOS arm64, iOS Simulator arm64, and macOS arm64.
