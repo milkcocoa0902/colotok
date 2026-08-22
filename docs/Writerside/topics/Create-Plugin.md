@@ -107,7 +107,9 @@ val logger = context.getLogger("application")
 logger.warn("delivery is delayed")
 
 // At application shutdown; this suspends until graceful completion.
-context.shutdown()
+suspend fun stopLogging() {
+    context.shutdown()
+}
 ```
 
 ## Delivery and lifecycle contract

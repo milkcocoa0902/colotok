@@ -1,82 +1,84 @@
 # Custom Formatter
-Define your formatter which you need.  
+
+Custom formatters subclass either `TextFormatter` or `StructuredFormatter`. Both format the timestamp captured when the log call is made, in UTC.
 
 ## Formatter Elements
 
 ### `Element.DATETIME`
-To used to embed the datetime when you print the log.   
-Formatted as `yyyy-MM-ddTHH:mm:ss.SSS`  
 
-> The event timestamp captured at the log call is formatted in UTC.
-{style="note"}
+Embeds an ISO-8601 UTC date-time. In a structured formatter, this is emitted in the `date` JSON field.
 
 ### `Element.DATE`
-To used to embed the date when you print the log.  
-Formatted as `yyyy-MM-dd`
 
-> For structured logging, `DATETIME` takes precedence. `DATE` plus `TIME` is treated as
-> `DATETIME`; a single `DATE` emits only the date. Duplicate time fields are normalized silently.
+Embeds an ISO-8601 date (`yyyy-MM-dd`).
+
+> For structured logging, `DATETIME` takes precedence. `DATE` plus `TIME` is treated as `DATETIME`; a single `DATE` emits only the date.
 {style="note"}
 
 ### `Element.TIME`
-To used to embed the time when you print the log.  
-Formatted as `HH:mm:ss.SSS`
 
-> The event timestamp captured at the log call is formatted in UTC.
+Embeds an ISO-8601 UTC time.
+
+> For structured logging, `DATETIME` takes precedence. `DATE` plus `TIME` is treated as `DATETIME`; a single `TIME` emits only the time.
 {style="note"}
 
-> For structured logging, `DATETIME` takes precedence. `DATE` plus `TIME` is treated as
-> `DATETIME`; a single `TIME` emits only the time. Duplicate time fields are normalized silently.
-{style="note"}
+### `Element.LEVEL`
 
-### `Element.LEVEL` ...  
-To used to embed the log level.
+Embeds the log level.
 
-### `Element.MESSAGE` ...   
-To used to embed the message what you want.
+### `Element.MESSAGE`
 
-### `Element.THREAD` ...  
-To used to embed the thread name
+Embeds the log message. In a structured formatter, a `LogStructure` is emitted as JSON under the `message` field.
 
-### `Element.CALLER` ...  
-To used to embed the caller where you print the log.
+### `Element.THREAD`
 
-### `Element.ATTR` ...  
-To used to embed the additional attributes
+Embeds the thread name.
 
-### `Element.NAME` ...  
-To used to embed the logger name
+### `Element.CALLER`
 
-### `Element.CUSTOM(name)` ...   
-To used to embed the Custom field which provided by logger context.
+Embeds the caller captured for the logging event.
+
+### `Element.ATTR`
+
+Embeds additional attributes. In a structured formatter, every attribute is emitted as a top-level JSON field.
+
+### `Element.NAME`
+
+`Element.NAME` is reserved for a logger name, but the current formatter implementations do not render it. Do not include it in a custom format until that implementation support is added.
+
+### `Element.CUSTOM(name)`
+
+Embeds the named MDC value. In a structured formatter, an absent value is emitted as an empty string. In a text formatter, placeholders whose MDC key is absent remain unchanged.
 
 ## Custom Text Formatter
-Defines your custom formatter
 
-``` kotlin
-object CustomTextFormatter: TextFormatter(
-    fmt = """ 
-    [${Element.LEVEL}] 
-    (${Element.THREAD}) ${Element.DATETIME} 
-    ${Element.CALLER}} -> ${Element.MESSAGE}, 
+Define a custom text formatter:
+
+```kotlin
+object CustomTextFormatter : TextFormatter(
+    fmt = """
+    [${Element.LEVEL}]
+    (${Element.THREAD}) ${Element.DATETIME}
+    ${Element.CALLER} -> ${Element.MESSAGE},
     attr = ${Element.ATTR}
     """.trimIndent()
         .replace("\n", "")
 )
 ```
 
-Then you can use formatter.
+Then configure a provider to use it.
 
 ```kotlin
 val logger = ColotokLoggerContext()
     .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
-        this.formatter = CustomTextFormatter
+        formatter = CustomTextFormatter
     }))
     .getLogger()
 ```
 
 ## Custom Structured Formatter
-Defines your custom formatter
+
+Define a custom structured formatter:
 
 ```kotlin
 object CustomStructuredFormatter : StructuredFormatter(
@@ -85,8 +87,7 @@ object CustomStructuredFormatter : StructuredFormatter(
         Element.MESSAGE,
         Element.LEVEL,
         Element.DATETIME,
-        Element.THREAD,
-        Element.ATTR
+        Element.ATTR,
     ),
     mask = listOf(
         "password",
@@ -96,15 +97,16 @@ object CustomStructuredFormatter : StructuredFormatter(
 )
 ```
 
-and then, you can use this formatter.
+Then configure a provider to use it.
 
 ```kotlin
 val logger = ColotokLoggerContext()
     .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
-        this.formatter = CustomStructuredFormatter
+        formatter = CustomStructuredFormatter
     }))
     .getLogger()
 ```
 
 ### Field masking
-Structured Formatter will replace by `*` which provided by `mask` field. 
+
+For a `LogStructure`, `mask` matches field names case-insensitively, including nested objects and arrays. Matching values are replaced with up to 32 `*` characters. It does not mask plain-text messages, attributes, or MDC values.
