@@ -108,6 +108,32 @@ val logger = ColotokLoggerContext()
     .getLogger()
 ```
 
+### CompositeMetricsCollector
+
+Use `CompositeMetricsCollector` when the same metric callback should be sent to multiple external
+collectors.
+
+```kotlin
+val combinedCollector = CompositeMetricsCollector(
+    listOf(prometheusCollector, auditCollector)
+)
+
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        metricsSpec = MetricsCollectorSpec.Explicit(combinedCollector)
+    }))
+    .getLogger()
+```
+
+Callbacks are forwarded to every collector in list order. Metrics are best-effort: if one collector
+throws, the exception is isolated and the remaining collectors still receive the callback. A
+collector failure does not fail logging, `flush()`, or `join()`, so collector exceptions must not
+be used for application control flow.
+
+`MetricsCollectorSpec.Explicit(collector, inheritParent = true)` automatically combines the
+context collector with the explicit collector. Do not also put that same context collector inside
+a `CompositeMetricsCollector` unless duplicate metric emission is intentional.
+
 ### NoOp
 
 The base or external metrics collector is disabled for the provider. Internal metrics logging can

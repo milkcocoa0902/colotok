@@ -16,6 +16,29 @@ choose different level and formatter defaults, as listed in the [official plugin
 | `metricsSpec` | How to collect metrics (`Inherit`, `Explicit`, `NoOp`) | `MetricsCollectorSpec.Inherit` |
 | `enableInternalMetricsLogging` | Whether to log metrics as internal records (`LogRecord.Metrics`) | `false` |
 
+## Log levels and filtering
+
+Levels are ordered from least to most severe:
+
+`TRACE < DEBUG < INFO < WARN < ERROR < OFF`
+
+Each provider applies its own `level` as the minimum accepted level. A record is accepted by that
+provider when `record.level >= provider.level`.
+
+| Provider level | Accepted standard log levels |
+| :--- | :--- |
+| `TRACE` | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `DEBUG` | `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `INFO` | `INFO`, `WARN`, `ERROR` |
+| `WARN` | `WARN`, `ERROR` |
+| `ERROR` | `ERROR` only |
+| `OFF` | No standard `TRACE` through `ERROR` records |
+
+`OFF` is a threshold above `ERROR`; it disables all standard logging methods for that provider.
+Because thresholds belong to providers, the same logger can send a `DEBUG` event to one provider
+while another provider configured at `INFO` filters it out. Filtering happens before enqueue and
+does not emit runtime metrics for the filtered record.
+
 ## ConsoleProvider
 ConsoleProvider write the log into console
 
