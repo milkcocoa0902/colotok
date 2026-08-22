@@ -11,11 +11,11 @@ Colotok is a Kotlin Multiplatform logging library.
 　🌟 StreamProvider  
 ✅ Log Rotation  
 　🌟 SizeBaseRotation  
-　🌟 DateBaseRotation (duration based)<br>
+　🌟 DateBaseRotation (duration based)<br/>
 ✅ Customize output location  
 　🌟 example [print log into slack](https://github.com/milkcocoa0902/colotok_slack_integration_sample)  
-✅ Structured Logging<br>
-✅ MDC (Mapped Diagnostic Context)<br>
+✅ Structured Logging<br/>
+✅ MDC (Mapped Diagnostic Context)<br/>
 ✅ Metrics Collection
 
 
