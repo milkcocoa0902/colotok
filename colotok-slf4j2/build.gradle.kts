@@ -1,5 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     alias(libs.plugins.kotlinJvm)
     id("maven-publish")
@@ -39,7 +37,7 @@ val DEVELOPER_EMAIL: String by project
 val REPOSITORY_URL: String by project
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
     coordinates(
         artifactId = "colotok-slf4j2"
