@@ -1,6 +1,5 @@
 @file:OptIn(ExperimentalEncodingApi::class)
 
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -132,7 +131,7 @@ val DEVELOPER_EMAIL: String by project
 val REPOSITORY_URL: String by project
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
     coordinates(
         artifactId = "colotok"
