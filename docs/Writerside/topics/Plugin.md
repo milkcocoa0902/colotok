@@ -15,11 +15,11 @@ Plugins follow a consistent architecture that makes them easy to use and integra
 
 ## Plugin Architecture
 
-Colotok has a flexible plugin architecture based on interfaces that define the contract between the core library and plugins:
+Colotok has a flexible plugin architecture built around core provider contracts:
 
-- **Provider Interface**: The foundation of the plugin system, defining methods for writing logs to various destinations
+- **Provider abstract class and IProvider interface**: The foundation for destinations that receive log records
 - **ProviderConfig Interface**: Defines configuration options for providers
-- **AsyncProvider Interface**: Extends the Provider interface to add support for asynchronous logging
+- **AsyncProvider abstract class**: Extends `Provider` with a channel-backed, batched publishing lifecycle
 
 This architecture allows plugins to be:
 
@@ -34,7 +34,7 @@ Using Colotok plugins offers several advantages:
 1. **Extended Functionality**: Access features beyond the core library
 2. **Simplified Integration**: Easily connect with other systems and services
 3. **Consistent API**: Use the same logging API regardless of the destination
-4. **Platform Flexibility**: Some plugins support multiple platforms (JVM, JS, Native)
+4. **Platform Flexibility**: Some plugins support the Kotlin Multiplatform targets published by Colotok
 5. **Customization**: Adapt logging behavior to your specific requirements
 
 ## Types of Plugins
@@ -47,13 +47,14 @@ These plugins connect Colotok with external systems:
 
 - **colotok-cloudwatch**: Sends logs to AWS CloudWatch
 - **colotok-loki**: Sends logs to Grafana Loki
-- **colotok-slf4j**: Allows Colotok to be used as an SLF4J implementation
+- **colotok-slf4j**: SLF4J 1.7 binding backed by Colotok
+- **colotok-slf4j2**: SLF4J 2.x service provider backed by Colotok
 
 ### 2. Enhancement Plugins
 
 These plugins add new capabilities to Colotok:
 
-- **colotok-coroutines**: Adds coroutine support for asynchronous logging
+- **colotok-coroutines**: Adds suspending logging extensions and the `AsyncProvider` base class for batched delivery
 
 ### 3. Custom Plugins
 
@@ -69,7 +70,7 @@ To use a plugin, you need to:
 
 1. Add the plugin dependency to your project
 2. Configure the plugin according to your needs
-3. Add the plugin's provider to your logger configuration
+3. Add the plugin's provider to a `ColotokLoggerContext` when the plugin supplies one
 
 For example, to use the colotok-coroutines plugin:
 
@@ -77,7 +78,7 @@ For example, to use the colotok-coroutines plugin:
 // Add dependency
 implementation("io.github.milkcocoa0902:colotok-coroutines:0.5.0")
 
-// Use the plugin
+// The extension is suspending and can be called from a coroutine.
 runBlocking {
     logger.infoAsync("Async log message")
 }

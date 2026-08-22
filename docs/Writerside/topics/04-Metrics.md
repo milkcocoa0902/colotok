@@ -84,9 +84,9 @@ The provider inherits the global collector configured in `ColotokLoggerContext`.
 ```kotlin
 val logger = ColotokLoggerContext()
     .withMetrics(globalCollector)
-    .addProvider(ConsoleProvider {
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
         metricsSpec = MetricsCollectorSpec.Inherit
-    })
+    }))
     .getLogger()
 ```
 
@@ -114,9 +114,9 @@ The base or external metrics collector is disabled for the provider. Internal me
 still be enabled separately.
 
 ```kotlin
-.addProvider(ConsoleProvider {
+.addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
     metricsSpec = MetricsCollectorSpec.NoOp
-})
+}))
 ```
 
 ## Internal Metrics Logging

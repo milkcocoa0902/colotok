@@ -6,7 +6,7 @@ Colotok output the log where you specified by the provider and formatted with yo
 
 ```Kotlin
 val logger = ColotokLoggerContext()
-    .addProvider(ConsoleProvider())
+    .addProvider(ConsoleProvider(ConsoleProviderConfig()))
     .getLogger()
 ```
 
@@ -17,7 +17,8 @@ you can get the logger instance by `ColotokLoggerContext#getLogger()`
 > if none of `addProvider()` is called, the logger will not print the log anywhere
 > {style="note"}
 
-On Android, the default `ConsoleProvider()` does not write to Logcat. Supply the debug-mode decision explicitly when debug output is wanted:
+On Android, the default `ConsoleProvider()` does not write to Logcat. From your Android source set,
+supply the debug-mode decision explicitly when debug output is wanted:
 
 ```Kotlin
 val logger = ColotokLoggerContext()
@@ -66,19 +67,20 @@ logger.atInfo {
 
 
 ### Structured Logging
-Colotok also can print structured log using `kotlinx-serialization`.
+Colotok can also print structured logs using `kotlinx.serialization`.
 
-> need for dependencies to kotlinx-serializations on your app
+> Apply the Kotlin serialization compiler plugin in your application. The `colotok` artifact
+> already exposes the serialization runtime used by its public API.
 > {style="note"}
 
-implement the log structure
+Implement the log structure. The serialization plugin generates the serializer used by the logger.
 
 ```kotlin
 @Serializable
-class LogDetail(val scope: String, val message: String): LogStructure
+data class LogDetail(val scope: String, val message: String): LogStructure
 
 @Serializable
-class Log(val name: String, val logDetail: LogDetail): LogStructure
+data class Log(val name: String, val logDetail: LogDetail): LogStructure
 ```
 
 and use `DetailStructureFormatter` to format the log.
@@ -96,30 +98,31 @@ then write the log
 logger.info(
     Log(
         name = "illegal state",
-        LogDetail(
-            "args",
-            "argument must be greater than zero"
+        logDetail = LogDetail(
+            scope = "args",
+            message = "argument must be greater than zero"
         )
-    ),
-    Log.serializer()
+    )
 )
 
-// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29T12:34:56"}
+// {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","thread":"main","date":"2023-12-29T12:34:56"}
 ```
 
 ## Shutdown and Flushing Logs
 
-Since Colotok processes logs asynchronously, you should explicitly shut down the logger context to ensure all logs are flushed and resources are released before the application exits.
+Since Colotok processes logs asynchronously, stop application logging and explicitly shut down the logger context before the application exits.
 
 ### Normal Shutdown
-`shutdown()` stops accepting new logs and suspends until all queued logs have been processed, provider buffers have been flushed, and resources have been closed.
+`shutdown()` gracefully closes each configured provider and suspends until its queued logs have been processed, its provider-specific buffer has been flushed, and its resources have been closed. Do not continue logging concurrently with shutdown.
 
 ```kotlin
-val context = ColotokLoggerContext()
-// ... setup providers and get logger ...
+suspend fun main() {
+    val context = ColotokLoggerContext()
+    // ... setup providers and get logger ...
 
-// At the end of application
-context.shutdown()
+    // At the end of the application
+    context.shutdown()
+}
 ```
 
 ### Force Shutdown
@@ -135,7 +138,9 @@ context.forceShutdown()
 If you only want to ensure that records accepted before a point are processed without shutting down the context, flush individual providers while they are open:
 
 ```kotlin
-context.providers.forEach { it.flush() }
+suspend fun flushLogs(logger: ColotokLogger) {
+    logger.providers.forEach { it.flush() }
+}
 ```
 
 `Provider.close()` starts graceful closure but does not wait. `Provider.join()` starts closure when necessary and suspends until completion. Once graceful or forced closure has started, `flush()` throws `ProviderClosedException`.
