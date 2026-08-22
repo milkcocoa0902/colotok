@@ -1,29 +1,35 @@
 name: Junie Code Review
+
 on:
     pull_request:
-        types: [opened, synchronize]
+        types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+    group: junie-review-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
 
 jobs:
     review:
-        if: github.actor != 'dependabot[bot]'
+        if: >-
+            !endsWith(github.actor, '[bot]') &&
+            !github.event.pull_request.draft &&
+            github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         permissions:
             contents: read
             pull-requests: write
             issues: write
         steps:
-            - uses: actions/checkout@v4
+            - name: Checkout repository
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 1
+                  persist-credentials: false
+
             - name: Junie Code Review
-              uses: JetBrains/junie-github-action@v0
+              uses: JetBrains/junie-github-action@v1
               with:
                   junie_api_key: ${{ secrets.JUNIE_API_KEY }}
-                  use_single_comment: true
+                  use_single_comment: "true"
                   prompt: "code-review"
-
-            - name: Auto Approve
-              if: github.actor == github.repository_owner
-              uses: hmarr/auto-approve-action@v4
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
