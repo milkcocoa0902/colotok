@@ -4,7 +4,7 @@ kotlin-serialization = "1.11.0"
 kotlinx-coroutines-core = "1.11.0"
 kotlinx-datetime = "0.7.1"
 ktor = "3.5.1"
-mockk = "1.14.9"
+mockk = "1.14.11"
 junit-bom = "5.14.4"
 okio = "3.17.0"
 #noinspection NewerVersionAvailable
