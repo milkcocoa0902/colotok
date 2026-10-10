@@ -25,7 +25,10 @@ class MetricsIntegrationTest {
     @AfterTest
     fun tearDown() {
         providersToClose.forEach { provider ->
-            runCatching { provider.forceShutdown() }
+            runBlocking {
+                provider.forceShutdown()
+                runCatching { provider.join() }
+            }
         }
         providersToClose.clear()
     }
@@ -316,7 +319,8 @@ class MetricsIntegrationTest {
                 assertTrue(receivedRecords.isNotEmpty())
             } finally {
                 releaseFirst.complete(Unit)
-                runCatching { provider.forceShutdown() }
+                provider.forceShutdown()
+                runCatching { provider.join() }
             }
         }
 

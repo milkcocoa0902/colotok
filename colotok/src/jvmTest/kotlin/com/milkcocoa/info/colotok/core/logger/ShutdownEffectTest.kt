@@ -15,24 +15,19 @@ class ShutdownEffectTest {
             val testLogFile = File("preserved_test.log")
             testLogFile.delete()
 
-            val logger =
-                ColotokLogger("preserved-test") {
-                    providers =
-                        listOf(
-                            FileProvider(testLogFile.toOkioPath()) {
-                                level = LogLevel.DEBUG
-                            }
-                        )
-                }
+            val provider = FileProvider(testLogFile.toOkioPath()) { level = LogLevel.DEBUG }
+            val context = ColotokLoggerContext().addProvider(provider)
+            val logger = context.getLogger("preserved-test")
 
             try {
                 logger.info("this log must be preserved")
-                logger.shutdown()
+                context.shutdown()
 
                 Assertions.assertTrue(testLogFile.exists())
                 Assertions.assertTrue(testLogFile.readText().contains("this log must be preserved"))
             } finally {
-                runCatching { logger.forceShutdown() }
+                context.forceShutdown()
+                runCatching { provider.join() }
                 testLogFile.delete()
             }
         }

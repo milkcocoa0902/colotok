@@ -22,10 +22,14 @@ class ColotokLoggerExtensionTest {
     private val providersToClose = mutableListOf<TestAsyncProvider>()
 
     @AfterTest
-    fun closeProviders() {
-        providersToClose.forEach { runCatching { it.forceShutdown() } }
-        providersToClose.clear()
-    }
+    fun closeProviders() =
+        runTest {
+            providersToClose.forEach {
+                it.forceShutdown()
+                runCatching { it.join() }
+            }
+            providersToClose.clear()
+        }
 
     private fun provider(config: ProviderConfig = TestProviderConfig()): TestAsyncProvider =
         TestAsyncProvider(config).also(providersToClose::add)
@@ -73,9 +77,10 @@ class ColotokLoggerExtensionTest {
             val first = provider()
             val second = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(first, second)
-                }
+                ColotokLoggerContext()
+                    .addProvider(first)
+                    .addProvider(second)
+                    .getLogger("test-logger")
 
             logger.infoAsync("message")
             first.flush()
@@ -91,9 +96,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atAsync(LogLevel.INFO, "Test message")
             provider.flush()
@@ -109,9 +114,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             val attributes = mapOf("key1" to "value1", "key2" to "value2")
             logger.atAsync(LogLevel.INFO, "Test message", attributes)
@@ -128,9 +133,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             val logStructure = TestLogStructure("Test message")
             logger.atAsync(LogLevel.INFO, logStructure)
@@ -147,9 +152,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             val logStructure = TestLogStructure("Test message")
             val attributes = mapOf("key1" to "value1", "key2" to "value2")
@@ -167,9 +172,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider(TestProviderConfig(LogLevel.TRACE))
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.traceAsync("Test message")
             provider.flush()
@@ -185,9 +190,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.debugAsync("Test message")
             provider.flush()
@@ -203,9 +208,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.infoAsync("Test message")
             provider.flush()
@@ -221,9 +226,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.warnAsync("Test message")
             provider.flush()
@@ -239,9 +244,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.errorAsync("Test message")
             provider.flush()
@@ -257,9 +262,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider(TestProviderConfig(LogLevel.TRACE))
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             val attributes = mapOf("key1" to "value1", "key2" to "value2")
             logger.traceAsync("Test message", attributes)
@@ -276,9 +281,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider(TestProviderConfig(LogLevel.TRACE))
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             val logStructure = TestLogStructure("Test message")
             logger.traceAsync(logStructure)
@@ -295,9 +300,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider(TestProviderConfig(LogLevel.TRACE))
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             val logStructure = TestLogStructure("Test message")
             val attributes = mapOf("key1" to "value1", "key2" to "value2")
@@ -315,9 +320,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider(TestProviderConfig(LogLevel.TRACE))
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atTraceAsync {
                 print("Test message")
@@ -335,9 +340,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atDebugAsync {
                 print("Test message")
@@ -355,9 +360,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atInfoAsync {
                 print("Test message")
@@ -375,9 +380,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atWarnAsync {
                 print("Test message")
@@ -395,9 +400,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atErrorAsync {
                 print("Test message")
@@ -415,9 +420,9 @@ class ColotokLoggerExtensionTest {
         runTest {
             val provider = provider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             logger.atAsync(LogLevel.INFO) {
                 print("Test message")
