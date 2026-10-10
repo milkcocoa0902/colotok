@@ -588,6 +588,7 @@ public abstract interface class com/milkcocoa/info/colotok/core/provider/details
 }
 
 public final class com/milkcocoa/info/colotok/core/provider/rotation/DateBaseRotation : com/milkcocoa/info/colotok/core/provider/rotation/Rotation {
+	public fun <init> ()V
 	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun doRotate (Lokio/Path;)V

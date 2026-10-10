@@ -87,9 +87,14 @@ suspend fun stopLogging() {
 Enable the Kotlin serialization compiler plugin when your log event types use `@Serializable`.
 Use the same version as the Kotlin Gradle plugin in your project.
 
+The build toolchain baseline for the upcoming Colotok 1.0.0 release is Kotlin/KGP **2.4.21**.
+The example below uses that version. Consumer compatibility with older Kotlin versions is being
+verified separately in [issue #43](https://github.com/milkcocoa0902/colotok/issues/43);
+the build toolchain version alone does not establish the minimum supported consumer version.
+
 ```kotlin
 plugins {
-    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.serialization") version "2.4.21"
 }
 ```
 
