@@ -64,11 +64,16 @@ Structured logging requires the Kotlin serialization compiler plugin because mes
 `@Serializable`. The `colotok` artifact already exposes the serialization runtime required by its
 public API, so a separate runtime dependency is normally unnecessary.
 
+The build toolchain baseline for the upcoming Colotok 1.0.0 release is Kotlin/KGP **2.4.21**.
+The example below uses that version. Consumer compatibility with older Kotlin versions is being
+verified separately in [issue #43](https://github.com/milkcocoa0902/colotok/issues/43);
+the build toolchain version alone does not establish the minimum supported consumer version.
+
 ```kotlin
 
 plugins {
     // Use the same version as your Kotlin Gradle plugin.
-    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.serialization") version "2.4.21"
 }
 ```
 
