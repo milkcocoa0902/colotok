@@ -67,6 +67,7 @@ class ProviderLifecycleTest {
 
             provider.forceShutdown()
             assertFailsWith<ProviderClosedException> { provider.flush() }
+            assertFailsWith<ProviderClosedException> { provider.join() }
         }
 
     @Test
@@ -210,6 +211,7 @@ class ProviderLifecycleTest {
 
             releaseMessage.complete(Unit)
             provider.forceShutdown()
+            assertFailsWith<ProviderClosedException> { provider.join() }
         }
 
     @Test
@@ -271,7 +273,8 @@ class ProviderLifecycleTest {
 
                     override fun onClosed() = throw forceFailure
                 }
-            assertTrue(assertFailsWith<IllegalArgumentException> { forced.forceShutdown() } === forceFailure)
+            forced.forceShutdown()
+            assertTrue(assertFailsWith<IllegalArgumentException> { forced.join() } === forceFailure)
         }
 
     @Test

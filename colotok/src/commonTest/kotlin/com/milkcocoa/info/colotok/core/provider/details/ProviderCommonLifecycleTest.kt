@@ -20,7 +20,7 @@ class ProviderCommonLifecycleTest {
         runTest {
             providersToClose.forEach {
                 runCatching { it.forceShutdown() }
-                it.job.join()
+                runCatching { it.join() }
             }
             providersToClose.clear()
         }
@@ -31,7 +31,7 @@ class ProviderCommonLifecycleTest {
         try {
             forceShutdown()
         } finally {
-            job.join()
+            assertFailsWith<ProviderClosedException> { join() }
         }
     }
 

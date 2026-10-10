@@ -12,9 +12,9 @@ class ColotokLoggerExtensionCallerTest {
         runTest {
             val provider = ColotokLoggerExtensionTest.TestAsyncProvider()
             val logger =
-                ColotokLogger("test-logger") {
-                    providers = listOf(provider)
-                }
+                ColotokLoggerContext()
+                    .addProvider(provider)
+                    .getLogger("test-logger")
 
             try {
                 logger.infoAsync("message")

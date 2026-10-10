@@ -34,7 +34,12 @@ class LogRecordSnapshotTest {
 
     @AfterTest
     fun tearDown() {
-        providersToClose.forEach(RecordingProvider::forceShutdown)
+        providersToClose.forEach { provider ->
+            runBlocking {
+                provider.forceShutdown()
+                runCatching { provider.join() }
+            }
+        }
         providersToClose.clear()
         MDC.clear()
     }

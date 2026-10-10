@@ -4,10 +4,11 @@ import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.collectBestEffort
-import com.milkcocoa.info.colotok.util.runBlocking
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -15,10 +16,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -50,7 +54,25 @@ interface IProvider : AutoCloseable {
 
     fun onClosed() {}
 
-    fun forceShutdown() {}
+    /** Requests cancellation without waiting for worker termination or resource release. */
+    fun forceShutdown()
+
+    /** Notifies in this provider's scope after worker termination and resource release. */
+    fun forceShutdown(onComplete: suspend (Result<Unit>) -> Unit) {
+        forceShutdown(coroutineScope, onComplete)
+    }
+
+    /**
+     * Requests cancellation even if [callbackScope] is cancelled.
+     *
+     * Expected cancellation is a successful result; processing or cleanup failures
+     * are reported to [onComplete]. Notification can be cancelled with [callbackScope],
+     * and callback exceptions follow that scope's normal exception handling.
+     */
+    fun forceShutdown(
+        callbackScope: CoroutineScope,
+        onComplete: suspend (Result<Unit>) -> Unit
+    )
 }
 
 abstract class Provider(
@@ -70,6 +92,13 @@ abstract class Provider(
     private val state = MutableStateFlow(State.OPEN)
     private val failure = MutableStateFlow<Throwable?>(null)
     private val closedHookInvoked = MutableStateFlow(false)
+    private val termination = CompletableDeferred<Unit>()
+
+    private class WorkerContext(val provider: Provider) : AbstractCoroutineContextElement(Key) {
+        companion object Key : CoroutineContext.Key<WorkerContext>
+    }
+
+    private val workerContext = WorkerContext(this)
 
     override val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     override val channel =
@@ -78,7 +107,7 @@ abstract class Provider(
             onBufferOverflow = onBufferOverflow
         )
     override val job =
-        coroutineScope.launch {
+        coroutineScope.launch(workerContext) {
             try {
                 for (record in channel) {
                     if (record is LogRecord.Pin) {
@@ -109,26 +138,67 @@ abstract class Provider(
                 }
 
                 withContext(NonCancellable) {
-                    closeResources()
-
-                    val terminalFailure = failure.value
-                    while (true) {
-                        val pending = channel.tryReceive().getOrNull() ?: break
-                        if (pending is LogRecord.Pin) {
-                            pending.deferred.completeExceptionally(
-                                terminalFailure ?: ProviderClosedException()
-                            )
-                        }
-                    }
-
-                    when (state.value) {
-                        State.CLOSING -> state.value = State.CLOSED
-                        State.OPEN -> state.value = State.CLOSED
-                        else -> Unit
-                    }
+                    releaseResources()
+                }
+            }
+        }.also { worker ->
+            worker.invokeOnCompletion { cause ->
+                if (cause != null && (cause !is CancellationException || state.value != State.CANCELLED)) {
+                    fail(cause)
+                }
+                if (closedHookInvoked.value) {
+                    termination.complete(Unit)
+                } else {
+                    releaseResourcesAfterUnstartedWorker()
                 }
             }
         }
+
+    // Cancellation before launch starts skips the worker's finally. Keep arbitrary
+    // close hooks out of completion handlers, and guarantee this finite cleanup
+    // starts even if the provider's parent scope was also cancelled.
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun releaseResourcesAfterUnstartedWorker() {
+        coroutineScope.launch(workerContext, start = CoroutineStart.ATOMIC) {
+            try {
+                releaseResources()
+            } catch (throwable: Throwable) {
+                fail(throwable)
+            } finally {
+                termination.complete(Unit)
+            }
+        }
+    }
+
+    private fun releaseResources() {
+        closeResources()
+
+        val terminalFailure = failure.value
+        while (true) {
+            val pending = channel.tryReceive().getOrNull() ?: break
+            if (pending is LogRecord.Pin) {
+                pending.deferred.completeExceptionally(terminalFailure ?: ProviderClosedException())
+            }
+        }
+
+        when (state.value) {
+            State.CLOSING, State.OPEN -> state.value = State.CLOSED
+            else -> Unit
+        }
+    }
+
+    internal fun onTermination(onComplete: (Result<Unit>) -> Unit) {
+        termination.invokeOnCompletion {
+            val result = failure.value?.let { Result.failure<Unit>(it) } ?: Result.success(Unit)
+            onComplete(result)
+        }
+    }
+
+    private suspend fun ensureOutsideWorker() {
+        check(termination.isCompleted || currentCoroutineContext()[WorkerContext]?.provider !== this) {
+            "A provider worker cannot wait for its own flush or termination"
+        }
+    }
 
     private fun fail(throwable: Throwable) {
         if (failure.compareAndSet(null, throwable)) {
@@ -190,13 +260,18 @@ abstract class Provider(
                 else -> if (state.compareAndSet(current, State.CANCELLED)) break
             }
         }
-        job.cancel()
         channel.close()
-        runBlocking {
-            job.join()
+        job.cancel()
+    }
+
+    override fun forceShutdown(
+        callbackScope: CoroutineScope,
+        onComplete: suspend (Result<Unit>) -> Unit
+    ) {
+        forceShutdown()
+        onTermination { result ->
+            notifyShutdown(callbackScope, result, onComplete)
         }
-        closeResources()
-        failure.value?.let { throw it }
     }
 
     /**
@@ -204,6 +279,7 @@ abstract class Provider(
      * かつ Provider 固有のバッファがフラッシュされるまで待機します。
      */
     override suspend fun flush(timeout: Duration) {
+        ensureOutsideWorker()
         failure.value?.let { throw it }
         if (state.value != State.OPEN) throw closedException()
 
@@ -233,12 +309,9 @@ abstract class Provider(
     }
 
     suspend fun join() {
-        when (state.value) {
-            State.OPEN -> close()
-            State.CANCELLED -> throw closedException()
-            else -> Unit
-        }
-        job.join()
+        ensureOutsideWorker()
+        if (state.value == State.OPEN) close()
+        termination.await()
         failure.value?.let { throw it }
         if (state.value == State.CANCELLED) throw closedException()
     }

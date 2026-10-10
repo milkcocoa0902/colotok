@@ -170,9 +170,6 @@ public final class com/milkcocoa/info/colotok/core/logger/ColotokConfig {
 }
 
 public final class com/milkcocoa/info/colotok/core/logger/ColotokLogger {
-	public fun <init> (Ljava/lang/String;Lcom/milkcocoa/info/colotok/core/logger/ColotokConfig;)V
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun at (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;)V
 	public final fun at (Lcom/milkcocoa/info/colotok/core/level/Level;Ljava/lang/String;Ljava/util/Map;)V
 	public final fun at (Lcom/milkcocoa/info/colotok/core/level/Level;Lkotlin/jvm/functions/Function1;)V
@@ -185,13 +182,11 @@ public final class com/milkcocoa/info/colotok/core/logger/ColotokLogger {
 	public final fun debug (Ljava/lang/String;Ljava/util/Map;)V
 	public final fun error (Ljava/lang/String;)V
 	public final fun error (Ljava/lang/String;Ljava/util/Map;)V
-	public final fun forceShutdown ()V
 	public final fun getAttrs ()Ljava/util/Map;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getProviders ()Ljava/util/List;
 	public final fun info (Ljava/lang/String;)V
 	public final fun info (Ljava/lang/String;Ljava/util/Map;)V
-	public final fun shutdown (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun trace (Ljava/lang/String;)V
 	public final fun trace (Ljava/lang/String;Ljava/util/Map;)V
 	public final fun warn (Ljava/lang/String;)V
@@ -203,6 +198,7 @@ public final class com/milkcocoa/info/colotok/core/logger/ColotokLoggerContext {
 	public fun <init> ()V
 	public final fun addProvider (Lcom/milkcocoa/info/colotok/core/provider/details/Provider;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLoggerContext;
 	public final fun forceShutdown ()V
+	public final fun forceShutdown (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function2;)V
 	public final fun freeze ()V
 	public final fun getLogger ()Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;
 	public final fun getLogger (Ljava/lang/String;)Lcom/milkcocoa/info/colotok/core/logger/ColotokLogger;
@@ -514,7 +510,9 @@ public final class com/milkcocoa/info/colotok/core/provider/builtin/stream/Strea
 public abstract interface class com/milkcocoa/info/colotok/core/provider/details/IProvider : java/lang/AutoCloseable {
 	public abstract fun flush-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun flush-VtjQ1oo$default (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public fun forceShutdown ()V
+	public abstract fun forceShutdown ()V
+	public fun forceShutdown (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun forceShutdown (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function2;)V
 	public abstract fun getChannel ()Lkotlinx/coroutines/channels/Channel;
 	public abstract fun getConfig ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig;
 	public abstract fun getCoroutineScope ()Lkotlinx/coroutines/CoroutineScope;
@@ -527,7 +525,7 @@ public abstract interface class com/milkcocoa/info/colotok/core/provider/details
 
 public final class com/milkcocoa/info/colotok/core/provider/details/IProvider$DefaultImpls {
 	public static synthetic fun flush-VtjQ1oo$default (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static fun forceShutdown (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;)V
+	public static fun forceShutdown (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;Lkotlin/jvm/functions/Function2;)V
 	public static fun onClosed (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;)V
 	public static fun onFlush (Lcom/milkcocoa/info/colotok/core/provider/details/IProvider;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -538,6 +536,8 @@ public abstract class com/milkcocoa/info/colotok/core/provider/details/Provider 
 	public fun close ()V
 	public fun flush-VtjQ1oo (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun forceShutdown ()V
+	public fun forceShutdown (Lkotlin/jvm/functions/Function2;)V
+	public fun forceShutdown (Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function2;)V
 	public fun getChannel ()Lkotlinx/coroutines/channels/Channel;
 	public fun getConfig ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig;
 	public fun getCoroutineScope ()Lkotlinx/coroutines/CoroutineScope;
@@ -607,11 +607,6 @@ public final class com/milkcocoa/info/colotok/core/provider/rotation/SizeBaseRot
 	public fun doRotate (Lokio/Path;)V
 	public final fun getSize ()J
 	public fun isRotateNeeded (Lokio/Path;)Z
-}
-
-public final class com/milkcocoa/info/colotok/util/RunBlocking_androidKt {
-	public static final fun runBlocking (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static synthetic fun runBlocking$default (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class com/milkcocoa/info/colotok/util/SinkUtil {

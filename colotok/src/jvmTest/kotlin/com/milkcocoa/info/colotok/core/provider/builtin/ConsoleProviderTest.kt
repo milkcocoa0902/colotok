@@ -55,7 +55,10 @@ class ConsoleProviderTest {
     @AfterEach
     public fun after() {
         providersToClose.forEach { provider ->
-            runCatching { provider.forceShutdown() }
+            runBlocking {
+                provider.forceShutdown()
+                runCatching { provider.join() }
+            }
         }
         providersToClose.clear()
 
