@@ -1,10 +1,14 @@
+# This workflow is managed by gh actions-lock.
+
 name: Quality
 
 on:
     push:
-        branches: [main]
+        # main pushes run this workflow through deploy-docs.yml.
+        branches: [develop]
     pull_request:
-        branches: [main]
+        branches: [main, develop]
+    workflow_dispatch:
     workflow_call:
         secrets:
             CODECOV_TOKEN:
@@ -31,14 +35,16 @@ jobs:
             CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v4.4.3
             - name: Run JVM tests
               run: >-
                   ./gradlew
@@ -53,11 +59,25 @@ jobs:
                   --max-workers=1
             - name: Upload coverage to Codecov
               if: ${{ env.CODECOV_TOKEN != '' }}
-              uses: codecov/codecov-action@v4
+              continue-on-error: true
+              uses: codecov/codecov-action@v4.6.0
               with:
                   token: ${{ env.CODECOV_TOKEN }}
                   files: "build/reports/kover/reportJvmAggregated.xml"
-                  fail_ci_if_error: true
+                  fail_ci_if_error: false
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-jvm-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     node:
         name: Node tests
@@ -65,14 +85,16 @@ jobs:
         timeout-minutes: 20
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v4.4.3
             - name: Run Node tests
               run: >-
                   ./gradlew
@@ -81,6 +103,19 @@ jobs:
                   :colotok-loki:jsNodeTest
                   --no-configuration-cache
                   --max-workers=1
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-node-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     android:
         name: Android unit tests
@@ -88,14 +123,16 @@ jobs:
         timeout-minutes: 20
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v4.4.3
             - name: Run Android unit tests
               run: >-
                   ./gradlew
@@ -104,6 +141,19 @@ jobs:
                   :colotok-loki:testAndroidHostTest
                   --no-configuration-cache
                   --max-workers=1
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-android-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     abi:
         name: Public API compatibility
@@ -111,16 +161,31 @@ jobs:
         timeout-minutes: 20
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v4.4.3
             - name: Check public API dumps
               run: ./gradlew apiCheck checkKotlinAbi --no-configuration-cache --max-workers=1
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-abi-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     consumers:
         name: Published consumer smoke tests
@@ -128,56 +193,88 @@ jobs:
         timeout-minutes: 30
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v4.4.3
             - name: Set up Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v4.4.0
               with:
                   node-version: 24
             - name: Set up Android SDK
-              uses: android-actions/setup-android@v3
+              uses: android-actions/setup-android@v3.2.2
             - name: Install Android platform
               run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
             - name: Verify isolated published consumers
               run: quality/consumers/run.sh
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-consumers-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     apple-consumers:
         name: Published Apple consumer smoke tests
-        runs-on: macos-latest
+        runs-on: macos-15
         timeout-minutes: 40
         steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-java@v4
+            - uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
+            - uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
-            - uses: gradle/actions/setup-gradle@v4
-            - uses: android-actions/setup-android@v3
+            - uses: gradle/actions/setup-gradle@v4.4.3
+            - uses: android-actions/setup-android@v3.2.2
             - name: Install Android platform
               run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
             - name: Verify isolated Apple publications
               run: quality/consumers/run.sh apple
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-apple-consumers-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     apple:
         name: Apple compile and tests
-        runs-on: macos-latest
+        runs-on: macos-15
         timeout-minutes: 30
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4
+              uses: actions/setup-java@v4.9.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v4.4.3
             - name: Compile iOS tests
               run: >-
                   ./gradlew
@@ -202,6 +299,19 @@ jobs:
                     ":colotok-loki:${target}" \
                     --no-configuration-cache \
                     --max-workers=1
+            - name: Upload verification reports
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-apple-reports
+                  path: |
+                      **/build/reports/tests/**
+                      **/build/test-results/**
+                      **/build/reports/api/**
+                      **/build/reports/kover/**
+                      **/build/reports/problems/**
+                  if-no-files-found: ignore
+                  retention-days: 7
 
     docs:
         name: Documentation
@@ -209,7 +319,9 @@ jobs:
         timeout-minutes: 20
         steps:
             - name: Check out code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
+              with:
+                  persist-credentials: false
             - name: Build Writerside documentation
               uses: JetBrains/writerside-github-action@v4
               with:
@@ -220,3 +332,31 @@ jobs:
               uses: JetBrains/writerside-checker-action@v1
               with:
                   instance: ${{ env.INSTANCE }}
+            - name: Upload checked documentation
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: docs
+                  path: artifacts/${{ env.ARTIFACT }}
+                  if-no-files-found: error
+                  retention-days: 7
+            - name: Upload documentation check report
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4.6.2
+              with:
+                  name: quality-docs-report
+                  path: artifacts/report.json
+                  if-no-files-found: ignore
+                  retention-days: 7
+
+    quality-gate:
+        name: Quality gate
+        if: ${{ always() }}
+        needs: [jvm, node, android, abi, consumers, apple-consumers, apple, docs]
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - name: Require all quality jobs to succeed
+              env:
+                  JOB_RESULTS: ${{ toJSON(needs) }}
+              run: |
+                  printf '%s\n' "$JOB_RESULTS" | jq -e 'all(.[]; .result == "success")'

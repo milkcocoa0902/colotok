@@ -1,3 +1,5 @@
+# This workflow is managed by gh actions-lock.
+
 name: Junie Code Review
 
 on:
@@ -22,13 +24,13 @@ jobs:
             issues: write
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v4.4.0
               with:
                   fetch-depth: 1
                   persist-credentials: false
 
             - name: Junie Code Review
-              uses: JetBrains/junie-github-action@v1
+              uses: JetBrains/junie-github-action@v1.7.18
               with:
                   junie_api_key: ${{ secrets.JUNIE_API_KEY }}
                   use_single_comment: "true"
