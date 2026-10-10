@@ -244,8 +244,17 @@ Colotok makes delivery behavior explicit:
   duplicate records if a destination accepted only part of the failed request; delivery is not
   exactly once, and bounded buffers can still reject or drop records under pressure.
 - `flush()` waits for records accepted before its marker while the provider is open.
-- `ColotokLoggerContext.shutdown()` gracefully drains and closes providers. `forceShutdown()`
-  cancels immediately and may lose queued records.
+- `ColotokLoggerContext.shutdown()` gracefully drains and closes providers. In the upcoming
+  1.0.0 API, `forceShutdown()` requests cancellation and may lose queued records. It returns
+  without waiting for worker termination or resource release.
+
+The upcoming 1.0.0 API provides `context.forceShutdown(callbackScope, onComplete)` to notify the
+application after all targeted providers have terminated and released their resources. Expected
+forced cancellation is `Result.success(Unit)`; it does not mean all records were delivered.
+The notification scope must remain active, and callback exceptions follow that scope's exception
+handling. Create loggers through `context.getLogger()` and stop logging through the context.
+See the [1.0 migration guide](docs/Writerside/topics/Migration-to-1.0.md) for changes from the
+published 0.5.0 API, including Logger constructors, lifecycle methods, and `IProvider` implementations.
 
 Read the [configuration guide](https://milkcocoa0902.github.io/colotok/02-configuration.html) and
 [metrics reference](https://milkcocoa0902.github.io/colotok/04-metrics.html) before relying on

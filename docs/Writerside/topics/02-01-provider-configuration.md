@@ -141,8 +141,10 @@ val logger = ColotokLoggerContext()
     .getLogger()
 ```
 
-> Note: Provider は Channel を使用して非同期に動作します。`flush()` は Provider が開いている間だけ利用でき、呼び出し以前に受理されたログの処理を待ちます。`close()` は graceful close を開始するだけで待機しません。終了を待つには `join()`、Context 全体では `shutdown()` を使用してください。graceful / force を問わず close 開始後の `flush()` は `ProviderClosedException` になります。
+> Note: Provider は Channel を使用して非同期に動作します。`flush()` は Provider が開いている間だけ利用でき、呼び出し以前に受理されたログの処理を待ちます。`close()` は graceful close を開始するだけで待機しません。終了を待つには `join()`、Context 全体では `shutdown()` を使用してください。close 開始後の `flush()` は `ProviderClosedException` になります。ただし、保存された Provider の失敗がある場合は元の原因を優先して通知します。
 {style="note"}
+
+1.0 開発版では、`forceShutdown()` は全 Target で終了要求のみを行い、return 時点の worker 終了やリソース解放は保証しません。完了コールバックか suspend な `join()` で解放完了を確認してください。強制終了後の `join()` は解放を待ってから `ProviderClosedException` を投げ、保存された失敗があればその原因を優先します。[終了処理の契約](02-configuration.md#force-shutdown)と[1.0 移行ガイド](Migration-to-1.0.md)を参照してください。
 
 ## AsyncProvider buffering
 

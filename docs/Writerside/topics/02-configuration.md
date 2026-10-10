@@ -4,10 +4,14 @@ Colotok output the log where you specified by the provider and formatted with yo
 
 ## Get Logger
 
+Create loggers through `ColotokLoggerContext` and retain the context for application shutdown.
+In the upcoming 1.0.0 API, `ColotokLogger` constructors are internal and loggers no longer expose
+`shutdown()` or `forceShutdown()`. See [Migrating to 1.0](Migration-to-1.0.md).
+
 ```Kotlin
-val logger = ColotokLoggerContext()
+val context = ColotokLoggerContext()
     .addProvider(ConsoleProvider(ConsoleProviderConfig()))
-    .getLogger()
+val logger = context.getLogger()
 ```
 
 you can get the logger instance by `ColotokLoggerContext#getLogger()`
@@ -112,6 +116,11 @@ logger.info(
 
 Since Colotok processes logs asynchronously, stop application logging and explicitly shut down the logger context before the application exits.
 
+The following lifecycle contract describes the upcoming 1.0.0 API. A logger uses its context's
+providers; stopping the context stops those destinations for all loggers that share them.
+`shallowCopy()` also shares Provider instances, so stopping a copied context affects the original
+context's shared destinations. Copies do not have independent provider lifetimes.
+
 ### Normal Shutdown
 `shutdown()` gracefully closes each configured provider and suspends until its queued logs have been processed, its provider-specific buffer has been flushed, and its resources have been closed. Do not continue logging concurrently with shutdown.
 
@@ -126,13 +135,61 @@ suspend fun main() {
 ```
 
 ### Force Shutdown
-If you need to close the logger immediately without waiting for the queue to be cleared, use `forceShutdown()`.
+Use `forceShutdown()` to stop accepting records and request cancellation of the provider workers.
+This call returns without waiting for worker termination or resource release on every target,
+including JVM, Android, JS/Node, and Native.
 
-Queued records may be lost. The provider close hook still runs.
+Queued records may be lost, and an in-progress operation is cancelled cooperatively. Forced
+shutdown does not start a final flush. The close hook runs after the operation's cleanup; a custom
+operation that ignores cancellation can delay resource release. Returning from this method is
+not permission to terminate the process if logging cleanup is still required.
 
 ```kotlin
 context.forceShutdown()
 ```
+
+To continue application shutdown after cleanup, use the completion overload:
+
+```kotlin
+context.forceShutdown(applicationScope) { result ->
+    result.exceptionOrNull()?.let { failure ->
+        reportLoggingShutdownFailure(failure)
+    }
+    finishApplicationShutdown()
+}
+```
+
+`applicationScope` is an application-owned `CoroutineScope`; the reporting and finishing functions
+are application-specific. The callback is a suspend lambda and is dispatched in the supplied
+scope's execution context. It is scheduled after **all targeted workers and their resource cleanup**
+have finished, including when the context has no providers or the providers have already stopped.
+Resource release is performed once; each completion registration can be notified once.
+If a close hook fails, the callback reports that failure; do not assume every external resource
+was successfully released. Report shutdown failures through a destination outside the stopped
+logger context.
+
+- `Result.success(Unit)` means cancellation and cleanup finished without a recorded provider
+  failure. It does **not** guarantee delivery of queued records.
+- `Result.failure(cause)` reports a recorded processing, flush, or close failure. The context
+  reports the first failure it observes after all targeted providers have finished.
+- The callback is not part of provider termination. Callback exceptions belong to the supplied
+  scope's normal exception handling and do not change the provider result.
+- The scope must remain active until notification completes. Cancelling it can suppress or
+  interrupt the callback, but does not undo the shutdown request. Process termination can also
+  prevent notification. No callback ordering across separate requests is guaranteed.
+
+Supply an application scope with appropriate exception handling if the callback can fail; its
+exception is not thrown synchronously from the `forceShutdown()` call.
+
+For a single Provider, `provider.forceShutdown { result -> ... }` uses the Provider's own scope.
+`provider.forceShutdown(applicationScope) { result -> ... }` selects an external notification
+scope. Cancelling the Provider's entire scope can suppress the default notification.
+
+From a suspend function, `provider.join()` is another completion boundary: after forced shutdown
+it waits for the worker and cleanup, then throws `ProviderClosedException` to report forced
+termination. If a provider failure was recorded, that original failure is thrown instead.
+Calling `context.shutdown()` after forcing its providers similarly waits and reports their
+forced termination or failure; it does not convert forced termination into graceful success.
 
 ### Manual Flush
 If you only want to ensure that records accepted before a point are processed without shutting down the context, flush individual providers while they are open:
@@ -143,7 +200,11 @@ suspend fun flushLogs(logger: ColotokLogger) {
 }
 ```
 
-`Provider.close()` starts graceful closure but does not wait. `Provider.join()` starts closure when necessary and suspends until completion. Once graceful or forced closure has started, `flush()` throws `ProviderClosedException`.
+`Provider.close()` starts graceful closure but does not wait. `Provider.join()` starts closure when
+necessary and suspends until worker termination and resource release. `flush()` is only valid
+while open: after graceful or forced closure starts it throws `ProviderClosedException`, unless
+a recorded provider failure takes precedence. Lifecycle hooks must not wait for their own
+provider's `join()` or `flush()`; these self-waits are rejected with `IllegalStateException`.
 
 ## Event snapshots and delivery
 

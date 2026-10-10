@@ -9,6 +9,7 @@
     <toc-element
             topic="01-colotok-introduce.md"
     />
+    <toc-element topic="Migration-to-1.0.md"/>
     <toc-element topic="02-configuration.md">
         <toc-element topic="02-01-provider-configuration.md"/>
         <toc-element topic="02-02-Formatter.md"/>
