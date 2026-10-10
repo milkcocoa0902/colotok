@@ -6,7 +6,7 @@ kotlinx-datetime = "0.8.0"
 ktor = "3.5.1"
 mockk = "1.14.9"
 junit-bom = "5.14.4"
-okio = "3.17.0"
+okio = "3.18.2"
 #noinspection NewerVersionAvailable
 slf4j-api = "1.7.36"
 slf4j2-api = "2.0.17"
