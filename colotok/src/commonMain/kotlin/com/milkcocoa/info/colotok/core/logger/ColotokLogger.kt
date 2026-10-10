@@ -7,7 +7,7 @@ import com.milkcocoa.info.colotok.core.provider.details.Provider
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
-class ColotokLogger(
+class ColotokLogger internal constructor(
     val name: String,
     private val providersProvider: () -> List<Provider>,
     private val attrsProvider: () -> Map<String, String>
@@ -15,13 +15,13 @@ class ColotokLogger(
     val providers get() = providersProvider()
     val attrs get() = attrsProvider()
 
-    constructor(name: String, config: ColotokConfig) : this(
+    internal constructor(name: String, config: ColotokConfig) : this(
         name = name,
         providersProvider = { config.providers },
         attrsProvider = { config.defaultAttrs }
     )
 
-    constructor(name: String, config: ColotokConfig.() -> Unit) : this(name = name, ColotokConfig().apply(config))
+    internal constructor(name: String, config: ColotokConfig.() -> Unit) : this(name = name, ColotokConfig().apply(config))
 
     /**
      * print log with providers into passed [level]
@@ -119,36 +119,6 @@ class ColotokLogger(
         p.forEach {
             it.write(record)
         }
-    }
-
-    /**
-     * Shutdown the logger and wait for all providers to finish processing.
-     */
-    suspend fun shutdown() {
-        var firstFailure: Throwable? = null
-        providers.forEach { provider ->
-            try {
-                provider.join()
-            } catch (throwable: Throwable) {
-                if (firstFailure == null) firstFailure = throwable
-            }
-        }
-        firstFailure?.let { throw it }
-    }
-
-    /**
-     * Shutdown the logger immediately.
-     */
-    fun forceShutdown() {
-        var firstFailure: Throwable? = null
-        providers.forEach { provider ->
-            try {
-                provider.forceShutdown()
-            } catch (throwable: Throwable) {
-                if (firstFailure == null) firstFailure = throwable
-            }
-        }
-        firstFailure?.let { throw it }
     }
 
     /**

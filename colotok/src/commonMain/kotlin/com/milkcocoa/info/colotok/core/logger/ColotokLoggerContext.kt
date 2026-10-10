@@ -10,7 +10,13 @@ import com.milkcocoa.info.colotok.core.metrics.NoOpMetricsCollector
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProvider
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
+import com.milkcocoa.info.colotok.core.provider.details.notifyShutdown
 import com.milkcocoa.info.colotok.util.createThreadSafeMap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 
 /**
  * builder class for get logger instance
@@ -136,12 +142,14 @@ class ColotokLoggerContext {
      * Shutdown all loggers created in this context and wait for all providers to finish processing.
      */
     suspend fun shutdown() {
+        val targets = immutableProviders
         activeLoggers.clear()
         var firstFailure: Throwable? = null
-        providers.forEach { provider ->
+        targets.forEach { provider ->
             try {
                 provider.join()
             } catch (throwable: Throwable) {
+                currentCoroutineContext().ensureActive()
                 if (firstFailure == null) firstFailure = throwable
             }
         }
@@ -149,19 +157,46 @@ class ColotokLoggerContext {
     }
 
     /**
-     * Shutdown all loggers created in this context immediately.
+     * Requests cancellation of all registered providers without waiting for cleanup.
      */
     fun forceShutdown() {
+        val targets = immutableProviders
         activeLoggers.clear()
-        var firstFailure: Throwable? = null
-        providers.forEach { provider ->
-            try {
-                provider.forceShutdown()
-            } catch (throwable: Throwable) {
-                if (firstFailure == null) firstFailure = throwable
+        targets.forEach { it.forceShutdown() }
+    }
+
+    /**
+     * Requests cancellation, then notifies once all targeted providers have
+     * terminated and released their resources. Expected cancellation is success.
+     *
+     * Cancelling [callbackScope] can suppress or cancel the notification, but
+     * never cancels the shutdown request. Callback exceptions are handled by
+     * [callbackScope], separately from provider failures.
+     */
+    fun forceShutdown(
+        callbackScope: CoroutineScope,
+        onComplete: suspend (Result<Unit>) -> Unit
+    ) {
+        val targets = immutableProviders
+        activeLoggers.clear()
+        targets.forEach { it.forceShutdown() }
+
+        if (targets.isEmpty()) {
+            notifyShutdown(callbackScope, Result.success(Unit), onComplete)
+            return
+        }
+
+        val remaining = MutableStateFlow(targets.size)
+        val firstFailure = MutableStateFlow<Throwable?>(null)
+        targets.forEach { provider ->
+            provider.onTermination { result ->
+                result.exceptionOrNull()?.let { firstFailure.compareAndSet(null, it) }
+                if (remaining.updateAndGet { it - 1 } == 0) {
+                    val completion = firstFailure.value?.let { Result.failure<Unit>(it) } ?: Result.success(Unit)
+                    notifyShutdown(callbackScope, completion, onComplete)
+                }
             }
         }
-        firstFailure?.let { throw it }
     }
 
     companion object {
