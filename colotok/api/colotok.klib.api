@@ -55,10 +55,12 @@ abstract interface com.milkcocoa.info.colotok.core.provider.details/IProvider : 
     abstract val job // com.milkcocoa.info.colotok.core.provider.details/IProvider.job|{}job[0]
         abstract fun <get-job>(): kotlinx.coroutines/Job // com.milkcocoa.info.colotok.core.provider.details/IProvider.job.<get-job>|<get-job>(){}[0]
 
+    abstract fun forceShutdown() // com.milkcocoa.info.colotok.core.provider.details/IProvider.forceShutdown|forceShutdown(){}[0]
+    abstract fun forceShutdown(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/SuspendFunction1<kotlin/Result<kotlin/Unit>, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.details/IProvider.forceShutdown|forceShutdown(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.SuspendFunction1<kotlin.Result<kotlin.Unit>,kotlin.Unit>){}[0]
     abstract fun write(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.details/IProvider.write|write(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
     abstract suspend fun flush(kotlin.time/Duration = ...) // com.milkcocoa.info.colotok.core.provider.details/IProvider.flush|flush(kotlin.time.Duration){}[0]
     abstract suspend fun onMessage(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.details/IProvider.onMessage|onMessage(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
-    open fun forceShutdown() // com.milkcocoa.info.colotok.core.provider.details/IProvider.forceShutdown|forceShutdown(){}[0]
+    open fun forceShutdown(kotlin.coroutines/SuspendFunction1<kotlin/Result<kotlin/Unit>, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.details/IProvider.forceShutdown|forceShutdown(kotlin.coroutines.SuspendFunction1<kotlin.Result<kotlin.Unit>,kotlin.Unit>){}[0]
     open fun onClosed() // com.milkcocoa.info.colotok.core.provider.details/IProvider.onClosed|onClosed(){}[0]
     open suspend fun onFlush() // com.milkcocoa.info.colotok.core.provider.details/IProvider.onFlush|onFlush(){}[0]
 }
@@ -288,6 +290,7 @@ abstract class com.milkcocoa.info.colotok.core.provider.details/Provider : com.m
     final suspend fun join() // com.milkcocoa.info.colotok.core.provider.details/Provider.join|join(){}[0]
     open fun close() // com.milkcocoa.info.colotok.core.provider.details/Provider.close|close(){}[0]
     open fun forceShutdown() // com.milkcocoa.info.colotok.core.provider.details/Provider.forceShutdown|forceShutdown(){}[0]
+    open fun forceShutdown(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/SuspendFunction1<kotlin/Result<kotlin/Unit>, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.details/Provider.forceShutdown|forceShutdown(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.SuspendFunction1<kotlin.Result<kotlin.Unit>,kotlin.Unit>){}[0]
     open fun write(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.details/Provider.write|write(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
     open suspend fun flush(kotlin.time/Duration) // com.milkcocoa.info.colotok.core.provider.details/Provider.flush|flush(kotlin.time.Duration){}[0]
 }
@@ -304,10 +307,6 @@ final class com.milkcocoa.info.colotok.core.logger/ColotokConfig { // com.milkco
 }
 
 final class com.milkcocoa.info.colotok.core.logger/ColotokLogger { // com.milkcocoa.info.colotok.core.logger/ColotokLogger|null[0]
-    constructor <init>(kotlin/String, com.milkcocoa.info.colotok.core.logger/ColotokConfig) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.<init>|<init>(kotlin.String;com.milkcocoa.info.colotok.core.logger.ColotokConfig){}[0]
-    constructor <init>(kotlin/String, kotlin/Function0<kotlin.collections/List<com.milkcocoa.info.colotok.core.provider.details/Provider>>, kotlin/Function0<kotlin.collections/Map<kotlin/String, kotlin/String>>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.<init>|<init>(kotlin.String;kotlin.Function0<kotlin.collections.List<com.milkcocoa.info.colotok.core.provider.details.Provider>>;kotlin.Function0<kotlin.collections.Map<kotlin.String,kotlin.String>>){}[0]
-    constructor <init>(kotlin/String, kotlin/Function1<com.milkcocoa.info.colotok.core.logger/ColotokConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.<init>|<init>(kotlin.String;kotlin.Function1<com.milkcocoa.info.colotok.core.logger.ColotokConfig,kotlin.Unit>){}[0]
-
     final val attrs // com.milkcocoa.info.colotok.core.logger/ColotokLogger.attrs|{}attrs[0]
         final fun <get-attrs>(): kotlin.collections/Map<kotlin/String, kotlin/String> // com.milkcocoa.info.colotok.core.logger/ColotokLogger.attrs.<get-attrs>|<get-attrs>(){}[0]
     final val name // com.milkcocoa.info.colotok.core.logger/ColotokLogger.name|{}name[0]
@@ -321,7 +320,6 @@ final class com.milkcocoa.info.colotok.core.logger/ColotokLogger { // com.milkco
     final fun debug(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.debug|debug(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
     final fun error(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.error|error(kotlin.String){}[0]
     final fun error(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.error|error(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
-    final fun forceShutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLogger.forceShutdown|forceShutdown(){}[0]
     final fun info(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.info|info(kotlin.String){}[0]
     final fun info(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.info|info(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
     final fun trace(kotlin/String) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.trace|trace(kotlin.String){}[0]
@@ -346,7 +344,6 @@ final class com.milkcocoa.info.colotok.core.logger/ColotokLogger { // com.milkco
     final inline fun atInfo(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atInfo|atInfo(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
     final inline fun atTrace(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atTrace|atTrace(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
     final inline fun atWarn(kotlin/Function1<com.milkcocoa.info.colotok.core.logger/LevelScopedColotokLogger, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLogger.atWarn|atWarn(kotlin.Function1<com.milkcocoa.info.colotok.core.logger.LevelScopedColotokLogger,kotlin.Unit>){}[0]
-    final suspend fun shutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLogger.shutdown|shutdown(){}[0]
 }
 
 final class com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext { // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext|null[0]
@@ -354,6 +351,7 @@ final class com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext { // com
 
     final fun addProvider(com.milkcocoa.info.colotok.core.provider.details/Provider): com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.addProvider|addProvider(com.milkcocoa.info.colotok.core.provider.details.Provider){}[0]
     final fun forceShutdown() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.forceShutdown|forceShutdown(){}[0]
+    final fun forceShutdown(kotlinx.coroutines/CoroutineScope, kotlin.coroutines/SuspendFunction1<kotlin/Result<kotlin/Unit>, kotlin/Unit>) // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.forceShutdown|forceShutdown(kotlinx.coroutines.CoroutineScope;kotlin.coroutines.SuspendFunction1<kotlin.Result<kotlin.Unit>,kotlin.Unit>){}[0]
     final fun freeze() // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.freeze|freeze(){}[0]
     final fun getLogger(): com.milkcocoa.info.colotok.core.logger/ColotokLogger // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.getLogger|getLogger(){}[0]
     final fun getLogger(kotlin/String): com.milkcocoa.info.colotok.core.logger/ColotokLogger // com.milkcocoa.info.colotok.core.logger/ColotokLoggerContext.getLogger|getLogger(kotlin.String){}[0]
@@ -683,7 +681,6 @@ final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colot
 final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForTrace(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForTrace|isEnabledForTrace@com.milkcocoa.info.colotok.core.level.Level(){}[0]
 final fun (com.milkcocoa.info.colotok.core.level/Level).com.milkcocoa.info.colotok.core.level/isEnabledForWarn(): kotlin/Boolean // com.milkcocoa.info.colotok.core.level/isEnabledForWarn|isEnabledForWarn@com.milkcocoa.info.colotok.core.level.Level(){}[0]
 final fun <#A: kotlin/Any?, #B: kotlin/Any?> com.milkcocoa.info.colotok.util/createThreadSafeMap(): kotlin.collections/MutableMap<#A, #B> // com.milkcocoa.info.colotok.util/createThreadSafeMap|createThreadSafeMap(){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
-final fun <#A: kotlin/Any?> com.milkcocoa.info.colotok.util/runBlocking(kotlin.coroutines/CoroutineContext = ..., kotlin.coroutines/SuspendFunction1<kotlinx.coroutines/CoroutineScope, #A>): #A // com.milkcocoa.info.colotok.util/runBlocking|runBlocking(kotlin.coroutines.CoroutineContext;kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope,0:0>){0§<kotlin.Any?>}[0]
 final fun com.milkcocoa.info.colotok.core.provider.builtin.file/getFileSystem(): okio/FileSystem // com.milkcocoa.info.colotok.core.provider.builtin.file/getFileSystem|getFileSystem(){}[0]
 
 // Targets: [apple]
