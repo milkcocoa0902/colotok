@@ -1,7 +1,30 @@
 version: 2
 updates:
-  # Gradle の依存関係を管理
+  # この設定は default branch (main) に反映する必要がある。
+  # security update PR は target-branch に関係なく main が対象。
   - package-ecosystem: "gradle"
     directory: "/"
+    target-branch: "develop"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    ignore:
+      # 1.x bridge と 2.x provider の両方の世代を維持する。
+      - dependency-name: "org.slf4j:slf4j-api"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
