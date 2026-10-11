@@ -254,6 +254,8 @@ abstract class com.milkcocoa.info.colotok.core.formatter.details/TextFormatter :
     open fun <#A1: com.milkcocoa.info.colotok.core.formatter.details/LogStructure> format(com.milkcocoa.info.colotok.core.logger/LogRecord.StructuredText<#A1>): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.StructuredText<0:0>){0§<com.milkcocoa.info.colotok.core.formatter.details.LogStructure>}[0]
     open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.Metrics): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics){}[0]
     open fun format(com.milkcocoa.info.colotok.core.logger/LogRecord.PlainText): kotlin/String // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.format|format(com.milkcocoa.info.colotok.core.logger.LogRecord.PlainText){}[0]
+
+    final object Companion // com.milkcocoa.info.colotok.core.formatter.details/TextFormatter.Companion|null[0]
 }
 
 abstract class com.milkcocoa.info.colotok.core.level/Level { // com.milkcocoa.info.colotok.core.level/Level|null[0]
@@ -442,6 +444,7 @@ final class com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider :
     constructor <init>(okio/Path, com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.<init>|<init>(okio.Path;com.milkcocoa.info.colotok.core.provider.builtin.file.FileProviderConfig){}[0]
     constructor <init>(okio/Path, kotlin/Function1<com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig, kotlin/Unit>) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.<init>|<init>(okio.Path;kotlin.Function1<com.milkcocoa.info.colotok.core.provider.builtin.file.FileProviderConfig,kotlin.Unit>){}[0]
 
+    final fun onClosed() // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.onClosed|onClosed(){}[0]
     final suspend fun onFlush() // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.onFlush|onFlush(){}[0]
     final suspend fun onMessage(com.milkcocoa.info.colotok.core.logger/LogRecord) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider.onMessage|onMessage(com.milkcocoa.info.colotok.core.logger.LogRecord){}[0]
 }

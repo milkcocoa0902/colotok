@@ -96,12 +96,16 @@ public abstract class com/milkcocoa/info/colotok/core/formatter/details/Structur
 }
 
 public abstract class com/milkcocoa/info/colotok/core/formatter/details/TextFormatter : com/milkcocoa/info/colotok/core/formatter/details/Formatter {
+	public static final field Companion Lcom/milkcocoa/info/colotok/core/formatter/details/TextFormatter$Companion;
 	public fun <init> (Ljava/lang/String;)V
 	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Metrics;)Ljava/lang/String;
 	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$Pin;)Ljava/lang/String;
 	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$PlainText;)Ljava/lang/String;
 	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord$StructuredText;)Ljava/lang/String;
 	public fun format (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;)Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/formatter/details/TextFormatter$Companion {
 }
 
 public abstract class com/milkcocoa/info/colotok/core/level/Level {
@@ -463,6 +467,7 @@ public final class com/milkcocoa/info/colotok/core/provider/builtin/file/FilePro
 	public fun <init> (Lokio/Path;)V
 	public fun <init> (Lokio/Path;Lcom/milkcocoa/info/colotok/core/provider/builtin/file/FileProviderConfig;)V
 	public fun <init> (Lokio/Path;Lkotlin/jvm/functions/Function1;)V
+	public fun onClosed ()V
 	public fun onFlush (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onMessage (Lcom/milkcocoa/info/colotok/core/logger/LogRecord;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
