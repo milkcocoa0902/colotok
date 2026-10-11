@@ -40,3 +40,74 @@ python3 quality/benchmarks/caller/summarize.py quality/benchmarks/caller/results
 `results/jdk11/` に両 variant の生の JMH JSON、テキスト出力、環境・実行コマンド・jar SHA-256、集計 CSV を保存する。`results/smoke/` は動作確認用で集計対象外。
 
 手法の参考: [OpenJDK JMH](https://github.com/openjdk/jmh)、[GC profiler の公式サンプル](https://github.com/openjdk/jmh/blob/master/jmh-samples/src/main/java/org/openjdk/jmh/samples/JMHSample_35_Profilers.java)。
+
+## caller を保持する実装同士の比較
+
+`run.py --baseline-jar /path/to/baseline.jar` で、保存した最適化前 jar と現在の jar を比較できる。
+このモードは bytecode の caller 省略パッチを適用せず、両方で caller の位置を検証する。
+baseline jar は同じ依存関係・caller 以外の同じソースで、最適化前にビルドして保存する。
+
+```sh
+# 最適化後の jar / classpath を準備する。
+./gradlew -I quality/benchmarks/caller/dependencies.init.gradle :colotok:prepareCallerBenchmark
+python3 quality/benchmarks/caller/run.py --java-home /path/to/jdk11 \
+  --baseline-jar /path/to/baseline.jar \
+  --include 'CallerBenchmark\.(plainRecord|metricsRecord)$' --label caller-allocation-2026-10-11
+python3 quality/benchmarks/caller/summarize.py \
+  quality/benchmarks/caller/results/caller-allocation-2026-10-11 \
+  --variants baseline optimized --expected-combinations 8
+```
+
+`baseline` / `optimized` の生データと jar ハッシュを保存する。基準測定 `results/jdk11/` は上書きしない。
+
+## JVM の取得 API を比較する
+
+`compare_strategies.py` は現在の caller-preserving JVM jar を基準に、以下の6方式を比較する。
+公開ライブラリのソースは変更せず、ignored の比較用 jar で ThreadWrapper.traceCallPoint の本体1か所のみを helper へ接続する。
+
+| variant | 方法 |
+|---|---|
+| current | 現在の ThreadWrapper（配列＋最適化済みループ）そのまま |
+| thread-array | 比較 helper を通す Thread.currentThread().getStackTrace。adapter の追加フレーム/呼び出し費用の control |
+| throwable-array | new Throwable().getStackTrace＋同じ配列ループ |
+| walker-stream | 共有 StackWalker＋dropWhile / findFirst |
+| walker-iterator | 共有 StackWalker＋Iterator のループ、caller で終了 |
+| walker-classvalue | RETAIN_CLASS_REFERENCE＋ClassValue<Boolean> で logging class を分類し、Iterator のループ |
+
+```sh
+./gradlew -I quality/benchmarks/caller/dependencies.init.gradle :colotok:prepareCallerBenchmark
+python3 quality/benchmarks/caller/compare_strategies.py --java-home /path/to/jdk11
+# 動作確認だけ（JMH の測定はしない）
+python3 quality/benchmarks/caller/compare_strategies.py --java-home /path/to/jdk11 \
+  --validate-only --label smoke-strategies
+```
+
+すべて現在のフレーム境界・クラス名短縮・メソッド名・行番号を維持する。StackWalker は SHOW_REFLECT_FRAMES を指定し、
+反射での既存出力を保つ。固定の skip 数、getCallerClass だけの取得、行番号の省略、caller の事前判定は使わない。
+ClassValue に保存するのは logging class かどうかの Boolean であり、caller の呼び出し位置は毎回取得する。
+
+測定前に、直接生成・追加16フレーム・reflection・MethodHandle・org.slf4j.* の bridge fixture・Logger→worker の6経路で、
+6方式すべての caller 文字列が current と完全に一致することを検証する。bridge は分類規則の fixture で、実 SLF4J module のテストとは区別する。
+反射による直接生成では current 自体が reflection 内部のフレームを返す場合があり、この検証はそれを維持する同等性検証である。
+
+性能測定は PlainText 生成、追加フレーム0/16、1 thread、各方式3独立 JVM、warmup 3×1秒、measurement 5×1秒、G1 / heap 512 MiB。
+現在の1回だけの class name split 削減等は全方式に共通の formatCallerFrame を使う。Stream / Iterator と ClassValue の差も分けて比較する。
+results/jvm-strategies-2026-10-11 に生データ・集計 CSV・環境・ソース/成果物ハッシュ・validation 出力を保存する。
+
+比較 helper の追加フレームはすべての候補にあるため、API 同士は同じ adapter で比較し、current との関係は thread-array control も確認する。
+ClassValue の初回解決・大量の異なる class・class loader の解放・複数 thread・異なる JDK はこの測定に含めない。
+採用時は Kotlin の実装へ移し、実際の integration と API/ABI の確認、取得方法の version 対応が別途必要。
+
+比較用 jar を使った既存 module の回帰確認は、実行時の classpath だけを切り替えて行える。
+`build/classload-<strategy>-<pid>.txt` で ThreadWrapper と helper のロード元を確認できる。
+
+```sh
+./gradlew -I quality/benchmarks/caller/strategies.tests.init.gradle \
+  -PcallerStrategy=walker-iterator \
+  :colotok:jvmTest :colotok-coroutines:jvmTest :colotok-slf4j:test :colotok-slf4j2:test
+# ClassValue 案は -PcallerStrategy=walker-classvalue。
+```
+
+参考: [StackWalker](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/StackWalker.html)、
+[StackWalker.Option](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/StackWalker.Option.html)、
+[ClassValue](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/ClassValue.html)。

@@ -18,6 +18,7 @@ kotlin {
         }
     }
     sourceSets {
+        commonTest.dependencies { implementation(kotlin("test")) }
         commonMain {
             kotlin.srcDir("../../../src/commonMain/kotlin")
             dependencies {
@@ -38,6 +39,7 @@ kotlin {
             dependencies { implementation("com.squareup.okio:okio-nodefilesystem:3.17.0") }
         }
         nativeMain { kotlin.srcDir("../../../src/nativeMain/kotlin") }
+        // Caller snapshot runtime tests are added by stage.py only for implementation comparisons.
     }
     compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 }

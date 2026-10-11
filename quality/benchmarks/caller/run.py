@@ -19,6 +19,8 @@ def main():
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--seconds", type=int, default=1)
     parser.add_argument("--label", default="jdk11")
+    parser.add_argument("--baseline-jar", type=Path, help="Compare two caller-preserving implementations")
+    parser.add_argument("--include", default="CallerBenchmark", help="JMH benchmark filter")
     args = parser.parse_args()
     here = Path(__file__).resolve().parent
     root = here.parents[2]
@@ -32,15 +34,20 @@ def main():
     core = Path((build / "core-jar.txt").read_text())
     tools = (build / "tools-classpath.txt").read_text()
     runtime = (build / "runtime-classpath.txt").read_text()
-    export = "java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED"
-    subprocess.run([javac, "--add-exports", export, "-d", str(classes), str(here / "PatchCaller.java")], check=True)
-    omitted = build / "colotok-no-caller.jar"
-    subprocess.run([java, "--add-exports", export, "-cp", str(classes),
-                    "quality.benchmarks.caller.PatchCaller", str(core), str(omitted)], check=True)
-    with zipfile.ZipFile(core) as original, zipfile.ZipFile(omitted) as patched:
-        assert original.namelist() == patched.namelist()
-        changed = [name for name in original.namelist() if original.read(name) != patched.read(name)]
-        assert changed == ["com/milkcocoa/info/colotok/core/logger/LogEventMetadata$Companion.class"], changed
+    if args.baseline_jar:
+        jars = {"baseline": args.baseline_jar.resolve(), "optimized": core}
+        changed = None
+    else:
+        export = "java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED"
+        subprocess.run([javac, "--add-exports", export, "-d", str(classes), str(here / "PatchCaller.java")], check=True)
+        omitted = build / "colotok-no-caller.jar"
+        subprocess.run([java, "--add-exports", export, "-cp", str(classes),
+                        "quality.benchmarks.caller.PatchCaller", str(core), str(omitted)], check=True)
+        with zipfile.ZipFile(core) as original, zipfile.ZipFile(omitted) as patched:
+            assert original.namelist() == patched.namelist()
+            changed = [name for name in original.namelist() if original.read(name) != patched.read(name)]
+            assert changed == ["com/milkcocoa/info/colotok/core/logger/LogEventMetadata$Companion.class"], changed
+        jars = {"current": core, "no-caller": omitted}
     classpath = os.pathsep.join([str(classes), str(core), runtime, tools])
     subprocess.run([javac, "-cp", classpath, "-processorpath", tools, "-d", str(classes),
                     str(here / "CallerBenchmark.java")], check=True)
@@ -51,17 +58,18 @@ def main():
         "platform": platform.platform(),
         "cpu": subprocess.check_output(["lscpu"], text=True),
         "core_sha256": hashlib.sha256(core.read_bytes()).hexdigest(),
-        "omitted_sha256": hashlib.sha256(omitted.read_bytes()).hexdigest(),
+        "jar_sha256": {name: hashlib.sha256(jar.read_bytes()).hexdigest() for name, jar in jars.items()},
         "changed_entries": changed,
-        "parameters": vars(args) | {"java_home": str(args.java_home)},
+        "parameters": vars(args) | {"java_home": str(args.java_home),
+                                    "baseline_jar": str(args.baseline_jar) if args.baseline_jar else None},
         "commands": [],
     }
     for fork in range(1, args.forks + 1):
-        variants = ["current", "no-caller"] if fork % 2 else ["no-caller", "current"]
+        variants = list(jars) if fork % 2 else list(reversed(jars))
         for variant in variants:
-            jar = core if variant == "current" else omitted
+            jar = jars[variant]
             cp = os.pathsep.join([str(classes), str(jar), runtime, tools])
-            command = [java, "-cp", cp, "org.openjdk.jmh.Main", "CallerBenchmark", "-f", "1",
+            command = [java, "-cp", cp, "org.openjdk.jmh.Main", args.include, "-f", "1",
                        "-wi", str(args.warmup), "-i", str(args.iterations),
                        "-w", f"{args.seconds}s", "-r", f"{args.seconds}s", "-prof", "gc",
                        "-jvmArgsAppend", "-Xms512m -Xmx512m -XX:+UseG1GC "

@@ -1,0 +1,6 @@
+{"type":"environment","platform":"android","variant":"baseline","callerExample":"q.b.p.BenchKt#main:61","windowMs":400,"warmupWindows":3,"measurementWindows":5}
+{"type":"measurement","platform":"android","variant":"baseline","case":"record","iteration":0,"nsPerUnit":21753.485026041668,"allocatedBytesPerUnit":5657.777777777777,"units":18432}
+{"type":"measurement","platform":"android","variant":"baseline","case":"record","iteration":1,"nsPerUnit":20742.02266142384,"allocatedBytesPerUnit":5656.582781456954,"units":19328}
+{"type":"measurement","platform":"android","variant":"baseline","case":"record","iteration":2,"nsPerUnit":18575.30665801187,"allocatedBytesPerUnit":5649.47181008902,"units":21568}
+{"type":"measurement","platform":"android","variant":"baseline","case":"record","iteration":3,"nsPerUnit":18109.264134754336,"allocatedBytesPerUnit":5651.236994219653,"units":22144}
+{"type":"measurement","platform":"android","variant":"baseline","case":"record","iteration":4,"nsPerUnit":18807.6337743994,"allocatedBytesPerUnit":5651.21921921922,"units":21312}

@@ -1,0 +1,173 @@
+# JMH version: 1.37
+# VM version: JDK 11.0.32, OpenJDK 64-Bit Server VM, 11.0.32+9
+# VM invoker: /mnt/Chocolate/.gradle/jdks/eclipse_adoptium-11-amd64-linux.2/bin/java
+# VM options: -Xms512m -Xmx512m -XX:+UseG1GC -Dcaller.omitted=false -Dcaller.strategy=walker-stream
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: quality.benchmarks.caller.CallerBenchmark.plainRecord
+# Parameters: (depth = 0)
+
+# Run progress: 0.00% complete, ETA 00:00:16
+# Fork: 1 of 1
+# Warmup Iteration   1: 2797.761 ns/op
+# Warmup Iteration   2: 2174.095 ns/op
+# Warmup Iteration   3: 2226.213 ns/op
+Iteration   1: 2531.514 ns/op
+                 gc.alloc.rate:      581.555 MB/sec
+                 gc.alloc.rate.norm: 1544.015 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            5.000 ms
+
+Iteration   2: 2389.543 ns/op
+                 gc.alloc.rate:      616.094 MB/sec
+                 gc.alloc.rate.norm: 1544.015 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   3: 2307.336 ns/op
+                 gc.alloc.rate:      638.053 MB/sec
+                 gc.alloc.rate.norm: 1544.014 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   4: 2289.077 ns/op
+                 gc.alloc.rate:      643.117 MB/sec
+                 gc.alloc.rate.norm: 1544.014 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   5: 2220.239 ns/op
+                 gc.alloc.rate:      663.073 MB/sec
+                 gc.alloc.rate.norm: 1544.014 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            3.000 ms
+
+
+
+Result "quality.benchmarks.caller.CallerBenchmark.plainRecord":
+  2347.542 ±(99.9%) 459.061 ns/op [Average]
+  (min, avg, max) = (2220.239, 2347.542, 2531.514), stdev = 119.217
+  CI (99.9%): [1888.480, 2806.603] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.alloc.rate":
+  628.378 ±(99.9%) 119.586 MB/sec [Average]
+  (min, avg, max) = (581.555, 628.378, 663.073), stdev = 31.056
+  CI (99.9%): [508.792, 747.965] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.alloc.rate.norm":
+  1544.014 ±(99.9%) 0.003 B/op [Average]
+  (min, avg, max) = (1544.014, 1544.014, 1544.015), stdev = 0.001
+  CI (99.9%): [1544.012, 1544.017] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.count":
+  10.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (2.000, 2.000, 2.000), stdev = 0.001
+  CI (99.9%): [10.000, 10.000] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.time":
+  19.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (3.000, 3.800, 5.000), stdev = 0.837
+  CI (99.9%): [19.000, 19.000] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 11.0.32, OpenJDK 64-Bit Server VM, 11.0.32+9
+# VM invoker: /mnt/Chocolate/.gradle/jdks/eclipse_adoptium-11-amd64-linux.2/bin/java
+# VM options: -Xms512m -Xmx512m -XX:+UseG1GC -Dcaller.omitted=false -Dcaller.strategy=walker-stream
+# Blackhole mode: full + dont-inline hint (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 3 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: quality.benchmarks.caller.CallerBenchmark.plainRecord
+# Parameters: (depth = 16)
+
+# Run progress: 50.00% complete, ETA 00:00:08
+# Fork: 1 of 1
+# Warmup Iteration   1: 3200.806 ns/op
+# Warmup Iteration   2: 2406.847 ns/op
+# Warmup Iteration   3: 2429.587 ns/op
+Iteration   1: 2425.272 ns/op
+                 gc.alloc.rate:      625.923 MB/sec
+                 gc.alloc.rate.norm: 1592.015 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   2: 2476.447 ns/op
+                 gc.alloc.rate:      612.951 MB/sec
+                 gc.alloc.rate.norm: 1592.015 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   3: 2436.922 ns/op
+                 gc.alloc.rate:      622.917 MB/sec
+                 gc.alloc.rate.norm: 1592.015 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            4.000 ms
+
+Iteration   4: 2372.772 ns/op
+                 gc.alloc.rate:      639.718 MB/sec
+                 gc.alloc.rate.norm: 1592.014 B/op
+                 gc.count:           2.000 counts
+                 gc.time:            3.000 ms
+
+Iteration   5: 2319.746 ns/op
+                 gc.alloc.rate:      654.365 MB/sec
+                 gc.alloc.rate.norm: 1592.014 B/op
+                 gc.count:           3.000 counts
+                 gc.time:            4.000 ms
+
+
+
+Result "quality.benchmarks.caller.CallerBenchmark.plainRecord":
+  2406.232 ±(99.9%) 234.494 ns/op [Average]
+  (min, avg, max) = (2319.746, 2406.232, 2476.447), stdev = 60.897
+  CI (99.9%): [2171.738, 2640.726] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.alloc.rate":
+  631.175 ±(99.9%) 62.049 MB/sec [Average]
+  (min, avg, max) = (612.951, 631.175, 654.365), stdev = 16.114
+  CI (99.9%): [569.125, 693.224] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.alloc.rate.norm":
+  1592.015 ±(99.9%) 0.001 B/op [Average]
+  (min, avg, max) = (1592.014, 1592.015, 1592.015), stdev = 0.001
+  CI (99.9%): [1592.013, 1592.016] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.count":
+  11.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (2.000, 2.200, 3.000), stdev = 0.447
+  CI (99.9%): [11.000, 11.000] (assumes normal distribution)
+
+Secondary result "quality.benchmarks.caller.CallerBenchmark.plainRecord:gc.time":
+  18.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (3.000, 3.600, 4.000), stdev = 0.548
+  CI (99.9%): [18.000, 18.000] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:16
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+Benchmark                                       (depth)  Mode  Cnt     Score     Error   Units
+CallerBenchmark.plainRecord                           0  avgt    5  2347.542 ± 459.061   ns/op
+CallerBenchmark.plainRecord:gc.alloc.rate             0  avgt    5   628.378 ± 119.586  MB/sec
+CallerBenchmark.plainRecord:gc.alloc.rate.norm        0  avgt    5  1544.014 ±   0.003    B/op
+CallerBenchmark.plainRecord:gc.count                  0  avgt    5    10.000            counts
+CallerBenchmark.plainRecord:gc.time                   0  avgt    5    19.000                ms
+CallerBenchmark.plainRecord                          16  avgt    5  2406.232 ± 234.494   ns/op
+CallerBenchmark.plainRecord:gc.alloc.rate            16  avgt    5   631.175 ±  62.049  MB/sec
+CallerBenchmark.plainRecord:gc.alloc.rate.norm       16  avgt    5  1592.015 ±   0.001    B/op
+CallerBenchmark.plainRecord:gc.count                 16  avgt    5    11.000            counts
+CallerBenchmark.plainRecord:gc.time                  16  avgt    5    18.000                ms
+
+Benchmark result is saved to /mnt/Cocoa/portfolio/Colotok/quality/benchmarks/caller/results/jvm-strategies-2026-10-11/walker-stream-1.json

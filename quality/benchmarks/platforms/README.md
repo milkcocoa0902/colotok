@@ -65,3 +65,29 @@ Android の B/unit は ART の `art.gc.bytes-allocated` の差分であり、ハ
 `results/reference/{android,js,linuxX64}/` に生の JSONL、集計 CSV、環境・コマンド・ソースハッシュ・成果物ハッシュを保存する。`results/smoke/` は動作確認用で集計対象外。公開 API の修正、logger dispatch／Provider キューの end-to-end、FileProvider の永続バッファ、実機比較は対象外。
 
 参考: [Android Microbenchmark](https://developer.android.com/topic/performance/benchmarking/microbenchmark-overview)、[Node.js stdout の I/O 特性](https://nodejs.org/docs/latest-v24.x/api/process.html#a-note-on-process-io)、[Kotlin/Native Release の LTO](https://kotlinlang.org/docs/native-improving-compilation-time.html)。
+
+## caller 生成処理の最適化前後を比較する
+
+`stage.py --caller-baseline-ref <commit>` は、`current` の ThreadWrapper actual だけを指定 commit の実装に戻し、
+`noCaller` は作業ツリーの最適化実装にする。このモードでは **両方の LogRecord が caller を取得する**。
+caller 以外のソースは同じ作業ツリーからコピーするため、別作業の formatter 変更を性能差に混ぜない。
+生成済みの `build/projects/*/src` は staging 時に作り直す。
+
+```sh
+python3 quality/benchmarks/platforms/stage.py \
+  --caller-baseline-ref 16b458250ea688b3486b3d4ac57a2fa909111644
+./gradlew -p quality/benchmarks/platforms \
+  :current:writeAndroidRuntime :noCaller:writeAndroidRuntime \
+  :current:linkReleaseExecutableLinuxX64 :noCaller:linkReleaseExecutableLinuxX64 \
+  :noCaller:linuxX64Test
+python3 quality/benchmarks/platforms/run.py --platform android --prepare-android \
+  --sdk "$ANDROID_HOME" --serial emulator-5554 \
+  --d8-jar quality/benchmarks/platforms/build/r8-9.5.23.jar \
+  --caller-implementation-comparison --case record --label caller-allocation-2026-10-11
+python3 quality/benchmarks/platforms/run.py --platform linuxX64 \
+  --caller-implementation-comparison --case record --label caller-allocation-2026-10-11
+```
+
+結果の variant は `baseline` / `optimized`。Android/Native の双方で caller が非空であることを確認し、
+ソースのハッシュを variant ごとに保存する。このモードの Native テストには、共通の選別・文字列処理テストと、
+直接生成・非同期 worker 後・level scope の caller 保持テストを含める。
