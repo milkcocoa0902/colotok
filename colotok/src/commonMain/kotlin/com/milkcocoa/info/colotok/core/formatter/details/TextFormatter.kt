@@ -81,9 +81,16 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
     ): String {
         val dt = timestamp
         return fmt
-            .replace(Element.DATETIME.toString(), dt.toLocalDateTime(TimeZone.UTC).format(LocalDateTime.Formats.ISO))
-            .replace(Element.DATE.toString(), dt.toLocalDateTime(TimeZone.UTC).date.format(LocalDate.Formats.ISO))
-            .replace(Element.TIME.toString(), dt.toLocalDateTime(TimeZone.UTC).time.format(LocalTime.Formats.ISO))
+            .let {
+                if(it.contains(Element.DATETIME.toString())) it.replace(Element.DATETIME.toString(), dt.toLocalDateTime(TimeZone.UTC).format(LocalDateTime.Formats.ISO))
+                else it
+            }.let {
+                if(it.contains(Element.DATE.toString())) it.replace(Element.DATE.toString(), dt.toLocalDateTime(TimeZone.UTC).date.format(LocalDate.Formats.ISO))
+                else it
+            }.let {
+                if(it.contains(Element.TIME.toString())) it.replace(Element.TIME.toString(), dt.toLocalDateTime(TimeZone.UTC).time.format(LocalTime.Formats.ISO))
+                else it
+            }
             .replace(Element.MESSAGE.toString(), msg)
             .replace(Element.LEVEL.toString(), level.toString())
             .replace(Element.THREAD.toString(), threadName)
