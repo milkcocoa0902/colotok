@@ -79,25 +79,37 @@ abstract class TextFormatter(private val fmt: String) : Formatter {
         caller: String,
         timestamp: Instant
     ): String {
-        val dt = timestamp
-        return fmt
-            .let {
-                if(it.contains(Element.DATETIME.toString())) it.replace(Element.DATETIME.toString(), dt.toLocalDateTime(TimeZone.UTC).format(LocalDateTime.Formats.ISO))
-                else it
-            }.let {
-                if(it.contains(Element.DATE.toString())) it.replace(Element.DATE.toString(), dt.toLocalDateTime(TimeZone.UTC).date.format(LocalDate.Formats.ISO))
-                else it
-            }.let {
-                if(it.contains(Element.TIME.toString())) it.replace(Element.TIME.toString(), dt.toLocalDateTime(TimeZone.UTC).time.format(LocalTime.Formats.ISO))
-                else it
-            }
-            .replace(Element.MESSAGE.toString(), msg)
-            .replace(Element.LEVEL.toString(), level.toString())
-            .replace(Element.THREAD.toString(), threadName)
-            .replace(Element.ATTR.toString(), attrs.toString())
-            .replace(Element.CALLER.toString(), caller)
-            .let {
-                mdc.keys.fold(it) { acc, k -> acc.replace(Element.CUSTOM(k).toString(), mdc.get(k).toString()) }
-            }
+        val localDateTime: LocalDateTime by lazy { timestamp.toLocalDateTime(TimeZone.UTC) }
+
+        return fmt.replace(DateTimeElementRegex){
+            localDateTime.format(LocalDateTime.Formats.ISO)
+        }.replace(DateElementRegex){
+            localDateTime.date.format(LocalDate.Formats.ISO)
+        }.replace(TimeElementRegex){
+            localDateTime.time.format(LocalTime.Formats.ISO)
+        }.replace(MessageElementRegex){
+            msg
+        }.replace(LevelElementRegex){
+            level.toString()
+        }.replace(ThreadElementRegex){
+            threadName
+        }.replace(AttributesElementRegex){
+            attrs.toString()
+        }.replace(CallerElementRegex){
+            caller
+        }.let {
+            mdc.keys.fold(it) { acc, k -> acc.replace(Element.CUSTOM(k).toString(), mdc.get(k).toString()) }
+        }
+    }
+
+    companion object {
+        private val DateTimeElementRegex by lazy { Regex.fromLiteral(Element.DATETIME.toString()) }
+        private val DateElementRegex by lazy { Regex.fromLiteral(Element.DATE.toString()) }
+        private val TimeElementRegex by lazy { Regex.fromLiteral(Element.TIME.toString()) }
+        private val MessageElementRegex by lazy { Regex.fromLiteral(Element.MESSAGE.toString()) }
+        private val LevelElementRegex by lazy { Regex.fromLiteral(Element.LEVEL.toString()) }
+        private val ThreadElementRegex by lazy { Regex.fromLiteral(Element.THREAD.toString()) }
+        private val AttributesElementRegex by lazy { Regex.fromLiteral(Element.ATTR.toString()) }
+        private val CallerElementRegex by lazy { Regex.fromLiteral(Element.CALLER.toString()) }
     }
 }
