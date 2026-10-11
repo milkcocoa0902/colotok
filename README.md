@@ -98,8 +98,8 @@ plugins {
 ```
 
 Use immutable event types: serialization runs in the Provider worker. Structured formatters
-accept JSON-object messages and arrays of objects; unmasked arrays of primitive values or nested
-arrays cause formatting to fail. See [formatter restrictions](docs/Writerside/topics/Custom-Formatter.md#field-masking).
+preserve JSON objects, arrays, primitive values, and nulls. See
+[field masking](docs/Writerside/topics/Custom-Formatter.md#field-masking) for sensitive fields.
 
 Define an event type and select a structured formatter:
 

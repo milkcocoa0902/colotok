@@ -206,9 +206,9 @@ subsequent lifecycle calls report the original failure.
 `IProvider.channel`, `job`, and `coroutineScope`, `LogRecord.Pin`, and
 `Provider.effectiveMetricsCollector` are public extension points in 1.0.0. See [public extension points](Create-Plugin.md#public-extension-points) for ownership and usage rules.
 
-Structured formatters require JSON-object messages. Unmasked arrays of primitive values or
-nested arrays cause formatting to fail; use arrays of objects or a custom Formatter for those
-schemas. See [field masking](Custom-Formatter.md#field-masking) for details.
+Structured formatters support nested and mixed arrays, including primitive values and nulls.
+Field masking also traverses objects inside arrays. See [field masking](Custom-Formatter.md#field-masking)
+for details.
 
 ## Binary compatibility
 

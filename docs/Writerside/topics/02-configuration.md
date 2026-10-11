@@ -71,7 +71,7 @@ logger.atInfo {
 ### Structured Logging
 Colotok can also print structured logs using `kotlinx.serialization`. Use immutable message
 types: serialization runs in the Provider worker, and the message object is not deep-copied.
-For array fields, see [structured formatter restrictions](Custom-Formatter.md#field-masking).
+See [field masking](Custom-Formatter.md#field-masking) for sensitive fields.
 
 > Apply the Kotlin serialization compiler plugin in your application. The `colotok` artifact
 > already exposes the serialization runtime used by its public API.

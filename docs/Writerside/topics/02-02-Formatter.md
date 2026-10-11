@@ -62,9 +62,9 @@ logger.info("message what happen", mapOf("param1" to "a custom attribute"))
 and a UTC date; `DetailStructureFormatter` emits `message`, `level`, a UTC datetime, `thread`, and
 additional attributes.
 
-Structured messages must serialize to a JSON object. Nested arrays of objects are supported;
-unmasked arrays containing primitive values or nested arrays cause formatting to fail.
-See [structured formatter restrictions](Custom-Formatter.md#field-masking) before using array fields.
+Structured messages can serialize to JSON objects, arrays, primitive values, or null. Nested
+and mixed arrays preserve their types and order. See [field masking](Custom-Formatter.md#field-masking)
+for sensitive fields.
 
 For example, define a structured message type:
 ```kotlin
