@@ -10,7 +10,10 @@ workflows:
         - 'actions/upload-pages-artifact@v3.0.1'
     '.github/workflows/junie-review.yml':
         - 'actions/checkout@v4.4.0'
-        - 'jetbrains/junie-github-action@v1.7.18'
+        - 'jetbrains/junie-github-action@v0.10.5'
+    '.github/workflows/junie-tag.yml':
+        - 'actions/checkout@v4.4.0'
+        - 'jetbrains/junie-github-action@v0.10.5'
     '.github/workflows/publish-library.yml':
         - 'actions/checkout@v4.4.0'
         - 'actions/setup-java@v6.0.1'
@@ -83,24 +86,18 @@ dependencies:
         commit: 'sha1-b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238'
         owner_id: 8226205
         repo_id: 200299178
-    'endbug/add-and-commit@v9':
-        ref: 'v9'
-        commit: 'sha1-a94899bca583c204427a224a7af87c02f9b325d5'
-        owner_id: 26386270
-        repo_id: 209101661
     'gradle/actions@v6.4.0':
         ref: 'v6.4.0'
         commit: 'sha1-3f5f9adaf7d9fecd50b5935e54106014257a94e6'
         owner_id: 124156
         repo_id: 743626948
-    'jetbrains/junie-github-action@v1.7.18':
-        ref: 'v1.7.18'
-        commit: 'sha1-e80674f1534684678e52266b40fe9751352bc1ff'
+    'jetbrains/junie-github-action@v0.10.5':
+        ref: 'v0.10.5'
+        commit: 'sha1-5c079dbb31a426a7951bfd6b056827f9da3e28b5'
         owner_id: 878437
         repo_id: 1104496003
         uses:
             - 'actions/upload-artifact@v4'
-            - 'endbug/add-and-commit@v9'
             - 'oven-sh/setup-bun@v2'
     'jetbrains/writerside-checker-action@v1':
         ref: 'v1'
