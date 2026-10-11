@@ -155,15 +155,19 @@ JVM `main` or ordinary test methods. Provider hooks must not block waiting for t
 
 ## Event metadata and delivery behavior
 
-Scoped calls such as `atInfoAsync { print(...) }` accept a suspending block, but `print()` uses
-non-blocking `Provider.write()`, including for `AsyncProvider`. Use `infoAsync(message)` or
-`atAsync(level, message)` when you need to wait for an AsyncProvider's channel capacity.
+Choose the logging call according to the enqueue behavior you need:
+
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
 
 Records capture event time, attributes, MDC, thread name, and caller where supported at the
 logging call. Delayed formatting and Loki/CloudWatch publication use that event time rather than
 publication time. Update custom formatters or timestamp-based assertions that assumed output time.
-JavaScript records use an empty caller value. The structured message object itself is not
-copied: use immutable message types and avoid changing their fields or collections after logging.
+JavaScript records use an empty caller value. Structured records hold a reference to the message
+object, which is serialized by the worker. Use immutable message types to keep message values
+consistent through output.
 
 `Provider.write()` is a non-blocking, best-effort enqueue attempt. Even with the default `SUSPEND`
 overflow policy, it rejects the newest record when the channel is full. `AsyncProvider.writeAsync()`
@@ -183,12 +187,12 @@ records for a later attempt; explicit/final flush failures propagate through `fl
 The flush timeout includes enqueueing and processing the marker; timing out does not undo a marker
 already enqueued or cancel all delivery work.
 
-If publication fails when the retention buffer reaches its limit, subsequent incoming records
-are dropped without another automatic publish attempt. Call `flush()` or perform graceful
-shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
-subsequent lifecycle calls report the original failure.
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
 
-## Platform and provider constraints
+## Platform behavior and resource ownership
 
 - Android console output is disabled by default. Supply `detectDebugModeFn = { BuildConfig.DEBUG }`
   from the Android source set, or explicitly enable release output.

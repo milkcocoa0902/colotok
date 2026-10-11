@@ -69,8 +69,9 @@ logger.atInfo {
 
 
 ### Structured Logging
-Colotok can also print structured logs using `kotlinx.serialization`. Use immutable message
-types: serialization runs in the Provider worker, and the message object is not deep-copied.
+Colotok prints structured logs using `kotlinx.serialization`. The Provider worker serializes
+the submitted message object. Use immutable message types to keep its values consistent from
+submission through output.
 See [field masking](Custom-Formatter.md#field-masking) for sensitive fields.
 
 > Apply the Kotlin serialization compiler plugin in your application. The `colotok` artifact
@@ -116,9 +117,9 @@ logger.info(
 
 Since Colotok processes logs asynchronously, stop application logging and explicitly shut down the logger context before the application exits.
 
-Configure Providers and Context metrics before logging starts. `withMetrics()` must be called
-before `addProvider()` to select the inherited collector. `addProvider()` captures that selection;
-calling `withMetrics()` later does not update registered Providers.
+Configure Context metrics with `withMetrics()`, then register Providers with `addProvider()`.
+Registration selects each Provider's effective collector from the Context and its `metricsSpec`.
+`withMetrics()` sets the Context collector used for subsequent registrations.
 
 The following lifecycle contract applies to 1.0.0. A logger uses its context's
 providers; stopping the context stops those destinations for all loggers that share them.
@@ -215,9 +216,12 @@ provider's `join()` or `flush()`; these self-waits are rejected with `IllegalSta
 
 ## Event snapshots and delivery
 
-Scoped calls such as `atInfoAsync { print(...) }` accept a suspending block, but `print()` uses
-non-blocking `Provider.write()`, including for `AsyncProvider`. Use `infoAsync(message)` or
-`atAsync(level, message)` when you need to wait for an AsyncProvider's channel capacity.
+Choose the logging call according to the enqueue behavior you need:
+
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
 
 The event timestamp, thread, caller where supported, attributes, and MDC are snapshotted at the logging call. Delayed formatting and remote publication keep that original event time. Mutating the original maps afterwards does not change output, and every provider receives the same event snapshot for that call. JavaScript currently leaves caller empty because no portable JS call-site implementation is provided.
 
@@ -227,17 +231,17 @@ On Kotlin/Native, MDC is thread-local. Basic operations and logging-call snapsho
 
 For an `AsyncProvider`, `bufferSize` is a publish threshold in `1..4096`. Failed batches are retained up to `min(bufferSize * 4, 4096)` records. When that capacity is exhausted, the newest incoming record is dropped, preserving the older records for retry. If a remote destination accepts part of a batch before the provider reports failure, retrying the retained batch can produce duplicates; integrations should tolerate duplicates. Bounded queues, retention limits, and forced shutdown can lose records; at-least-once delivery is not guaranteed.
 
-If publication fails when the retention buffer reaches its limit, subsequent incoming records
-are dropped without another automatic publish attempt. Call `flush()` or perform graceful
-shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
-subsequent lifecycle calls report the original failure.
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
 
 There is no time-based automatic flush. A low-volume buffer stays pending until the next publish threshold, an explicit `flush()`, or graceful shutdown.
 
 The `flush(timeout)` timeout includes waiting to enqueue the marker and waiting for its processing; the default is one second. A timeout does not undo an already enqueued marker or confirm remote delivery.
 
-Structured message objects are serialized when the worker formats the record. Unlike event
-metadata, the message object is not deep-copied. Use immutable message types or avoid mutating
-messages after submitting them.
+A structured record holds a reference to its message object. The worker serializes that object
+when it formats the record; event metadata is captured separately at the logging call. Use
+immutable message types to keep message values consistent through output.
 
 An automatic publish failure is recorded and can be retried by a later publish attempt. A failure from an explicit `flush()` is propagated and moves the provider to its failed terminal state; `join()` reports the same original failure.

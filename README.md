@@ -97,7 +97,7 @@ plugins {
 }
 ```
 
-Use immutable event types: serialization runs in the Provider worker. Structured formatters
+Pass immutable event types: the Provider worker serializes the submitted message object. Structured formatters
 preserve JSON objects, arrays, primitive values, and nulls. See
 [field masking](docs/Writerside/topics/Custom-Formatter.md#field-masking) for sensitive fields.
 

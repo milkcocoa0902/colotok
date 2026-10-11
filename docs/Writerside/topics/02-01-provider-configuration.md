@@ -128,9 +128,9 @@ rotation = DateBaseRotation(period = 7.days)
 `StreamProvider` accepts an Okio `Sink` factory. Okio is exposed transitively by the `colotok`
 artifact; add a direct Okio dependency only when your own code uses Okio APIs.
 
-The factory is called for each record. StreamProvider writes, flushes, and closes the returned
-Sink for that record. Return a new Sink on each call; returning the same Sink causes later writes
-to use a closed resource. The default factory returns a blackhole Sink and discards output.
+StreamProvider manages a separate Sink for each record. `outputStreamBuilder` creates the Sink;
+the Provider writes the record, flushes it, and closes it. Supply a factory that opens a new
+Sink on each call. For testing, the default factory uses a blackhole Sink that discards output.
 
 ```Kotlin
 import okio.blackholeSink
@@ -163,9 +163,12 @@ See [shutdown and completion](02-configuration.md#force-shutdown) and
 
 ## AsyncProvider buffering
 
-Scoped calls such as `atInfoAsync { print(...) }` accept a suspending block, but `print()` uses
-non-blocking `Provider.write()`, including for `AsyncProvider`. Use `infoAsync(message)` or
-`atAsync(level, message)` when you need to wait for an AsyncProvider's channel capacity.
+Choose the logging call according to the enqueue behavior you need:
+
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
 
 `Provider.write()` attempts to enqueue a record without blocking. With the default `SUSPEND`
 overflow policy, a full channel rejects the newest record and preserves previously accepted
@@ -189,10 +192,10 @@ Automatic publish failures retain the batch for a later attempt. An explicit flu
 propagates to the caller and puts the Provider in its failed state. Subsequent `join()` calls
 report the original failure.
 
-If publication fails when the retention buffer reaches its limit, subsequent incoming records
-are dropped without another automatic publish attempt. Call `flush()` or perform graceful
-shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
-subsequent lifecycle calls report the original failure.
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
 
 Attributes and MDC are captured when the log call creates the record. Later changes to the
 original maps do not affect formatter output.

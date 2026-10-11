@@ -81,9 +81,10 @@ You can specify how to collect metrics for each provider using `MetricsCollector
 
 ### Inherit
 
-The provider inherits the collector configured in `ColotokLoggerContext` when it is registered.
-Call `withMetrics()` before `addProvider()`. Changing the Context collector later does not update
-already registered Providers. This is the default selection strategy.
+With the default `Inherit` strategy, registration selects the collector configured in
+`ColotokLoggerContext`. Configure it with `withMetrics()` before adding Providers. Later calls
+to `withMetrics()` apply to subsequent registrations; each registered Provider uses its selected
+collector.
 
 ```kotlin
 val logger = ColotokLoggerContext()

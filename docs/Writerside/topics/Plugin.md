@@ -36,9 +36,12 @@ suspend fun logRequest(logger: ColotokLogger) {
 For an `AsyncProvider`, the call waits for channel capacity. A regular `Provider` uses its
 non-blocking `write()` implementation.
 
-Scoped calls such as `atInfoAsync { print(...) }` accept a suspending block, but `print()` uses
-non-blocking `Provider.write()`, including for `AsyncProvider`. Use `infoAsync(message)` or
-`atAsync(level, message)` when you need to wait for an AsyncProvider's channel capacity.
+Choose the logging call according to the enqueue behavior you need:
+
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
 
 ## Custom integrations
 

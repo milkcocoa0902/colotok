@@ -45,9 +45,12 @@ suspend fun logMessages(logger: ColotokLogger) {
 }
 ```
 
-Scoped calls such as `atInfoAsync { print(...) }` accept a suspending block, but `print()` uses
-non-blocking `Provider.write()`, including for `AsyncProvider`. Use `infoAsync(message)` or
-`atAsync(level, message)` when you need to wait for an AsyncProvider's channel capacity.
+Choose the logging call according to the enqueue behavior you need:
+
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
 
 **Platform Support**: This plugin is published for the same targets as the core library: JVM, Android, JavaScript, iOS arm64, iOS Simulator arm64, and macOS arm64.
 
@@ -113,10 +116,10 @@ logger.info("This log will be sent to CloudWatch")
 ```
 
 **Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. There is no timer-based automatic flush, so low-volume logs can remain buffered until an explicit flush or graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, when the buffer first reaches its retention limit, or on a flush.
-If publication fails when the retention buffer reaches its limit, subsequent incoming records
-are dropped without another automatic publish attempt. Call `flush()` or perform graceful
-shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
-subsequent lifecycle calls report the original failure.
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
 
 ```kotlin
 // Get a reference to the provider
@@ -254,10 +257,10 @@ Loki and CloudWatch use the timestamp captured by the original logging call, not
 Injected Loki clients are not closed by the provider; the caller must close them after provider shutdown.
 
 **Buffering and Flushing**: The Loki provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. There is no timer-based automatic flush, so low-volume logs can remain buffered until an explicit flush or graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, when the buffer first reaches its retention limit, or on a flush.
-If publication fails when the retention buffer reaches its limit, subsequent incoming records
-are dropped without another automatic publish attempt. Call `flush()` or perform graceful
-shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
-subsequent lifecycle calls report the original failure.
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
 
 ```kotlin
 // Get a reference to the provider

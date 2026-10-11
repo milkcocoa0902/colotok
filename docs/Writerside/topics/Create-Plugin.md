@@ -144,10 +144,10 @@ On automatic publish failure, `AsyncProvider` retains records up to `min(bufferS
 
 Delivery can lose records under buffer pressure or forced shutdown, and retries can duplicate records. If a transport accepts part of a batch and then throws, the complete retained batch can be retried and accepted messages may appear again. Prefer an idempotency key or destination-side deduplication when duplicates matter.
 
-If publication fails when the retention buffer reaches its limit, subsequent incoming records
-are dropped without another automatic publish attempt. Call `flush()` or perform graceful
-shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
-subsequent lifecycle calls report the original failure.
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
 
 ## Implementing IProvider directly
 
