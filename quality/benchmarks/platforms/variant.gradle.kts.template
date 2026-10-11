@@ -1,0 +1,52 @@
+plugins {
+    kotlin("multiplatform") version "2.4.21"
+    kotlin("plugin.serialization") version "2.4.21"
+}
+
+kotlin {
+    jvm {
+        compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
+    js {
+        nodejs()
+        binaries.executable()
+    }
+    linuxX64 {
+        binaries.executable(listOf(org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE)) {
+            entryPoint = "quality.benchmarks.platforms.main"
+            debuggable = false
+        }
+    }
+    sourceSets {
+        commonMain {
+            kotlin.srcDir("../../../src/commonMain/kotlin")
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-properties:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
+                implementation("com.squareup.okio:okio:3.17.0")
+            }
+        }
+        jvmMain {
+            kotlin.srcDirs("src/androidMain/kotlin", "../../../src/androidMain/kotlin")
+            dependencies { compileOnly(files(System.getenv("ANDROID_HOME") + "/platforms/android-34/android.jar")) }
+        }
+        jsMain {
+            kotlin.srcDir("../../../src/jsMain/kotlin")
+            dependencies { implementation("com.squareup.okio:okio-nodefilesystem:3.17.0") }
+        }
+        nativeMain { kotlin.srcDir("../../../src/nativeMain/kotlin") }
+    }
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+}
+
+tasks.register("writeAndroidRuntime") {
+    dependsOn("jvmJar")
+    doLast {
+        layout.buildDirectory.file("android-runtime.txt").get().asFile.writeText(
+            configurations.getByName("jvmRuntimeClasspath").asPath
+        )
+    }
+}

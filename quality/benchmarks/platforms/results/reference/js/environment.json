@@ -1,0 +1,135 @@
+{
+  "started_at_utc": "2026-10-10T15:01:52.703717+00:00",
+  "host": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+  "source_manifest": {
+    "commit": "d6b24f07adec4a8ed4f9f12cfecda8d0a58f68ca",
+    "sources": {
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/ThreadSafeMap.kt": "0d2f8eb5aea544a71658fead97c65d39bb8324f59b3ca32c71d6422afa17b41e",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/ThreadWrapper.kt": "287e49fca48e075929b440a7f72581ee46a6878f7d114b755ed903ebaebfc4b9",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/SinkUtil.kt": "ca1aa14b3eabe10bceb1ca6af0df8c210720ede288c3c21e8ebd87e3c96e1523",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/unit/Size.kt": "9c597252e058f92616cc1068a09809a9b742a1fcdf888b0442132822b33c8fa3",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/color/Color.kt": "6f6843a84787944375c8601c722981cddc160f0d155d0758467ff4765d1e3bdf",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/color/ColorExtension.kt": "f87f83741f177f8a466c833103dca3511e102958466c1aeae7f353602750cf9a",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/util/color/AnsiColor.kt": "47f6d540a30187639e6adcf7c336409990b8c4a33cfafa41b64cb676840962fc",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/level/LevelInt.kt": "148ce0ada564895874949c35220ee6b6a713577bbc508e5167d994ea6d0f6b24",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/level/Level.kt": "28316136dd41ee1e79bf0e962e9f29fc5dffa7cd143ece20d6a49fb771dfabdd",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/metrics/InternalLoggingMetricsCollector.kt": "b8be83cc8db0f04c6d4817751c90da5ff87c89881a9ed6ec6ce10cda5cbb550e",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/metrics/MetricsCollector.kt": "4e470e85d6de4a04495a25168b436da9d5bd314f39900a705d7ed389a2f3ad99",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/logger/LevelScopedColotokLogger.kt": "5f2b1e2b250c01d1af1e989170e40f3f0e6903b9aa5e89534675ea5578163be1",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/logger/ColotokLogger.kt": "c8a35c482b806508e93cda58224d984e2a0c14acf1c0e009d1c9a37f9a13d99c",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/logger/MDC.kt": "73a0249f5a2a1b841c30327f79f230dddb0ce4783417c2867048283465263dd1",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/logger/ColotokConfig.kt": "9d0f332f434b0896d750d1033543052fb77dece3df5ff010949707c9dea4f831",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/logger/ColotokLoggerContext.kt": "576364877286b687301f6c6485741c2d9a92f7cd0ae0dca1294cfaa3a78544cf",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/logger/LogRecord.kt": "fcfe3e0a6479a60330d8d4d424e44f756526bfb2b11f31702494fe8d337d27d3",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/Element.kt": "13950d2e04fae73d76149d88a2fba2cb925e59848c9091ff8b91d751b980f92c",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/details/StructuredFormatter.kt": "c4b26c046dc144cdb91aa3ecad6ce3b216ccd25395fec15c379a0605a8a5f416",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/details/Formatter.kt": "0481aef7bb0b4180ceef60bedfe18d3f0e917d5675d25e86498a03a40fba0945",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/details/TextFormatter.kt": "b73ab068873a11b9d06daa3acf3e599b307613e045ede644b187491838fd9b6e",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/builtin/text/PlainTextFormatter.kt": "44a1fb70159a90cfedff8062267ecce8ed9a924ce653f8ec58288f7969a64dd6",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/builtin/text/DetailTextFormatter.kt": "e11be3d0b4e98df278bbe510a8b1020c2345d3df49ca132e71ad450a29a146cf",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/builtin/text/SimpleTextFormatter.kt": "2799c21ddaae4637684007fda9c7b9325baddc692f92682e0feb4b5d85ca4ff5",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/builtin/structure/DetailStructureFormatter.kt": "68cc20069a5e10963be1139af5b72079deb1a7ad70279d00ffcdbdd74fc0ccae",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/formatter/builtin/structure/SimpleStructureFormatter.kt": "7d5a4386c7dcefaf2a0880eb10efb2205250b5a0f8b9c8a36c2a5cb4fb12015c",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/details/ProviderColorConfig.kt": "f0d07dbd1358ddfc8950d5c9ac32ccbd4f64b422ff6f1d9bed4a01f2d8cc20e3",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/details/ProviderConfig.kt": "5efcd727bfd4e8cc0ee5f311d5722712116def8249a6b042bb6ca59bb5e63ea4",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/details/ShutdownCompletion.kt": "28cb03aa1324077deb97cd75ba6891555c5f2ff1d6314535d11edb5e8432458a",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/details/Provider.kt": "9d636c20e6a2f0992aea6fed45e686f3d8ce5984ade2c7d40327adae3256483c",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/rotation/SizeBaseRotation.kt": "c935ef7b6f3883e0c8caf6b59769045b39a4fca10b57d5cd5d54d629f227b0b7",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/rotation/DateBaseRotation.kt": "48cb5ef414fa5d95d552ada1fef96cbba82f703b34a33e288878036c0c496f39",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/rotation/Rotation.kt": "f6c598770956c6147861fbcdf439e2d9259b8a22baa544011b83f3b9258b1a3d",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/file/FileProviderConfig.kt": "73ab653421ad7e1821332af6e82e8ef31c0cf54c878d97d7694ebcb9ad99dd3b",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/file/FileSystem.kt": "5fc4dfada01ccb33658b0be70aacef4a0f5fcf5006d221ec7e6b3283e2669656",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/file/FileProvider.kt": "d4114153036b1b83053de5b00db9b24c7e92f2d3daabab5e42fd3e232715eb84",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProvider.kt": "c88327844d68c5927d6f3800a9d6f292b63781a815a135a28bfcc9e42bd7355a",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig.kt": "f97aa11db1a2901c3d9c179b8a786e8a002a2f70f50f5a9a7b7757fcd11d7655",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/stream/StreamProvider.kt": "9eeb7c66e74bdfb6e3422f0cf63488044a327ddb386ec521d71a3c46968cec2d",
+      "src/commonMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/stream/StreamProviderConfig.kt": "1fcead8a69c5ae68d632ba577fab37b45462a0faeed531879bf09d5405477105",
+      "src/androidMain/kotlin/com/milkcocoa/info/colotok/util/ThreadWrapper.android.kt": "b97cab087b1ec0843a4850ba639c649c7b6c29603f2cfcb9120039b7fbe0ef32",
+      "src/androidMain/kotlin/com/milkcocoa/info/colotok/util/ThreadSafeMap.android.kt": "8ed119a40bf14b27c9955eab1ce0f2f32e559024cabb30fe01840034af0fad33",
+      "src/androidMain/kotlin/com/milkcocoa/info/colotok/core/logger/MDC.android.kt": "2d90ea20ea91da232c5a7973758adfd74ca80683c0e0c4647dd9dd00f4bf8b5f",
+      "src/androidMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/file/FileSystem.android.kt": "4e87384b04f963b2d8671b139baf2bb05585922eea05ffeb51721590625c5976",
+      "src/androidMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProvider.android.kt": "2cbd3a4f2151078a1bebba0fff87cd0d254d2c6089f62708aa08c1b7c76c6a74",
+      "src/androidMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig.andriod.kt": "b9ede03d947c5565d29e2b3fa33a659e0ee5d8c5ad5c2a1381b280f4a7ce5480",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/util/ThreadWrapper.js.kt": "2a1124d4be7841b384368225a733cbf61f9e3bf4f0957ac6a21257da6b5b0598",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/util/ThreadSafeMap.js.kt": "a5f7b831b337302dce9810b655007a633d953e10391178e3e1853c23b388af74",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/core/logger/MDC.js.kt": "1f6f30414e9f4681527be6b7ffeb6ec6e053f7489b737dc448e955eb076cad95",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/core/logger/AsyncLocalStorage.kt": "033fcd3054f1c29192c381be27be83cb939a452f6ac42e0ad6cd935524668ab5",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/file/FileSystem.js.kt": "648fe317a4eaf5f36e14335a57d2507700e7f4531e42de961878fbf82fe3e636",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig.js.kt": "18fec8cdd3cdb20228035a4321d4d4a16f5b47cd4d2824ce9bd2dc23a58c855c",
+      "src/jsMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProvider.js.kt": "bb2e969eeadfe0042d72a66142be20d04a6a5dbf93bb555404e5a982bd319f3b",
+      "src/nativeMain/kotlin/com/milkcocoa/info/colotok/util/ThreadSafeMap.native.kt": "a5f7b831b337302dce9810b655007a633d953e10391178e3e1853c23b388af74",
+      "src/nativeMain/kotlin/com/milkcocoa/info/colotok/util/ThreadWrapper.native.kt": "475eaf515263c526cd0717066d47bdee0d9658caa6ea5e18eb7468a4fbfd50bf",
+      "src/nativeMain/kotlin/com/milkcocoa/info/colotok/core/logger/MDC.native.kt": "feec64311caa667cf8e19dbd3dfcf2d4a0d730818133eeba24ef33c7c556ec49",
+      "src/nativeMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/file/FileSystem.native.kt": "4e87384b04f963b2d8671b139baf2bb05585922eea05ffeb51721590625c5976",
+      "src/nativeMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig.native.kt": "09680360ed24b50ae2a3c4691d91b4c9d13a7cab360f19ce63de6415c7c3af6a",
+      "src/nativeMain/kotlin/com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProvider.native.kt": "22c47e3539f1ba2681efa00d3f14beac1886326b4262ddbceaf797bbc4c6780a"
+    }
+  },
+  "parameters": {
+    "platform": "js",
+    "sdk": "/home/keita/Android/Sdk",
+    "serial": "emulator-5554",
+    "build_tools": "36.1.0",
+    "d8_jar": null,
+    "forks": 3,
+    "window_ms": 400,
+    "case": "all",
+    "label": "reference",
+    "prepare_android": false
+  },
+  "commands": [
+    [
+      "node",
+      "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/current/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-current.js",
+      "current",
+      "all",
+      "400"
+    ],
+    [
+      "node",
+      "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/noCaller/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-noCaller.js",
+      "noCaller",
+      "all",
+      "400"
+    ],
+    [
+      "node",
+      "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/noCaller/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-noCaller.js",
+      "noCaller",
+      "all",
+      "400"
+    ],
+    [
+      "node",
+      "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/current/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-current.js",
+      "current",
+      "all",
+      "400"
+    ],
+    [
+      "node",
+      "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/current/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-current.js",
+      "current",
+      "all",
+      "400"
+    ],
+    [
+      "node",
+      "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/noCaller/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-noCaller.js",
+      "noCaller",
+      "all",
+      "400"
+    ]
+  ],
+  "artifacts": {
+    "current": {
+      "path": "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/current/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-current.js",
+      "sha256": "6809ba786408a1e78af25de4e418d400ce259acf61d4c1ddc25094ba8ef91f44"
+    },
+    "noCaller": {
+      "path": "/mnt/Cocoa/portfolio/Colotok/quality/benchmarks/platforms/build/projects/noCaller/build/compileSync/js/main/productionExecutable/kotlin/ColotokPlatformBenchmarks-noCaller.js",
+      "sha256": "d891e348ec76a610cd7e3af96c976d1d504d0ffe235eee4b63dca3b1fb615146"
+    }
+  },
+  "node": "v24.16.0"
+}
