@@ -67,7 +67,7 @@ jobs:
                   fail_ci_if_error: false
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-jvm-reports
                   path: |
@@ -105,7 +105,7 @@ jobs:
                   --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-node-reports
                   path: |
@@ -143,7 +143,7 @@ jobs:
                   --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-android-reports
                   path: |
@@ -175,7 +175,7 @@ jobs:
               run: ./gradlew apiCheck checkKotlinAbi --no-configuration-cache --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-abi-reports
                   path: |
@@ -215,7 +215,7 @@ jobs:
               run: quality/consumers/run.sh
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-consumers-reports
                   path: |
@@ -247,7 +247,7 @@ jobs:
               run: quality/consumers/run.sh apple
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-apple-consumers-reports
                   path: |
@@ -301,7 +301,7 @@ jobs:
                     --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-apple-reports
                   path: |
@@ -333,7 +333,7 @@ jobs:
               with:
                   instance: ${{ env.INSTANCE }}
             - name: Upload checked documentation
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: docs
                   path: artifacts/${{ env.ARTIFACT }}
@@ -341,7 +341,7 @@ jobs:
                   retention-days: 7
             - name: Upload documentation check report
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-docs-report
                   path: artifacts/report.json
