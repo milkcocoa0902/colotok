@@ -34,7 +34,7 @@ quality/consumers/run.sh
 ```
 
 This runs common metadata compilation, Android compilation, JVM tests and Node tests for all
-three KMP fixtures. A successful producer build alone does not count as consumer validation.
+three KMP fixtures. Each fixture resolves the published artifacts in an independent build.
 
 On an Apple Silicon Mac, run the Apple publications and independent consumer instead:
 
@@ -59,38 +59,37 @@ COLOTOK_CONSUMER_KOTLIN_VERSIONS=2.4.21,2.3.21 quality/consumers/run.sh
 
 The producer compiler remains the version in `gradle/libs.versions.toml`. The runner publishes
 once, then cleans and builds the consumer separately for each compiler. Any selected consumer
-failure fails the command; there is no metadata-version bypass or ignored compatibility failure.
+failure exits the command with a nonzero status.
 
 To retain publications for diagnostics, set `COLOTOK_CONSUMER_REPOSITORY` to a dedicated empty
 directory. The default repository is temporary and removed on exit. Do not reuse a directory
 containing older publications when assessing missing-publication failures.
 
-## Validation record
+## Tested compiler and platform combinations
 
-For the 1.0.0 toolchain baseline, the producer is Kotlin/KGP 2.4.21. Local validation on
-2026-10-10 used Gradle 9.8.0, AGP 9.0.1, Android platform 36, Node 24.16.0 and Colotok 0.5.0
-publications built from this working tree.
+The library uses Kotlin/KGP 2.4.21. The following combinations have been tested with the smoke
+fixtures and their transitive dependencies:
 
 | Consumer Kotlin/KGP | Common metadata | JVM runtime | Android compile | Node runtime | Apple |
 | --- | --- | --- | --- | --- | --- |
-| 2.4.21 | Passed | Passed | Passed | Passed | Awaiting macOS CI |
-| 2.3.21 | Passed | Passed | Passed | Incompatible KLIB ABI | Not verified |
+| 2.4.21 | Passed | Passed | Passed | Passed | iOS Arm64/Simulator Arm64 compile and macOS Arm64 runtime passed |
+| 2.3.21 | Passed | Passed | Passed | Incompatible KLIB ABI | Not tested |
 
-Results cover the smoke fixtures and resolved transitive dependencies, not every public API.
-They do not establish a minimum consumer Kotlin version or guarantee all 2.3.x versions.
-The Kotlin 2.3.21 JS compiler rejected `colotok-js` built with Kotlin 2.4.21: the artifact has
-KLIB ABI 2.4.0, while that compiler accepts ABI versions up to 2.3.0. The resolved Kotlin
-2.4.21 JS standard library also has the newer ABI. Use the tested 2.4.21 consumer for JS/Node;
-successful common metadata resolution or JVM compilation does not establish JS compatibility.
-Compiler-specific npm locks are kept in separate directories to avoid mixing JS test tooling.
+Kotlin 2.3.21 accepts KLIB ABI versions up to 2.3.0. Colotok and the Kotlin standard library
+built with Kotlin 2.4.21 use KLIB ABI 2.4.0. Use Kotlin 2.4.21 for JS/Node consumers.
+Compiler-specific npm locks are stored in separate directories.
 
-Quality CI runs the Linux and Apple consumer jobs. Its current automatic entry points are
-pushes/PRs for `main`, and the release workflow's `workflow_call`; a PR targeting `develop`
-does not automatically execute this workflow.
+Apple checks compile iOS Arm64 and iOS Simulator Arm64 code and execute macOS Arm64 tests.
+iOS device and simulator runtime tests are outside this suite. The smoke fixtures exercise
+logger creation, custom Providers, log delivery, and shutdown; they cover a subset of the public API.
 
-The local end-to-end `run.sh` invocation (temporary publication repository, both SLF4J consumers,
-and all three Kotlin 2.4.21 KMP consumers) passed. Existing module JVM tests and
-`apiCheck checkKotlinAbi` passed as well. Apple Gradle configuration was checked on Linux,
-but that does not establish native compilation or runtime success.
-An empty isolated repository was also tested: common metadata compilation failed to resolve
-`io.github.milkcocoa0902:colotok:0.5.0`, as intended, even after a successful consumer build.
+## Continuous integration
+
+Quality CI runs Linux and Apple consumer jobs on pushes to `develop`, PRs targeting
+`main` or `develop`, manual dispatch, and calls from the documentation/release workflows.
+
+The [2026-10-11 Quality run](https://github.com/milkcocoa0902/colotok/actions/runs/38158279085)
+on commit `59fb635fa8cf261a6a5aaec5fdf746ce08590480` passed both consumer jobs, module tests,
+Apple compilation/macOS runtime tests, and Writerside checks. The API compatibility job failed
+because the Android API dump differed from the generated API. Run the workflow after updating
+API dumps or changing the release version.

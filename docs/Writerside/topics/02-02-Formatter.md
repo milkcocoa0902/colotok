@@ -4,7 +4,7 @@ A `Formatter` converts a queued `LogRecord` to the string written by a provider.
 formatters are available from the `com.milkcocoa.info.colotok.core.formatter.builtin` packages.
 
 ## TextFormatter
-`TextFormatter` is used to format as text. 'text' means **NOT structured**  
+`TextFormatter` formats log records as plain text.
 
 Colotok has three built-in `TextFormatter` implementations. `%D` (`DATETIME`), `%d` (`DATE`),
 and `%T` (`TIME`) are independent replacements. All timestamp values use the UTC event timestamp
@@ -25,7 +25,6 @@ logger.info("message what happen")
 
 // message what happen
 ```
-
 
 ### SimpleTextFormatter
 ```Kotlin
@@ -54,17 +53,18 @@ logger.info("message what happen", mapOf("param1" to "a custom attribute"))
 ```
 
 ## StructuredFormatter
-`StructuredFormatter` is used to format as structured log
-
-Colotok has 2 types of builtin `StructuredFormatter`.
-1. SimpleStructureFormatter
-2. DetailStructureFormatter
+`StructuredFormatter` formats log records as JSON. The built-in implementations are
+`SimpleStructureFormatter` and `DetailStructureFormatter`.
 
 `StructuredFormatter` emits JSON and at most one `date` field. `DATETIME` takes precedence over
 `DATE` and `TIME`; `DATE` plus `TIME` is treated as `DATETIME`. Otherwise, a single `DATE` or
 `TIME` emits only that component. The built-in `SimpleStructureFormatter` emits `message`, `level`,
 and a UTC date; `DetailStructureFormatter` emits `message`, `level`, a UTC datetime, `thread`, and
 additional attributes.
+
+Structured messages must serialize to a JSON object. Nested arrays of objects are supported;
+unmasked arrays containing primitive values or nested arrays cause formatting to fail.
+See [structured formatter restrictions](Custom-Formatter.md#field-masking) before using array fields.
 
 For example, define a structured message type:
 ```kotlin
@@ -74,7 +74,6 @@ data class LogDetail(val scope: String, val message: String): LogStructure
 @Serializable
 data class Log(val name: String, val logDetail: LogDetail): LogStructure
 ```
-
 
 ### SimpleStructureFormatter
 
@@ -96,7 +95,6 @@ logger.info(
 )
 
 // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","date":"2023-12-29"}
-
 
 logger.info("message what happen")
 
@@ -124,7 +122,6 @@ logger.info(
 )
 
 // {"message":{"name":"illegal state","logDetail":{"scope":"args","message":"argument must be greater than zero"}},"level":"INFO","thread":"main","additional":"additional param","date":"2023-12-29T12:34:56"}
-
 
 logger.info("message what happen")
 

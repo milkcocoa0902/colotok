@@ -119,7 +119,7 @@ structured field.
 
 Providers process records asynchronously. Call `context.shutdown()` from a suspend context at the
 end of the application to drain records and release provider resources. Use `forceShutdown()` only
-when queued records may be discarded. In the upcoming 1.0.0 API, the force call requests
+when queued records may be discarded. In 1.0.0, the force call requests
 cancellation without waiting for cleanup; use the [completion callback](02-configuration.md#force-shutdown)
 when application shutdown must continue after resources are released.
 

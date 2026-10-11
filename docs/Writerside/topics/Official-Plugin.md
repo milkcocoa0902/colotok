@@ -6,7 +6,9 @@ Colotok provides several official plugins to extend its functionality for differ
 
 The `colotok-coroutines` plugin provides suspending logging extensions for use from coroutine contexts, as well as the `AsyncProvider` base class for batched providers.
 
-**Description**: The extensions create the log record once and dispatch writes to the configured providers concurrently. For an `AsyncProvider`, they suspend until its channel accepts the record. A regular `Provider` keeps the same best-effort, non-blocking enqueue behavior as its synchronous `write()` method. Use `AsyncProvider` for a channel-backed, batched remote provider.
+**Description**: Message calls such as `infoAsync(message)` create one record and dispatch
+writes to the configured Providers concurrently. For an `AsyncProvider`, they wait for channel
+capacity. A regular `Provider` uses its best-effort, non-blocking `write()` method.
 
 **When to Use**: Use this plugin when your application uses Kotlin coroutines and you want to:
 - Use suspending logging calls from coroutine code
@@ -17,14 +19,13 @@ The `colotok-coroutines` plugin provides suspending logging extensions for use f
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-coroutines:0.5.0")
+implementation("io.github.milkcocoa0902:colotok-coroutines:1.0.0")
 ```
 
 **Usage**: The plugin provides async versions of all standard logging methods:
 
 ```kotlin
-// Use in a coroutine context
-runBlocking {
+suspend fun logMessages(logger: ColotokLogger) {
     // Async logging methods
     logger.traceAsync("Trace message")
     logger.debugAsync("Debug message")
@@ -44,6 +45,10 @@ runBlocking {
 }
 ```
 
+Scoped calls such as `atInfoAsync { print(...) }` accept a suspending block, but `print()` uses
+non-blocking `Provider.write()`, including for `AsyncProvider`. Use `infoAsync(message)` or
+`atAsync(level, message)` when you need to wait for an AsyncProvider's channel capacity.
+
 **Platform Support**: This plugin is published for the same targets as the core library: JVM, Android, JavaScript, iOS arm64, iOS Simulator arm64, and macOS arm64.
 
 ## colotok-cloudwatch (JVM only)
@@ -62,7 +67,7 @@ The `colotok-cloudwatch` plugin provides integration with Amazon CloudWatch Logs
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.5.0")
+implementation("io.github.milkcocoa0902:colotok-cloudwatch:1.0.0")
 ```
 
 **Usage**: Configure the CloudWatch provider with your AWS credentials and log group/stream information:
@@ -75,7 +80,6 @@ implementation("io.github.milkcocoa0902:colotok-cloudwatch:0.5.0")
 | `level` | Minimum log level to publish | `DEBUG` |
 | `formatter` | Formatter used for CloudWatch event messages | `SimpleStructureFormatter` |
 | `bufferSize` | Publish threshold; retained failures may grow to `min(bufferSize * 4, 4096)` | `50` |
-
 
 ```kotlin
 val logger = ColotokLoggerContext()
@@ -108,7 +112,11 @@ val logger = ColotokLoggerContext()
 logger.info("This log will be sent to CloudWatch")
 ```
 
-**Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, at the retention limit, or on a flush.
+**Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. There is no timer-based automatic flush, so low-volume logs can remain buffered until an explicit flush or graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, when the buffer first reaches its retention limit, or on a flush.
+If publication fails when the retention buffer reaches its limit, subsequent incoming records
+are dropped without another automatic publish attempt. Call `flush()` or perform graceful
+shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
+subsequent lifecycle calls report the original failure.
 
 ```kotlin
 // Get a reference to the provider
@@ -142,10 +150,10 @@ The `colotok-slf4j` and `colotok-slf4j2` plugins allow Colotok to be used as an 
 // Gradle Kotlin DSL
 
 // For SLF4J 1.7.x
-implementation("io.github.milkcocoa0902:colotok-slf4j:0.5.0")
+implementation("io.github.milkcocoa0902:colotok-slf4j:1.0.0")
 
 // For SLF4J 2.x
-implementation("io.github.milkcocoa0902:colotok-slf4j2:0.5.0")
+implementation("io.github.milkcocoa0902:colotok-slf4j2:1.0.0")
 ```
 
 Each binding exposes its matching `slf4j-api` major as a transitive compile dependency. Do not add
@@ -196,15 +204,14 @@ The `colotok-loki` plugin provides integration with Grafana Loki, allowing you t
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("io.github.milkcocoa0902:colotok-loki:0.5.0")
+implementation("io.github.milkcocoa0902:colotok-loki:1.0.0")
 ```
 
 **Usage**: Configure the Loki provider with your Loki server information:
 
-
 | Property | Description | Default |
 | :--- | :--- | :--- |
-| `host` | Loki host URL | `null` |
+| `host` | Base URL; the Provider appends `/loki/api/v1/push` | `null` |
 | `logStream` | Labels for Loki stream | `null` |
 | `credential` | Loki credentials | `null` |
 | `level` | Minimum log level to publish | `INFO` |
@@ -246,7 +253,11 @@ logger.info("This log will be sent to Loki")
 Loki and CloudWatch use the timestamp captured by the original logging call, not the later publish time.
 Injected Loki clients are not closed by the provider; the caller must close them after provider shutdown.
 
-**Buffering and Flushing**: The Loki provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, at the retention limit, or on a flush.
+**Buffering and Flushing**: The Loki provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. There is no timer-based automatic flush, so low-volume logs can remain buffered until an explicit flush or graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, when the buffer first reaches its retention limit, or on a flush.
+If publication fails when the retention buffer reaches its limit, subsequent incoming records
+are dropped without another automatic publish attempt. Call `flush()` or perform graceful
+shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
+subsequent lifecycle calls report the original failure.
 
 ```kotlin
 // Get a reference to the provider

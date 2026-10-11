@@ -10,8 +10,8 @@ Add the core and coroutine artifacts to the custom provider module:
 
 ```kotlin
 dependencies {
-    implementation("io.github.milkcocoa0902:colotok:<version>")
-    implementation("io.github.milkcocoa0902:colotok-coroutines:<version>")
+    implementation("io.github.milkcocoa0902:colotok:1.0.0")
+    implementation("io.github.milkcocoa0902:colotok-coroutines:1.0.0")
 }
 ```
 
@@ -88,7 +88,8 @@ private fun validateWebhookConfig(
 
 Validate required values in the expression passed to `AsyncProvider`. This ensures invalid configuration fails before the base class starts its worker.
 
-The example has no custom mutable buffer, does not block a coroutine with `runBlocking`, and does not perform network I/O while holding a provider-owned lock. Publication errors propagate to the base class instead of being printed or ignored.
+`AsyncProvider` manages the buffer and calls `onPublish()` outside its buffer lock. Let
+publication errors propagate so the base class can retain the batch for retry.
 
 ## Use the provider
 
@@ -114,7 +115,7 @@ suspend fun stopLogging() {
 
 ## Delivery and lifecycle contract
 
-These lifecycle rules describe the upcoming 1.0.0 API; see [Migrating to 1.0](Migration-to-1.0.md)
+These lifecycle rules describe the 1.0.0 API; see [Migrating to 1.0](Migration-to-1.0.md)
 for changes from the published 0.5.0 API.
 
 - `write` accepts records only while the provider is open. Logger attributes and MDC have already been snapshotted when the provider receives a record.
@@ -141,7 +142,12 @@ run after the worker has finished and are not part of the worker's completion co
 
 On automatic publish failure, `AsyncProvider` retains records up to `min(bufferSize * 4, 4096)` and can retry them on a later publish attempt. At the retention limit it drops the newest incoming record, preserving the older failed batch. A failure during an explicit `flush()` is propagated to the caller and puts the provider in its failed terminal state; `join()` reports the same original failure.
 
-Delivery is at least once, not exactly once. If a transport accepts part of a batch and then throws, the complete retained batch can be retried and accepted messages may appear again. Prefer an idempotency key or destination-side deduplication when duplicates matter.
+Delivery can lose records under buffer pressure or forced shutdown, and retries can duplicate records. If a transport accepts part of a batch and then throws, the complete retained batch can be retried and accepted messages may appear again. Prefer an idempotency key or destination-side deduplication when duplicates matter.
+
+If publication fails when the retention buffer reaches its limit, subsequent incoming records
+are dropped without another automatic publish attempt. Call `flush()` or perform graceful
+shutdown to retry that full buffer. If this flush fails, the Provider enters its failed state;
+subsequent lifecycle calls report the original failure.
 
 ## Implementing IProvider directly
 
@@ -151,11 +157,31 @@ both `forceShutdown()` and `forceShutdown(callbackScope, onComplete)`; the old n
 implementation has been removed. The `forceShutdown(onComplete)` convenience overload delegates
 to the explicit-scope overload with the implementation's `coroutineScope`.
 
+`ColotokLoggerContext.addProvider()` requires a `Provider`, so use a `Provider` subclass for
+Context integration. A direct `IProvider` implementation can be used through the interface
+independently of the Context.
+
 A direct implementation must request shutdown even when the notification scope is already
 cancelled, and must notify only after its worker and resource cleanup have finished. Repeated
 requests must not close resources twice or omit a live completion registration just because
 shutdown has already completed. These guarantees are implemented by the base classes; the
 interface alone does not provide them. See the [IProvider migration notes](Migration-to-1.0.md#custom-provider-implementations).
+
+## Public extension points
+
+`IProvider.channel`, `job`, and `coroutineScope`, `LogRecord.Pin`, and
+`Provider.effectiveMetricsCollector` remain public in 1.0.0. Use them when implementing or integrating Providers. Application code should use `write()`, `flush()`, `close()` / `join()`, and
+`forceShutdown()` to preserve the lifecycle contract.
+
+The base `Provider` owns its channel and worker. Sending directly to the channel bypasses the
+level filter and enqueue metrics; receiving from it consumes records intended for the worker.
+Closing the channel or cancelling its job/scope directly bypasses the lifecycle entry points.
+`LogRecord.Pin` is a flush marker consumed by `Provider` before `onMessage()`, rather than a log
+payload. Handle this type in exhaustive `when` expressions over `LogRecord`.
+
+`effectiveMetricsCollector` is configured when a Provider is added to a Context. Configure metrics
+through the Context or `ProviderConfig.metricsSpec`; replacing the effective collector overrides
+that selection, including any internal metrics collector.
 
 ## Resource ownership
 

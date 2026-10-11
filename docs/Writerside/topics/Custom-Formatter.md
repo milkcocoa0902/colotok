@@ -109,4 +109,12 @@ val logger = ColotokLoggerContext()
 
 ### Field masking
 
-For a `LogStructure`, `mask` matches field names case-insensitively, including nested objects and arrays. Matching values are replaced with up to 32 `*` characters. It does not mask plain-text messages, attributes, or MDC values.
+For a `LogStructure`, `mask` matches field names case-insensitively in JSON objects, including
+nested objects and arrays of objects. Matching values are replaced with up to 32 `*` characters.
+It does not mask plain-text messages, attributes, or MDC values.
+
+The current structured formatter expects the message to serialize to a JSON object. Unmasked
+arrays must contain JSON objects: arrays of strings, numbers, booleans, nulls, or nested arrays
+cause formatting to fail. Wrap array values in objects, convert them to strings, or use a custom
+`Formatter` when your message schema includes these types. This restriction also applies to
+`SimpleStructureFormatter` and `DetailStructureFormatter`.
