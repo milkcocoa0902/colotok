@@ -11,9 +11,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("results", type=Path)
     parser.add_argument("--expected-forks", type=int, default=3)
+    parser.add_argument("--variants", nargs=2, default=["current", "no-caller"])
+    parser.add_argument("--expected-combinations", type=int, default=12)
     args = parser.parse_args()
     groups = {}
-    for variant in ("current", "no-caller"):
+    for variant in args.variants:
         for file in sorted(args.results.glob(f"{variant}-*.json")):
             for result in json.loads(file.read_text()):
                 assert result["primaryMetric"]["scoreUnit"] == "ns/op"
@@ -33,8 +35,8 @@ def main():
                          fork_mean_min_ns=min(fork_means), fork_mean_max_ns=max(fork_means)))
     if not rows:
         raise SystemExit("No JMH results found")
-    if len(rows) != 12:
-        raise SystemExit(f"Expected 12 case/variant combinations, got {len(rows)}")
+    if len(rows) != args.expected_combinations:
+        raise SystemExit(f"Expected {args.expected_combinations} case/variant combinations, got {len(rows)}")
     with (args.results / "summary.csv").open("w") as output:
         writer = csv.DictWriter(output, fieldnames=rows[0].keys())
         writer.writeheader()

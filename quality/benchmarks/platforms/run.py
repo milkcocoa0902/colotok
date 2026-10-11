@@ -76,6 +76,7 @@ def main():
     parser.add_argument("--case", default="all")
     parser.add_argument("--label", default="reference")
     parser.add_argument("--prepare-android", action="store_true")
+    parser.add_argument("--caller-implementation-comparison", action="store_true")
     args = parser.parse_args()
     if args.prepare_android:
         prepare_android(args.sdk, args.build_tools, args.d8_jar)
@@ -89,6 +90,9 @@ def main():
         "commands": [],
         "artifacts": {},
     }
+    expected_mode = "caller-implementation" if args.caller_implementation_comparison else "caller-omission"
+    if metadata["source_manifest"].get("mode", "caller-omission") != expected_mode:
+        raise RuntimeError("Stage mode does not match comparison mode")
     artifacts = {}
     if args.platform == "android":
         adb = str(args.sdk / "platform-tools/adb")
@@ -113,22 +117,25 @@ def main():
         metadata["artifacts"][variant] = {"path": str(artifact), "sha256": hashlib.sha256(artifact.read_bytes()).hexdigest()}
     for fork in range(1, args.forks + 1):
         for variant in (["current", "noCaller"] if fork % 2 else ["noCaller", "current"]):
+            name = ("baseline" if variant == "current" else "optimized") if args.caller_implementation_comparison else variant
             if args.platform == "android":
-                remote = f"CLASSPATH=/data/local/tmp/colotok-benchmark/{variant}.zip app_process -Xms64m -Xmx256m /system/bin quality.benchmarks.platforms.BenchKt {shlex.quote(variant)} {shlex.quote(args.case)} {args.window_ms} 1>/dev/null"
+                remote = f"CLASSPATH=/data/local/tmp/colotok-benchmark/{variant}.zip app_process -Xms64m -Xmx256m /system/bin quality.benchmarks.platforms.BenchKt {shlex.quote(name)} {shlex.quote(args.case)} {args.window_ms} 1>/dev/null"
                 command = [adb, "-s", args.serial, "shell", "-T", remote]
             elif args.platform == "js":
-                command = ["node", str(artifacts[variant]), variant, args.case, str(args.window_ms)]
+                command = ["node", str(artifacts[variant]), name, args.case, str(args.window_ms)]
             else:
-                command = [str(artifacts[variant]), variant, args.case, str(args.window_ms)]
+                command = [str(artifacts[variant]), name, args.case, str(args.window_ms)]
             metadata["commands"].append(command)
             (directory / "environment.json").write_text(json.dumps(metadata, indent=2) + "\n")
-            print(f"{args.platform}: {variant}, process {fork}/{args.forks}", flush=True)
+            print(f"{args.platform}: {name}, process {fork}/{args.forks}", flush=True)
             # stdout is an actual /dev/null file, not a pipe; stderr contains JSONL results.
-            with (directory / f"{variant}-{fork}.jsonl").open("w") as output:
+            with (directory / f"{name}-{fork}.jsonl").open("w") as output:
                 subprocess.run(command, stdout=subprocess.DEVNULL, stderr=output, check=True)
-            lines = (directory / f"{variant}-{fork}.jsonl").read_text().splitlines()
+            lines = (directory / f"{name}-{fork}.jsonl").read_text().splitlines()
             environment = [json.loads(line) for line in lines if line.startswith('{"') and json.loads(line).get("type") == "environment"]
-            assert len(environment) == 1 and environment[0]["variant"] == variant, lines[:10]
+            assert len(environment) == 1 and environment[0]["variant"] == name, lines[:10]
+            if args.caller_implementation_comparison and args.platform != "js":
+                assert environment[0]["callerExample"], "Both implementations must retain caller"
     summarize(directory, args.forks, 9 if args.case == "all" else 1)
 
 
