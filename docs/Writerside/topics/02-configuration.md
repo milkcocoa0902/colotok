@@ -1,11 +1,12 @@
 # Configuration
 
-Colotok output the log where you specified by the provider and formatted with you passed.
+A Context manages loggers and Providers. Each Provider defines its output destination, log level,
+and formatter.
 
-## Get Logger
+## Create a logger
 
 Create loggers through `ColotokLoggerContext` and retain the context for application shutdown.
-In the upcoming 1.0.0 API, `ColotokLogger` constructors are internal and loggers no longer expose
+In 1.0.0, `ColotokLogger` constructors are internal and loggers no longer expose
 `shutdown()` or `forceShutdown()`. See [Migrating to 1.0](Migration-to-1.0.md).
 
 ```Kotlin
@@ -14,11 +15,10 @@ val context = ColotokLoggerContext()
 val logger = context.getLogger()
 ```
 
-you can get the logger instance by `ColotokLoggerContext#getLogger()`
+`getLogger()` returns a logger backed by the Context's Providers. `ConsoleProvider` writes to
+the platform console.
 
-`ConsoleProvider` is a builtin provider which used for print the log into console
-
-> if none of `addProvider()` is called, the logger will not print the log anywhere
+> Add at least one Provider to enable output.
 > {style="note"}
 
 On Android, the default `ConsoleProvider()` does not write to Logcat. From your Android source set,
@@ -37,7 +37,7 @@ Output is enabled only when `isOutputEnabled && (isEnabledForRelease || detectDe
 ## Print log
 
 ### Text Logging
-use bellow methods for appropriately level
+Select a method matching the log level:
 
 ```Kotlin
 logger.trace("message what happen")
@@ -46,7 +46,6 @@ logger.info("message what happen")
 logger.warn("message what happen")
 logger.error("message what happen")
 
-
 // 2023-12-29T12:21:13.354328 (main)[TRACE] - message what happen, additional = {}
 // 2023-12-29T12:21:13.354328 (main)[DEBUG] - message what happen, additional = {}
 // 2023-12-29T12:21:13.354328 (main)[INFO] - message what happen, additional = {}
@@ -54,7 +53,7 @@ logger.error("message what happen")
 // 2023-12-29T12:21:13.354328 (main)[ERROR] - message what happen, additional = {}
 ```
 
-or
+Use `atInfo` to write several messages at the same level:
 
 ```Kotlin
 logger.atInfo {
@@ -65,13 +64,15 @@ logger.atInfo {
 // 2023-12-29T12:21:13.354328 (main)[INFO] - in this block, additional = {}
 // 2023-12-29T12:21:13.356133 (main)[INFO] - all of logs are printed out with INFO level, additional = {}
 ```
-> if no formatter is passed to `ConsoleProvider()`, builtin `DetailTextFormatter` is used
+> `ConsoleProvider` uses `DetailTextFormatter` by default.
 > {style="note"}
 
 
-
 ### Structured Logging
-Colotok can also print structured logs using `kotlinx.serialization`.
+Colotok prints structured logs using `kotlinx.serialization`. The Provider worker serializes
+the submitted message object. Use immutable message types to keep its values consistent from
+submission through output.
+See [field masking](Custom-Formatter.md#field-masking) for sensitive fields.
 
 > Apply the Kotlin serialization compiler plugin in your application. The `colotok` artifact
 > already exposes the serialization runtime used by its public API.
@@ -87,7 +88,7 @@ data class LogDetail(val scope: String, val message: String): LogStructure
 data class Log(val name: String, val logDetail: LogDetail): LogStructure
 ```
 
-and use `DetailStructureFormatter` to format the log.
+Configure `DetailStructureFormatter` to serialize the message as JSON.
 
 ```Kotlin
 val logger = ColotokLoggerContext()
@@ -97,7 +98,7 @@ val logger = ColotokLoggerContext()
     .getLogger()
 ```
 
-then write the log
+Write the structured message:
 ```Kotlin
 logger.info(
     Log(
@@ -116,13 +117,20 @@ logger.info(
 
 Since Colotok processes logs asynchronously, stop application logging and explicitly shut down the logger context before the application exits.
 
-The following lifecycle contract describes the upcoming 1.0.0 API. A logger uses its context's
+Configure Context metrics with `withMetrics()`, then register Providers with `addProvider()`.
+Registration selects each Provider's effective collector from the Context and its `metricsSpec`.
+`withMetrics()` sets the Context collector used for subsequent registrations.
+
+The following lifecycle contract applies to 1.0.0. A logger uses its context's
 providers; stopping the context stops those destinations for all loggers that share them.
 `shallowCopy()` also shares Provider instances, so stopping a copied context affects the original
 context's shared destinations. Copies do not have independent provider lifetimes.
 
 ### Normal Shutdown
-`shutdown()` gracefully closes each configured provider and suspends until its queued logs have been processed, its provider-specific buffer has been flushed, and its resources have been closed. Do not continue logging concurrently with shutdown.
+`shutdown()` gracefully closes each configured provider and suspends until its queued logs have been processed, its provider-specific buffer has been flushed, and its resources have been closed. Providers are closed and joined sequentially in registration order. Stop application logging
+before calling shutdown. Cancellation of the calling coroutine interrupts the wait and can leave
+later Providers open; use a completion callback with `forceShutdown()` when graceful shutdown
+cannot continue.
 
 ```kotlin
 suspend fun main() {
@@ -208,12 +216,32 @@ provider's `join()` or `flush()`; these self-waits are rejected with `IllegalSta
 
 ## Event snapshots and delivery
 
+Choose the logging call according to the enqueue behavior you need:
+
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
+
 The event timestamp, thread, caller where supported, attributes, and MDC are snapshotted at the logging call. Delayed formatting and remote publication keep that original event time. Mutating the original maps afterwards does not change output, and every provider receives the same event snapshot for that call. JavaScript currently leaves caller empty because no portable JS call-site implementation is provided.
 
 On JS/Node, MDC follows Node `AsyncLocalStorage` resources. Root operations, nested scope restoration, and native async-chain propagation are supported. Kotlin coroutine siblings are not guaranteed to have isolated MDC mutation because a coroutine `Job` is not always a separate Node async resource. Logging-call snapshots remain isolated.
 
 On Kotlin/Native, MDC is thread-local. Basic operations and logging-call snapshots are supported on the current thread; automatic propagation or isolation across coroutine thread switches is not guaranteed.
 
-For an `AsyncProvider`, `bufferSize` is a publish threshold in `1..4096`. Failed batches are retained up to `min(bufferSize * 4, 4096)` records. When that capacity is exhausted, the newest incoming record is dropped, preserving the older records for retry. If a remote destination accepts part of a batch before the provider reports failure, retrying the retained batch can produce duplicates; integrations should be designed for at-least-once delivery.
+For an `AsyncProvider`, `bufferSize` is a publish threshold in `1..4096`. Failed batches are retained up to `min(bufferSize * 4, 4096)` records. When that capacity is exhausted, the newest incoming record is dropped, preserving the older records for retry. If a remote destination accepts part of a batch before the provider reports failure, retrying the retained batch can produce duplicates; integrations should tolerate duplicates. Bounded queues, retention limits, and forced shutdown can lose records; at-least-once delivery is not guaranteed.
+
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
+
+There is no time-based automatic flush. A low-volume buffer stays pending until the next publish threshold, an explicit `flush()`, or graceful shutdown.
+
+The `flush(timeout)` timeout includes waiting to enqueue the marker and waiting for its processing; the default is one second. A timeout does not undo an already enqueued marker or confirm remote delivery.
+
+A structured record holds a reference to its message object. The worker serializes that object
+when it formats the record; event metadata is captured separately at the logging call. Use
+immutable message types to keep message values consistent through output.
 
 An automatic publish failure is recorded and can be retried by a later publish attempt. A failure from an explicit `flush()` is propagated and moves the provider to its failed terminal state; `join()` reports the same original failure.

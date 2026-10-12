@@ -70,8 +70,10 @@ the accepted FIFO prefix remains queued.
 `AsyncProvider.writeAsync()` waits until channel capacity is available, so channel pressure alone
 does not produce a full rejection. Coroutine `*Async` calls targeting a regular `Provider` still
 delegate to its non-blocking `write()` path. Rejection after normal close is reported as
-`provider_closed`; a failed provider reports `provider_failed` and rethrows the failure to the async
-caller.
+`provider_closed`. `AsyncProvider.writeAsync()` rethrows a failed channel's cause after recording
+`provider_failed`; normal closure is reported through metrics without throwing. A regular
+`Provider.write()` records rejection metrics without throwing, including when called through the
+coroutine extension.
 
 ## Metrics Selection Strategy
 
@@ -79,7 +81,10 @@ You can specify how to collect metrics for each provider using `MetricsCollector
 
 ### Inherit
 
-The provider inherits the global collector configured in `ColotokLoggerContext`. This is the default.
+With the default `Inherit` strategy, registration selects the collector configured in
+`ColotokLoggerContext`. Configure it with `withMetrics()` before adding Providers. Later calls
+to `withMetrics()` apply to subsequent registrations; each registered Provider uses its selected
+collector.
 
 ```kotlin
 val logger = ColotokLoggerContext()
