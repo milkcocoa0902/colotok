@@ -1,5 +1,6 @@
 import kotlinx.validation.KotlinApiBuildTask
 import kotlinx.validation.KotlinApiCompareTask
+import org.gradle.jvm.toolchain.JavaToolchainService
 
 plugins {
     alias(libs.plugins.kotlinSerialization) apply false
@@ -76,6 +77,16 @@ val publicationVersion = providers.gradleProperty("VERSION").get()
 subprojects {
     group = publicationGroup
     version = publicationVersion
+
+    pluginManager.withPlugin("jvm-toolchains") {
+        val javaToolchains = extensions.getByType<JavaToolchainService>()
+        // Test frameworks can require a newer runtime than the published library.
+        tasks.withType<Test>().configureEach {
+            javaLauncher.set(javaToolchains.launcherFor {
+                languageVersion.set(JavaLanguageVersion.of(17))
+            })
+        }
+    }
 
     val moduleName = name
     pluginManager.withPlugin("kotlin-multiplatform") {

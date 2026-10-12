@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalEncodingApi::class)
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import java.util.Properties
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -20,6 +21,12 @@ kotlin {
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+        }
+        // JUnit 6 requires Java 17; main compilations remain on Java 11.
+        compilations.named("test") {
+            compileTaskProvider.configure {
+                compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+            }
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -73,6 +80,19 @@ kotlin {
 
     @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
     abiValidation {}
+}
+
+tasks.named<KotlinJvmCompile>("compileTestKotlinJvm") {
+    kotlinJavaToolchain.toolchain.use(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    })
+}
+
+tasks.named<JavaCompile>("compileJvmTestJava") {
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    })
+    options.release.set(17)
 }
 
 dependencies { }
