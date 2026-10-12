@@ -16,8 +16,31 @@ choose different level and formatter defaults, as listed in the [official plugin
 | `metricsSpec` | How to collect metrics (`Inherit`, `Explicit`, `NoOp`) | `MetricsCollectorSpec.Inherit` |
 | `enableInternalMetricsLogging` | Whether to log metrics as internal records (`LogRecord.Metrics`) | `false` |
 
+## Log levels and filtering
+
+Levels are ordered from least to most severe:
+
+`TRACE < DEBUG < INFO < WARN < ERROR < OFF`
+
+Each provider applies its own `level` as the minimum accepted level. A record is accepted by that
+provider when `record.level >= provider.level`.
+
+| Provider level | Accepted standard log levels |
+| :--- | :--- |
+| `TRACE` | `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `DEBUG` | `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `INFO` | `INFO`, `WARN`, `ERROR` |
+| `WARN` | `WARN`, `ERROR` |
+| `ERROR` | `ERROR` only |
+| `OFF` | No standard `TRACE` through `ERROR` records |
+
+`OFF` is a threshold above `ERROR`; it disables all standard logging methods for that provider.
+Because thresholds belong to providers, the same logger can send a `DEBUG` event to one provider
+while another provider configured at `INFO` filters it out. Filtering happens before enqueue and
+does not emit runtime metrics for the filtered record.
+
 ## ConsoleProvider
-ConsoleProvider write the log into console
+`ConsoleProvider` writes log records to the platform console.
 
 ```Kotlin
 ....
@@ -56,9 +79,10 @@ On JVM and Native targets, `ConsoleProvider` can colorize output with ANSI color
 properties are platform-specific; Android's `ConsoleProvider` writes to Logcat and does not expose
 these color properties.
 
-
 ## FileProvider
-FileProvider writes the log into a file asynchronously.
+FileProvider writes the log into a file asynchronously. It lazily opens and reuses the sink,
+flushes each write, and closes it on rotation, explicit flush, shutdown, or failure. After a flush,
+the next record reopens the sink; an unused provider does not open a file merely to shut down.
 
 `FileProvider` accepts an Okio `Path`. Okio is exposed transitively by the `colotok` artifact; add a
 direct Okio dependency only when your own code uses Okio APIs.
@@ -78,34 +102,35 @@ import okio.Path.Companion.toPath
 })
 ```
 
-FileProvider can rotate log files using `rotation`. A rotated file is renamed to
-`application.log.1`, `application.log.2`, and so on. When the path passed to `FileProvider` is an
+FileProvider can rotate log files using `rotation`. A rotated file keeps its original name
+with an increasing suffix: for example, `test.log.1`, `test.log.2`, and so on. When the path passed to `FileProvider` is an
 existing directory, the active file is `application.log` inside that directory.
 
-
 #### SizeBaseRotation
-This rotation runs after a write when the file size is greater than [size] bytes.
+This rotation is checked after writes and explicit flushes. It runs when the file size is greater than `size` bytes.
 
 ```Kotlin
 rotation = SizeBaseRotation(size = 8192L)
 ```
 
-
 #### DateBaseRotation
-This rotation runs after a write when the file's creation time (or, when unavailable, last modified
-time) is at least [period] old.
+This rotation is checked after writes and explicit flushes. It runs when the file's creation time (or, when unavailable, last modified
+time) is at least `period` old. Without either timestamp it does not rotate. There is no background rotation timer.
 ```Kotlin
 import kotlin.time.Duration.Companion.days
 
 rotation = DateBaseRotation(period = 7.days)
 ```
 
-
 ## StreamProvider
-StreamProvider write the log into stream
+`StreamProvider` writes log records to an Okio sink.
 
 `StreamProvider` accepts an Okio `Sink` factory. Okio is exposed transitively by the `colotok`
 artifact; add a direct Okio dependency only when your own code uses Okio APIs.
+
+StreamProvider manages a separate Sink for each record. `outputStreamBuilder` creates the Sink;
+the Provider writes the record, flushes it, and closes it. Supply a factory that opens a new
+Sink on each call. For testing, the default factory uses a blackhole Sink that discards output.
 
 ```Kotlin
 import okio.blackholeSink
@@ -118,20 +143,59 @@ val logger = ColotokLoggerContext()
     .getLogger()
 ```
 
-> Note: Provider は Channel を使用して非同期に動作します。`flush()` は Provider が開いている間だけ利用でき、呼び出し以前に受理されたログの処理を待ちます。`close()` は graceful close を開始するだけで待機しません。終了を待つには `join()`、Context 全体では `shutdown()` を使用してください。graceful / force を問わず close 開始後の `flush()` は `ProviderClosedException` になります。
-{style="note"}
+## Provider lifecycle
+
+Providers process queued records asynchronously. Call `flush()` while a Provider is open to
+wait for accepted records and flush its output. `close()` starts graceful shutdown; `join()`
+waits for worker termination and resource cleanup. Use `ColotokLoggerContext.shutdown()` to
+shut down all Providers in a Context.
+
+Once shutdown starts, `flush()` throws `ProviderClosedException`. If the Provider recorded a
+processing or cleanup failure, lifecycle methods report that original failure instead.
+
+`forceShutdown()` requests cancellation and returns before worker termination and resource
+cleanup. Use a completion callback or `join()` to wait for cleanup. After forced shutdown,
+`join()` waits for cleanup and throws `ProviderClosedException`, or the original Provider
+failure if one was recorded.
+
+See [shutdown and completion](02-configuration.md#force-shutdown) and
+[the 1.0.0 migration guide](Migration-to-1.0.md) for examples.
 
 ## AsyncProvider buffering
 
-`Provider.write()` はnon-blockingのenqueue試行です。default `SUSPEND` policyでもcapacityを
-待たず、channelが満杯なら既存のFIFO prefixを残してnewest recordをrejectします。
-`AsyncProvider.writeAsync()`はcapacityが空くまでsuspendします。通常の`Provider`に対する
-coroutine `*Async` APIは、同じnon-blocking `write()` pathへdelegateします。
+Choose the logging call according to the enqueue behavior you need:
 
-`bufferSize` は送信を試みる閾値で、有効範囲は `1..4096` です。送信失敗時は `min(bufferSize * 4, 4096)` 件まで既存レコードを保持します。上限到達後は、古い未送信レコードを残すため新しいレコードを破棄します。
+- `atInfoAsync { print(...) }` provides a suspending block with non-blocking `print()` calls.
+  Each `print()` uses `Provider.write()`, including for `AsyncProvider`.
+- Message calls such as `infoAsync(message)` and `atAsync(level, message)` wait for channel
+  capacity when the destination is an `AsyncProvider`.
 
-送信先がバッチの一部だけを受理してから失敗した場合、保持したバッチの再送で重複が発生し得ます。リモート Provider は at-least-once delivery として扱い、受信側を重複許容にしてください。
+`Provider.write()` attempts to enqueue a record without blocking. With the default `SUSPEND`
+overflow policy, a full channel rejects the newest record and preserves previously accepted
+records in FIFO order. `AsyncProvider.writeAsync()` suspends until channel capacity is available.
+Coroutine logging extensions targeting a regular `Provider` use its non-blocking `write()` method.
 
-自動 publish の失敗は記録され、後続の publish で再試行できます。明示的な `flush()` の失敗は呼び出し元へ伝播して Provider を failed 状態にし、その後の `join()` も同じ原因を通知します。
+`bufferSize` is the publish threshold, with a valid range of `1..4096`. Failed batches are retained
+for retry, up to `min(bufferSize * 4, 4096)` records. At the retention limit, new records are dropped
+so previously buffered records can be retried.
 
-ログ呼び出し時に attributes と MDC は snapshot されます。その後に元の map を変更しても、非同期 formatter の出力は変化しません。
+If a destination accepts part of a batch before a request fails, retrying the batch can duplicate
+records. Use idempotent requests or destination-side deduplication when duplicates matter.
+Queue limits, retention limits, and forced shutdown can cause log loss; at-least-once delivery
+is not guaranteed.
+
+Publication is attempted at threshold multiples, at the retention limit, on explicit `flush()`,
+and during graceful shutdown. There is no time-based automatic flush. For low-volume applications,
+call `flush()` when output is needed before shutdown.
+
+Automatic publish failures retain the batch for a later attempt. An explicit flush failure
+propagates to the caller and puts the Provider in its failed state. Subsequent `join()` calls
+report the original failure.
+
+At full retention capacity, the Provider keeps the buffered batch and drops new records.
+Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
+while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
+failed state. Subsequent lifecycle calls report the original failure.
+
+Attributes and MDC are captured when the log call creates the record. Later changes to the
+original maps do not affect formatter output.

@@ -39,12 +39,12 @@ jobs:
               with:
                   persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4.9.1
+              uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4.4.3
+              uses: gradle/actions/setup-gradle@v6.4.0
             - name: Run JVM tests
               run: >-
                   ./gradlew
@@ -60,14 +60,14 @@ jobs:
             - name: Upload coverage to Codecov
               if: ${{ env.CODECOV_TOKEN != '' }}
               continue-on-error: true
-              uses: codecov/codecov-action@v4.6.0
+              uses: codecov/codecov-action@v7.1.1
               with:
                   token: ${{ env.CODECOV_TOKEN }}
                   files: "build/reports/kover/reportJvmAggregated.xml"
                   fail_ci_if_error: false
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-jvm-reports
                   path: |
@@ -89,12 +89,12 @@ jobs:
               with:
                   persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4.9.1
+              uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4.4.3
+              uses: gradle/actions/setup-gradle@v6.4.0
             - name: Run Node tests
               run: >-
                   ./gradlew
@@ -105,7 +105,7 @@ jobs:
                   --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-node-reports
                   path: |
@@ -127,12 +127,12 @@ jobs:
               with:
                   persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4.9.1
+              uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4.4.3
+              uses: gradle/actions/setup-gradle@v6.4.0
             - name: Run Android unit tests
               run: >-
                   ./gradlew
@@ -143,7 +143,7 @@ jobs:
                   --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-android-reports
                   path: |
@@ -165,17 +165,17 @@ jobs:
               with:
                   persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4.9.1
+              uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4.4.3
+              uses: gradle/actions/setup-gradle@v6.4.0
             - name: Check public API dumps
               run: ./gradlew apiCheck checkKotlinAbi --no-configuration-cache --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-abi-reports
                   path: |
@@ -197,25 +197,25 @@ jobs:
               with:
                   persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4.9.1
+              uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4.4.3
+              uses: gradle/actions/setup-gradle@v6.4.0
             - name: Set up Node
               uses: actions/setup-node@v4.4.0
               with:
                   node-version: 24
             - name: Set up Android SDK
-              uses: android-actions/setup-android@v3.2.2
+              uses: android-actions/setup-android@v4.0.4
             - name: Install Android platform
               run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
             - name: Verify isolated published consumers
               run: quality/consumers/run.sh
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-consumers-reports
                   path: |
@@ -235,19 +235,19 @@ jobs:
             - uses: actions/checkout@v4.4.0
               with:
                   persist-credentials: false
-            - uses: actions/setup-java@v4.9.1
+            - uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
-            - uses: gradle/actions/setup-gradle@v4.4.3
-            - uses: android-actions/setup-android@v3.2.2
+            - uses: gradle/actions/setup-gradle@v6.4.0
+            - uses: android-actions/setup-android@v4.0.4
             - name: Install Android platform
               run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
             - name: Verify isolated Apple publications
               run: quality/consumers/run.sh apple
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-apple-consumers-reports
                   path: |
@@ -269,12 +269,12 @@ jobs:
               with:
                   persist-credentials: false
             - name: Set up JDK 17
-              uses: actions/setup-java@v4.9.1
+              uses: actions/setup-java@v6.0.1
               with:
                   distribution: zulu
                   java-version: 17
             - name: Set up Gradle
-              uses: gradle/actions/setup-gradle@v4.4.3
+              uses: gradle/actions/setup-gradle@v6.4.0
             - name: Compile iOS tests
               run: >-
                   ./gradlew
@@ -301,7 +301,7 @@ jobs:
                     --max-workers=1
             - name: Upload verification reports
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-apple-reports
                   path: |
@@ -333,7 +333,7 @@ jobs:
               with:
                   instance: ${{ env.INSTANCE }}
             - name: Upload checked documentation
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: docs
                   path: artifacts/${{ env.ARTIFACT }}
@@ -341,7 +341,7 @@ jobs:
                   retention-days: 7
             - name: Upload documentation check report
               if: ${{ always() }}
-              uses: actions/upload-artifact@v4.6.2
+              uses: actions/upload-artifact@v7.0.2
               with:
                   name: quality-docs-report
                   path: artifacts/report.json

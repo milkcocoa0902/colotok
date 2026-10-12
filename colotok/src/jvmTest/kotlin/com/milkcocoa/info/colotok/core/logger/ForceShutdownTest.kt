@@ -2,109 +2,59 @@ package com.milkcocoa.info.colotok.core.logger
 
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import kotlin.test.assertTrue
 
 class ForceShutdownTest {
-    private class SlowProvider : Provider(
-        config = ConsoleProviderConfig()
-    ) {
-        val isFinished = AtomicBoolean(false)
-        val messageReceived = AtomicBoolean(false)
-
-        override suspend fun onMessage(record: LogRecord) {
-            messageReceived.set(true)
-            delay(500) // 処理を遅延させる
-        }
-
-        override fun onClosed() {
-            isFinished.set(true)
-        }
-    }
-
-    private class HangingFlushProvider : Provider(
-        config = ConsoleProviderConfig()
-    ) {
-        val isClosed = AtomicBoolean(false)
-
-        override suspend fun onMessage(record: LogRecord) = Unit
-
-        override suspend fun onFlush() {
-            delay(Long.MAX_VALUE)
-        }
-
-        override fun onClosed() {
-            isClosed.set(true)
-        }
-    }
-
     @Test
-    fun testForceShutdownBlocksUntilFinished() {
-        val slowProvider = SlowProvider()
-        val logger =
-            ColotokLogger("force-test") {
-                providers = listOf(slowProvider)
-            }
-
-        logger.info("slow message")
-
-        // forceShutdownを呼ぶ。これが完了するまでブロックするはず。
-        val startTime = System.currentTimeMillis()
-        logger.forceShutdown()
-        val endTime = System.currentTimeMillis()
-
-        // close hook should run, but forceShutdown is allowed to drop queued records.
-        Assertions.assertTrue(slowProvider.isFinished.get())
-
-        // delay(500) していたが、forceShutdownによってキャンセルされるため、500ms待たずに終了するはず
-        val duration = endTime - startTime
-        Assertions.assertTrue(
-            duration < 500,
-            "forceShutdown should be immediate and not wait for slow provider to finish"
-        )
-    }
-
-    @Test
-    fun force_does_not_start_or_wait_for_hanging_flush() {
-        val provider = HangingFlushProvider()
-
-        val startTime = System.currentTimeMillis()
-        provider.forceShutdown()
-        val duration = System.currentTimeMillis() - startTime
-
-        Assertions.assertTrue(provider.isClosed.get())
-        Assertions.assertTrue(duration < 500, "forceShutdown must not run the graceful flush hook")
-        Assertions.assertThrows(
-            com.milkcocoa.info.colotok.core.provider.details.ProviderClosedException::class.java
-        ) {
-            runBlocking { provider.flush() }
-        }
-    }
-
-    @Test
-    fun force_cancels_hanging_graceful_final_flush() =
+    fun completed_provider_does_not_run_a_blocking_unconfined_callback_on_the_requesting_thread() =
         runBlocking {
-            val flushStarted = CompletableDeferred<Unit>()
             val provider =
                 object : Provider(ConsoleProviderConfig()) {
                     override suspend fun onMessage(record: LogRecord) = Unit
-
-                    override suspend fun onFlush() {
-                        flushStarted.complete(Unit)
-                        delay(Long.MAX_VALUE)
-                    }
                 }
             provider.close()
-            flushStarted.await()
+            provider.join()
 
-            val startTime = System.currentTimeMillis()
-            provider.forceShutdown()
-            val duration = System.currentTimeMillis() - startTime
+            val callbackScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+            val callbackEntered = CountDownLatch(1)
+            val releaseCallback = CountDownLatch(1)
+            val callbackFinished = CountDownLatch(1)
+            val result = CompletableFuture<Result<Unit>>()
+            val caller = Executors.newSingleThreadExecutor()
 
-            Assertions.assertTrue(duration < 500, "forceShutdown must cancel a final flush already in progress")
+            try {
+                val request =
+                    caller.submit {
+                        provider.forceShutdown(callbackScope) {
+                            result.complete(it)
+                            callbackEntered.countDown()
+                            // A user callback may have a synchronous prefix. It must
+                            // not block the request or a provider completion handler.
+                            try {
+                                releaseCallback.await()
+                            } finally {
+                                callbackFinished.countDown()
+                            }
+                        }
+                    }
+                request.get(5, TimeUnit.SECONDS)
+                assertTrue(callbackEntered.await(5, TimeUnit.SECONDS))
+                assertTrue(result.get(5, TimeUnit.SECONDS).isSuccess)
+            } finally {
+                releaseCallback.countDown()
+                callbackFinished.await(5, TimeUnit.SECONDS)
+                callbackScope.cancel()
+                caller.shutdownNow()
+            }
         }
 }

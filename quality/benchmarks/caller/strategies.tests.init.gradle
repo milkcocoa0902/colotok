@@ -1,0 +1,18 @@
+// Applies a comparison jar to tests only. Never changes the production compilation classpath.
+gradle.projectsEvaluated {
+    def root = gradle.rootProject
+    def strategy = root.providers.gradleProperty('callerStrategy').get()
+    root.allprojects { project ->
+        project.tasks.withType(Test).configureEach {
+            classpath = root.files(
+                new File(root.projectDir, 'quality/benchmarks/caller/build/colotok-strategy-adapter.jar'),
+                new File(root.projectDir, 'quality/benchmarks/caller/build/strategy-classes')
+            ) + classpath
+            systemProperty 'caller.strategy', strategy
+            jvmArgs '-Xlog:class+load=info:file=' + new File(
+                root.projectDir, 'quality/benchmarks/caller/build/classload-' + strategy + '-%p.txt'
+            ).absolutePath
+            outputs.upToDateWhen { false }
+        }
+    }
+}

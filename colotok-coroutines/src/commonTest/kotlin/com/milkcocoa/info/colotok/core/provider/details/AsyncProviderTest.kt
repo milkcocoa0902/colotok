@@ -9,6 +9,8 @@ import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -16,6 +18,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
@@ -27,12 +30,58 @@ class AsyncProviderTest {
         runTest {
             providersToClose.forEach {
                 runCatching { it.forceShutdown() }
-                it.job.join()
+                runCatching { it.join() }
             }
             providersToClose.clear()
         }
 
     private fun <T : AsyncProvider> T.track(): T = also(providersToClose::add)
+
+    @Test
+    fun force_shutdown_keeps_resources_open_until_in_flight_publish_cleanup_finishes() =
+        runTest {
+            val publishing = CompletableDeferred<Unit>()
+            val cleaning = CompletableDeferred<Unit>()
+            val releaseCleanup = CompletableDeferred<Unit>()
+            val notified = CompletableDeferred<Result<Unit>>()
+            var closeCount = 0
+            val provider =
+                object : AsyncProvider(TestAsyncProviderConfig()) {
+                    override suspend fun onPublish(records: List<LogRecord>) {
+                        publishing.complete(Unit)
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            withContext(NonCancellable) {
+                                cleaning.complete(Unit)
+                                releaseCleanup.await()
+                                assertEquals(0, closeCount)
+                            }
+                        }
+                    }
+
+                    override fun onClosed() {
+                        closeCount++
+                    }
+                }.track()
+
+            try {
+                provider.write(record(1))
+                publishing.await()
+                provider.forceShutdown(this) { notified.complete(it) }
+                cleaning.await()
+                assertFalse(notified.isCompleted)
+                assertEquals(0, closeCount)
+
+                releaseCleanup.complete(Unit)
+                notified.await().getOrThrow()
+                assertEquals(1, closeCount)
+            } finally {
+                releaseCleanup.complete(Unit)
+                provider.forceShutdown()
+                runCatching { provider.join() }
+            }
+        }
 
     class TestAsyncProviderConfig : AsyncProviderConfig {
         override var level: Level = LogLevel.DEBUG
@@ -255,9 +304,9 @@ class AsyncProviderTest {
             }
 
             provider.forceShutdown()
-            provider.job.join()
+            assertFailsWith<ProviderClosedException> { provider.join() }
             provider.forceShutdown()
-            provider.job.join()
+            assertFailsWith<ProviderClosedException> { provider.join() }
 
             assertEquals(emptyList(), provider.publishAttempts)
             assertEquals(emptyList(), provider.processedRecords)

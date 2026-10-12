@@ -4,13 +4,20 @@ import com.milkcocoa.info.colotok.core.formatter.builtin.structure.DetailStructu
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.provider.details.ProviderClosedException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -19,10 +26,65 @@ import kotlinx.serialization.serializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class LokiProviderRemoteTest {
+    @Test
+    fun `forced shutdown closes owned client after in-flight HTTP pipeline cleanup`() =
+        runTest {
+            val sending = CompletableDeferred<Unit>()
+            val cleaning = CompletableDeferred<Unit>()
+            val releaseCleanup = CompletableDeferred<Unit>()
+            val notified = CompletableDeferred<Result<Unit>>()
+            var closeCount = 0
+            val client = HttpClient(MockEngine { respond("") })
+            client.plugin(HttpSend).intercept {
+                sending.complete(Unit)
+                try {
+                    awaitCancellation()
+                } finally {
+                    withContext(NonCancellable) {
+                        cleaning.complete(Unit)
+                        releaseCleanup.await()
+                        assertEquals(0, closeCount, "Client must stay open during HTTP pipeline cleanup")
+                    }
+                }
+            }
+            val provider =
+                LokiProvider(
+                    validConfig().apply {
+                        bufferSize = 1
+                        // Use the factory rather than injection to exercise
+                        // provider ownership of this client.
+                        httpClientFactory = { client }
+                        httpClientCloser = {
+                            closeCount++
+                            it.close()
+                        }
+                    }
+                )
+
+            try {
+                provider.write(plain())
+                sending.await()
+                provider.forceShutdown(this) { notified.complete(it) }
+                cleaning.await()
+                assertEquals(0, closeCount)
+                assertFalse(notified.isCompleted)
+
+                releaseCleanup.complete(Unit)
+                notified.await().getOrThrow()
+                assertEquals(1, closeCount)
+            } finally {
+                releaseCleanup.complete(Unit)
+                provider.forceShutdown()
+                runCatching { provider.join() }
+                client.close()
+            }
+        }
+
     @Test
     fun `invalid configuration does not create default client`() {
         var createCount = 0
@@ -59,21 +121,23 @@ class LokiProviderRemoteTest {
         }
 
     @Test
-    fun `unused force shutdown does not initialize client`() {
-        var createCount = 0
-        val config =
-            validConfig().apply {
-                httpClientFactory = {
-                    createCount++
-                    HttpClient(MockEngine { respond("") })
+    fun `unused force shutdown does not initialize client`() =
+        runTest {
+            var createCount = 0
+            val config =
+                validConfig().apply {
+                    httpClientFactory = {
+                        createCount++
+                        HttpClient(MockEngine { respond("") })
+                    }
                 }
-            }
-        val provider = LokiProvider(config)
+            val provider = LokiProvider(config)
 
-        provider.forceShutdown()
+            provider.forceShutdown()
+            assertFailsWith<ProviderClosedException> { provider.join() }
 
-        assertEquals(0, createCount)
-    }
+            assertEquals(0, createCount)
+        }
 
     @Test
     fun `owned client is closed once but injected client remains caller owned`() =
@@ -94,7 +158,10 @@ class LokiProviderRemoteTest {
                 ownedProvider.join()
                 assertEquals(1, ownedCloseCount)
             } finally {
-                runCatching { ownedProvider.forceShutdown() }
+                runCatching {
+                    ownedProvider.forceShutdown()
+                    ownedProvider.join()
+                }
             }
 
             var injectedCloseCount = 0
@@ -123,7 +190,10 @@ class LokiProviderRemoteTest {
                 injected.get("https://loki.example.com/health")
                 assertEquals(2, injectedRequestCount)
             } finally {
-                runCatching { injectedProvider.forceShutdown() }
+                runCatching {
+                    injectedProvider.forceShutdown()
+                    injectedProvider.join()
+                }
                 injected.close()
             }
         }
@@ -149,7 +219,10 @@ class LokiProviderRemoteTest {
 
                 assertTrue(requestBody.contains("1700000000123456789"))
             } finally {
-                runCatching { provider.forceShutdown() }
+                runCatching {
+                    provider.forceShutdown()
+                    provider.join()
+                }
                 client.close()
             }
         }
@@ -169,7 +242,10 @@ class LokiProviderRemoteTest {
                 provider.close()
                 provider.join()
             } finally {
-                runCatching { provider.forceShutdown() }
+                runCatching {
+                    provider.forceShutdown()
+                    provider.join()
+                }
                 client.close()
             }
         }
@@ -199,7 +275,10 @@ class LokiProviderRemoteTest {
                 provider.close()
                 provider.join()
             } finally {
-                runCatching { provider.forceShutdown() }
+                runCatching {
+                    provider.forceShutdown()
+                    provider.join()
+                }
                 client.close()
             }
         }
@@ -248,7 +327,10 @@ class LokiProviderRemoteTest {
                 assertEquals(JsonPrimitive(12345), message["userId"])
                 assertEquals(JsonPrimitive("authentication"), formatted["component"])
             } finally {
-                runCatching { provider.forceShutdown() }
+                runCatching {
+                    provider.forceShutdown()
+                    provider.join()
+                }
                 client.close()
             }
         }

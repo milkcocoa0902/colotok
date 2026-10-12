@@ -20,8 +20,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlin.time.Instant
 
 /**
@@ -121,11 +119,15 @@ abstract class StructuredFormatter(
         } ?: kotlin.run checkFormat@{
             d?.let {
                 @Suppress("ktlint:standard:max-line-length")
-                return@checkFormat JsonPrimitive(LocalDate.Formats.ISO.format(instant.toLocalDateTime(TimeZone.UTC).date))
+                return@checkFormat JsonPrimitive(
+                    LocalDate.Formats.ISO.format(instant.toLocalDateTime(TimeZone.UTC).date)
+                )
             }
             t?.let {
                 @Suppress("ktlint:standard:max-line-length")
-                return@checkFormat JsonPrimitive(LocalTime.Formats.ISO.format(instant.toLocalDateTime(TimeZone.UTC).time))
+                return@checkFormat JsonPrimitive(
+                    LocalTime.Formats.ISO.format(instant.toLocalDateTime(TimeZone.UTC).time)
+                )
             }
         }
     }
@@ -144,20 +146,20 @@ abstract class StructuredFormatter(
         val s =
             object : JsonTransformingSerializer<T>(serializer) {
                 override fun transformSerialize(element: JsonElement): JsonElement =
-                    JsonObject(
-                        element.jsonObject.mapValues {
-                            if (this@StructuredFormatter.lowerMask.contains(it.key.lowercase())) {
-                                return@mapValues JsonPrimitive(
-                                    "*".repeat(it.value.toString().length.coerceAtMost(32))
-                                )
-                            }
-                            return@mapValues when (it.value) {
-                                is JsonArray -> JsonArray(it.value.jsonArray.map { transformSerialize(it) })
-                                is JsonObject -> transformSerialize(it.value)
-                                else -> it.value
-                            }
-                        }
-                    )
+                    when (element) {
+                        is JsonObject ->
+                            JsonObject(
+                                element.mapValues { (name, value) ->
+                                    if (name.lowercase() in lowerMask) {
+                                        JsonPrimitive("*".repeat(value.toString().length.coerceAtMost(32)))
+                                    } else {
+                                        transformSerialize(value)
+                                    }
+                                }
+                            )
+                        is JsonArray -> JsonArray(element.map { transformSerialize(it) })
+                        else -> element
+                    }
             }
 
         return buildJsonObject {

@@ -23,4 +23,5 @@
         <toc-element topic="Official-Plugin.md"/>
         <toc-element topic="Create-Plugin.md"/>
     </toc-element>
+    <toc-element topic="Migration-to-1.0.md"/>
 </instance-profile>

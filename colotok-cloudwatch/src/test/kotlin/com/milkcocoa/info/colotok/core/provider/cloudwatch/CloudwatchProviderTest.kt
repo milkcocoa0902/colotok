@@ -33,23 +33,27 @@ class CloudwatchProviderTest {
                 assertEquals(0, factory.client.closeCount)
             } finally {
                 provider.forceShutdown()
+                runCatching { provider.join() }
             }
         }
 
     @Test
-    fun `unused force shutdown does not initialize client`() {
-        val factory = RecordingFactory()
-        val provider = CloudwatchProvider(validConfig(factory))
+    fun `unused force shutdown does not initialize client`() =
+        runTest {
+            val factory = RecordingFactory()
+            val provider = CloudwatchProvider(validConfig(factory))
 
-        try {
-            provider.forceShutdown()
+            try {
+                provider.forceShutdown()
+                runCatching { provider.join() }
 
-            assertEquals(0, factory.createCount)
-            assertEquals(0, factory.client.closeCount)
-        } finally {
-            provider.forceShutdown()
+                assertEquals(0, factory.createCount)
+                assertEquals(0, factory.client.closeCount)
+            } finally {
+                provider.forceShutdown()
+                runCatching { provider.join() }
+            }
         }
-    }
 
     @Test
     fun `publish uses event time and stable chronological order`() =
@@ -63,6 +67,7 @@ class CloudwatchProviderTest {
             try {
                 provider.onPublish(listOf(later, firstAtSameTime, secondAtSameTime))
                 provider.forceShutdown()
+                runCatching { provider.join() }
 
                 val events = factory.client.calls.single()
                 assertEquals(listOf(1_000L, 1_000L, 2_000L), events.map { it.timestampMillis })
@@ -71,6 +76,7 @@ class CloudwatchProviderTest {
                 assertEquals(1, factory.client.closeCount)
             } finally {
                 provider.forceShutdown()
+                runCatching { provider.join() }
             }
         }
 
@@ -90,6 +96,7 @@ class CloudwatchProviderTest {
                 assertEquals(2, factory.client.calls.size)
             } finally {
                 provider.forceShutdown()
+                runCatching { provider.join() }
             }
             assertEquals(1, factory.client.closeCount)
         }
@@ -114,6 +121,7 @@ class CloudwatchProviderTest {
                 assertTrue(factory.client.calls[3].single().message.contains("second"))
             } finally {
                 provider.forceShutdown()
+                runCatching { provider.join() }
             }
             assertEquals(1, factory.client.closeCount)
         }
@@ -136,6 +144,7 @@ class CloudwatchProviderTest {
                 assertEquals(1, factory.client.closeCount)
             } finally {
                 provider.forceShutdown()
+                runCatching { provider.join() }
             }
         }
 

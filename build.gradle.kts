@@ -10,13 +10,63 @@ plugins {
     id("maven-publish")
     id("signing")
     alias(libs.plugins.mavenPublish) apply false
-    alias(libs.plugins.kover) apply false
+    alias(libs.plugins.kover)
     alias(libs.plugins.binaryCompatibilityValidator)
     jacoco
 }
 
 apiValidation {
     ignoredProjects.add("sample")
+}
+
+kover {
+    merge {
+        projects(
+            ":colotok",
+            ":colotok-coroutines",
+            ":colotok-loki",
+            ":colotok-cloudwatch",
+            ":colotok-slf4j",
+            ":colotok-slf4j2"
+        )
+
+        createVariant("jvmAggregated") {
+            if (project != rootProject) {
+                add("jvm")
+            }
+        }
+    }
+
+    reports {
+        filters {
+            includes {
+                classes(
+                    "com.milkcocoa.info.colotok.*",
+                    "org.slf4j.impl.*"
+                )
+            }
+            excludes {
+                classes(
+                    "*BuildConfig*",
+                    "*_*Factory*",
+                    "*_ComponentTreeDeps*",
+                    "*Hilt_**",
+                    "*HiltWrapper_*",
+                    "*_Factory*",
+                    "*_GeneratedInjector*",
+                    "*_HiltComponents*",
+                    "*_HiltModules*",
+                    "*_HiltModules_BindsModule*",
+                    "*_HiltModules_KeyModule*",
+                    "*_MembersInjector*",
+                    "*_ProvideFactory*",
+                    "*_SingletonC*",
+                    "*_TestComponentDataSupplier*",
+                    "*_TestInjector*"
+                )
+            }
+        }
+    }
 }
 
 val publicationGroup = providers.gradleProperty("GROUP").get()
@@ -67,7 +117,7 @@ subprojects {
 val ktlint by configurations.creating
 
 dependencies {
-    ktlint("com.pinterest.ktlint:ktlint-cli:1.1.0") {
+    ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
         }

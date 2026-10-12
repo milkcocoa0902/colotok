@@ -6,41 +6,32 @@ import com.milkcocoa.info.colotok.core.logger.LogEventMetadata
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 
 actual object ThreadWrapper {
-    private val loggingWrapperClassNames =
-        setOf(
+    private val loggingClassNames =
+        arrayOf(
+            ThreadWrapper::class.java.name,
+            LogEventMetadata::class.java.name,
+            LogRecord::class.java.name,
+            ColotokLogger::class.java.name,
+            LevelScopedColotokLogger::class.java.name,
             "com.milkcocoa.info.colotok.core.logger.ColotokLoggerExtensionKt",
             "com.milkcocoa.info.colotok.core.logger.ColotokLogger4J",
             "com.milkcocoa.info.colotok.core.logger.ColotokLogger4J2"
         )
 
+    private val loggingNestedClassPrefixes = Array(loggingClassNames.size) { loggingClassNames[it] + '$' }
+
     actual fun getCurrentThreadName() = Thread.currentThread().name
 
-    actual fun traceCallPoint() =
-        Thread.currentThread().stackTrace
-            .asSequence()
-            .dropWhile {
-                it.isLoggingFrame().not()
-            }
-            .dropWhile {
-                it.isLoggingFrame()
-            }
-            .firstOrNull()
-            ?.let {
-                val path = it.className.split(".").dropLast(1).map { it.first() }.joinToString(".")
-                val className = it.className.split(".").last()
+    actual fun traceCallPoint(): String {
+        val caller = firstCallerFrame(Thread.currentThread().stackTrace) { it.isLoggingFrame() } ?: return ""
+        return formatCallerFrame(caller.className, caller.methodName, caller.lineNumber)
+    }
 
-                "$path.$className#${it.methodName}:${it.lineNumber}"
-            } ?: ""
-
-    private fun StackTraceElement.isLoggingFrame(): Boolean =
-        isClassOrNestedClass(ThreadWrapper::class.java.name) ||
-            isClassOrNestedClass(LogEventMetadata::class.java.name) ||
-            isClassOrNestedClass(LogRecord::class.java.name) ||
-            isClassOrNestedClass(ColotokLogger::class.java.name) ||
-            isClassOrNestedClass(LevelScopedColotokLogger::class.java.name) ||
-            loggingWrapperClassNames.any { isClassOrNestedClass(it) } ||
-            className.startsWith("org.slf4j.")
-
-    private fun StackTraceElement.isClassOrNestedClass(ownerName: String): Boolean =
-        className == ownerName || className.startsWith("$ownerName$")
+    private fun StackTraceElement.isLoggingFrame(): Boolean {
+        val name = className
+        for (index in loggingClassNames.indices) {
+            if (name == loggingClassNames[index] || name.startsWith(loggingNestedClassPrefixes[index])) return true
+        }
+        return name.startsWith("org.slf4j.")
+    }
 }

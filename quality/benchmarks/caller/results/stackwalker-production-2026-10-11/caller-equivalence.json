@@ -1,0 +1,18 @@
+{
+  "array": {
+    "direct-0": "q.b.c.CallerStrategiesFixture#direct:30",
+    "direct-16": "q.b.c.CallerStrategiesFixture#direct:30",
+    "reflection": "j.i.r.NativeConstructorAccessorImpl#newInstance0:-2",
+    "method-handle": "j.l.i.MethodHandle#invokeWithArguments:710",
+    "slf4j-bridge": "q.b.c.CallerStrategiesFixture#slf4jBridge:46",
+    "logger-after-worker": "q.b.c.CallerStrategiesFixture#loggerAndWorker:63"
+  },
+  "stackwalker": {
+    "direct-0": "q.b.c.CallerStrategiesFixture#direct:30",
+    "direct-16": "q.b.c.CallerStrategiesFixture#direct:30",
+    "reflection": "j.i.r.NativeConstructorAccessorImpl#newInstance0:-2",
+    "method-handle": "j.l.i.MethodHandle#invokeWithArguments:710",
+    "slf4j-bridge": "q.b.c.CallerStrategiesFixture#slf4jBridge:46",
+    "logger-after-worker": "q.b.c.CallerStrategiesFixture#loggerAndWorker:63"
+  }
+}

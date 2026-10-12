@@ -1,0 +1,6 @@
+{"type":"environment","platform":"linuxX64","variant":"baseline","callerExample":"1   current.kexe                        0x35451d           kfun:quality.benchmarks.platforms#main(kotlin.Array<kotlin.String>){} + 1693 ","windowMs":400,"warmupWindows":3,"measurementWindows":5}
+{"type":"measurement","platform":"linuxX64","variant":"baseline","case":"record","iteration":0,"nsPerUnit":167369.7417763158,"allocatedBytesPerUnit":-1.0,"units":2432}
+{"type":"measurement","platform":"linuxX64","variant":"baseline","case":"record","iteration":1,"nsPerUnit":164316.09174679487,"allocatedBytesPerUnit":-1.0,"units":2496}
+{"type":"measurement","platform":"linuxX64","variant":"baseline","case":"record","iteration":2,"nsPerUnit":163598.95352564103,"allocatedBytesPerUnit":-1.0,"units":2496}
+{"type":"measurement","platform":"linuxX64","variant":"baseline","case":"record","iteration":3,"nsPerUnit":172082.4991554054,"allocatedBytesPerUnit":-1.0,"units":2368}
+{"type":"measurement","platform":"linuxX64","variant":"baseline","case":"record","iteration":4,"nsPerUnit":169396.86908783784,"allocatedBytesPerUnit":-1.0,"units":2368}

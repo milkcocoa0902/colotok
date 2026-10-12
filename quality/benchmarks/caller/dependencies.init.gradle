@@ -1,0 +1,17 @@
+// Keeps benchmark dependencies and tasks outside the published library build.
+gradle.projectsEvaluated {
+    def core = gradle.rootProject.project(':colotok')
+    def benchmark = core.configurations.create('callerBenchmarkTools')
+    core.dependencies.add(benchmark.name, 'org.openjdk.jmh:jmh-core:1.37')
+    core.dependencies.add(benchmark.name, 'org.openjdk.jmh:jmh-generator-annprocess:1.37')
+    core.tasks.register('prepareCallerBenchmark') {
+        dependsOn core.tasks.named('jvmJar')
+        doLast {
+            def output = new File(core.rootProject.projectDir, 'quality/benchmarks/caller/build')
+            output.mkdirs()
+            new File(output, 'runtime-classpath.txt').text = core.configurations.getByName('jvmRuntimeClasspath').asPath
+            new File(output, 'tools-classpath.txt').text = benchmark.asPath
+            new File(output, 'core-jar.txt').text = core.tasks.named('jvmJar').get().archiveFile.get().asFile.absolutePath
+        }
+    }
+}

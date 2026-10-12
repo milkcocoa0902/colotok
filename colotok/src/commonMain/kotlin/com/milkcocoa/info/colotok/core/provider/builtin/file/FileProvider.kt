@@ -6,7 +6,7 @@ import com.milkcocoa.info.colotok.util.SinkUtil.write
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.Path
-import okio.use
+import okio.Sink
 
 /**
  * builtin provider which used to write the log into file.
@@ -26,50 +26,74 @@ class FileProvider(private val outputFileName: okio.Path, config: FileProviderCo
     ) : this(outputFileName, FileProviderConfig().apply(config))
 
     private val rotation = config.rotation
-
-    /**
-     * get file path where to write the log.
-     * if [outputFileName] is the directory, provider creates "application.log" under [outputFileName].
-     */
-    private val filePath: Path
-        get() {
-            if (getFileSystem().exists(outputFileName)) {
-                // output target exists
-                if (getFileSystem().metadata(outputFileName).isDirectory) {
-                    return outputFileName / "application.log"
-                }
-                return outputFileName
-            } else {
-                // output target does not exist
-                // maybe output target is file
-                return outputFileName
-            }
-        }
-
     private val mutex = Mutex()
+
+    private var destination: Pair<Sink, Path>? = null
 
     override suspend fun onMessage(record: LogRecord) {
         mutex.withLock {
-            getFileSystem().appendingSink(
-                file = filePath,
-                mustExist = false
-            ).use { sink ->
-                sink.write(record.format(config.formatter).plus("\n").encodeToByteArray())
-                sink.flush()
-            }
+            try {
+                val bytes = record.format(config.formatter).plus("\n").encodeToByteArray()
+                val (sink, path) = destination ?: openDestination()
 
-            if (rotation?.isRotateNeeded(filePath) == true) {
-                rotation.doRotate(filePath)
+                sink.write(bytes)
+                sink.flush()
+
+                if (rotation?.isRotateNeeded(path) == true) {
+                    closeDestination()
+                    rotation.doRotate(path)
+                }
+            } catch (throwable: Throwable) {
+                closeDestination(throwable)
+                throw throwable
             }
         }
     }
 
     /**
-     * flush buffered data into file.
+     * Flush and release the current sink, then check rotation.
+     * The next record opens the destination again.
      */
     override suspend fun onFlush() {
-        if (getFileSystem().exists(filePath) && rotation?.isRotateNeeded(filePath) == true) {
-            rotation.doRotate(filePath)
+        mutex.withLock {
+            val (sink, path) = destination ?: return@withLock
+            try {
+                sink.flush()
+                closeDestination()
+                if (getFileSystem().exists(path) && rotation?.isRotateNeeded(path) == true) {
+                    rotation.doRotate(path)
+                }
+            } catch (throwable: Throwable) {
+                closeDestination(throwable)
+                throw throwable
+            }
+        }
+    }
+
+    override fun onClosed() {
+        // Provider invokes this callback after worker processing has stopped.
+        closeDestination()
+    }
+
+    private fun openDestination(): Pair<Sink, Path> {
+        val path =
+            if (getFileSystem().metadataOrNull(outputFileName)?.isDirectory == true) {
+                outputFileName / "application.log"
+            } else {
+                outputFileName
+            }
+        return (getFileSystem().appendingSink(file = path, mustExist = false) to path)
+            .also { destination = it }
+    }
+
+    private fun closeDestination(cause: Throwable? = null) {
+        val current = destination ?: return
+        destination = null
+        try {
+            current.first.close()
+        } catch (throwable: Throwable) {
+            if (cause == null) throw throwable
+            if (throwable !== cause) cause.addSuppressed(throwable)
         }
     }
 }

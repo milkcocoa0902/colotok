@@ -70,8 +70,10 @@ the accepted FIFO prefix remains queued.
 `AsyncProvider.writeAsync()` waits until channel capacity is available, so channel pressure alone
 does not produce a full rejection. Coroutine `*Async` calls targeting a regular `Provider` still
 delegate to its non-blocking `write()` path. Rejection after normal close is reported as
-`provider_closed`; a failed provider reports `provider_failed` and rethrows the failure to the async
-caller.
+`provider_closed`. `AsyncProvider.writeAsync()` rethrows a failed channel's cause after recording
+`provider_failed`; normal closure is reported through metrics without throwing. A regular
+`Provider.write()` records rejection metrics without throwing, including when called through the
+coroutine extension.
 
 ## Metrics Selection Strategy
 
@@ -79,7 +81,10 @@ You can specify how to collect metrics for each provider using `MetricsCollector
 
 ### Inherit
 
-The provider inherits the global collector configured in `ColotokLoggerContext`. This is the default.
+With the default `Inherit` strategy, registration selects the collector configured in
+`ColotokLoggerContext`. Configure it with `withMetrics()` before adding Providers. Later calls
+to `withMetrics()` apply to subsequent registrations; each registered Provider uses its selected
+collector.
 
 ```kotlin
 val logger = ColotokLoggerContext()
@@ -107,6 +112,32 @@ val logger = ColotokLoggerContext()
     })
     .getLogger()
 ```
+
+### CompositeMetricsCollector
+
+Use `CompositeMetricsCollector` when the same metric callback should be sent to multiple external
+collectors.
+
+```kotlin
+val combinedCollector = CompositeMetricsCollector(
+    listOf(prometheusCollector, auditCollector)
+)
+
+val logger = ColotokLoggerContext()
+    .addProvider(ConsoleProvider(ConsoleProviderConfig().apply {
+        metricsSpec = MetricsCollectorSpec.Explicit(combinedCollector)
+    }))
+    .getLogger()
+```
+
+Callbacks are forwarded to every collector in list order. Metrics are best-effort: if one collector
+throws, the exception is isolated and the remaining collectors still receive the callback. A
+collector failure does not fail logging, `flush()`, or `join()`, so collector exceptions must not
+be used for application control flow.
+
+`MetricsCollectorSpec.Explicit(collector, inheritParent = true)` automatically combines the
+context collector with the explicit collector. Do not also put that same context collector inside
+a `CompositeMetricsCollector` unless duplicate metric emission is intentional.
 
 ### NoOp
 
