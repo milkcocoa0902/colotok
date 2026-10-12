@@ -47,7 +47,7 @@ jobs:
               run: unzip -O UTF-8 -qq artifacts/webHelpCD2-all.zip -d dir
 
             - name: Setup Pages
-              uses: actions/configure-pages@v5.0.0
+              uses: actions/configure-pages@v6.0.0
 
             - name: Upload Pages artifact
               uses: actions/upload-pages-artifact@v5.0.0
