@@ -1,27 +1,38 @@
 # This workflow is managed by gh actions-lock.
 
-name: Code Review
+name: Junie Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
-    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: junie-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   review:
+    if: >-
+      !endsWith(github.actor, '[bot]') &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !github.event.pull_request.draft &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write
       issues: write
     steps:
-      - uses: actions/checkout@v4.4.0
+      - name: Checkout repository
+        uses: actions/checkout@v4.4.0
         with:
           fetch-depth: 1
+          persist-credentials: false
 
-      - uses: JetBrains/junie-github-action@v1.7.18
+      - name: Junie Code Review
+        uses: JetBrains/junie-github-action@v1.7.18
         with:
           junie_api_key: ${{ secrets.JUNIE_API_KEY }}
           use_single_comment: "true"
           prompt: "code-review"
-          # model: "claude-opus-4-5-20251101"  # Optional: specify which model to use
