@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
 
       - name: Junie Code Review
-        uses: JetBrains/junie-github-action@v1.7.18
+        uses: JetBrains/junie-github-action@v1.7.20
         with:
           junie_api_key: ${{ secrets.JUNIE_API_KEY }}
           use_single_comment: "true"
