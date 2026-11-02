@@ -10,7 +10,7 @@ okio = "3.18.2"
 #noinspection NewerVersionAvailable
 slf4j-api = "1.7.36"
 slf4j2-api = "2.0.17"
-android-gradle-plugin = "9.0.1"
+android-gradle-plugin = "9.5.0"
 maven-publish-plugin = "0.37.0"
 kover-plugin = "0.9.11"
 binary-compatibility-validator = "0.18.1"
