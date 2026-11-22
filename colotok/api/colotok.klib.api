@@ -89,6 +89,9 @@ abstract interface com.milkcocoa.info.colotok.core.provider.details/ProviderColo
 }
 
 abstract interface com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig|null[0]
+    abstract var autoFlash // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.autoFlash|{}autoFlash[0]
+        abstract fun <get-autoFlash>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.autoFlash.<get-autoFlash>|<get-autoFlash>(){}[0]
+        abstract fun <set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.autoFlash.<set-autoFlash>|<set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig.AutoFlash){}[0]
     abstract var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
         abstract fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
         abstract fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
@@ -101,6 +104,27 @@ abstract interface com.milkcocoa.info.colotok.core.provider.details/ProviderConf
     abstract var metricsSpec // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.metricsSpec|{}metricsSpec[0]
         abstract fun <get-metricsSpec>(): com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.metricsSpec.<get-metricsSpec>|<get-metricsSpec>(){}[0]
         abstract fun <set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics/MetricsCollectorSpec) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.metricsSpec.<set-metricsSpec>|<set-metricsSpec>(com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec){}[0]
+
+    sealed interface AutoFlash { // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash|null[0]
+        final class Enabled : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash { // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled|null[0]
+            constructor <init>(kotlin.time/Duration = ...) // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.<init>|<init>(kotlin.time.Duration){}[0]
+
+            final val interval // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.interval|{}interval[0]
+                final fun <get-interval>(): kotlin.time/Duration // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.interval.<get-interval>|<get-interval>(){}[0]
+
+            final fun component1(): kotlin.time/Duration // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.component1|component1(){}[0]
+            final fun copy(kotlin.time/Duration = ...): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.copy|copy(kotlin.time.Duration){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Enabled.toString|toString(){}[0]
+        }
+
+        final object Disabled : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash { // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Disabled|null[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Disabled.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Disabled.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash.Disabled.toString|toString(){}[0]
+        }
+    }
 }
 
 abstract interface com.milkcocoa.info.colotok.core.provider.rotation/Rotation { // com.milkcocoa.info.colotok.core.provider.rotation/Rotation|null[0]
@@ -452,6 +476,9 @@ final class com.milkcocoa.info.colotok.core.provider.builtin.file/FileProvider :
 final class com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig|null[0]
     constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.<init>|<init>(){}[0]
 
+    final var autoFlash // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.autoFlash|{}autoFlash[0]
+        final fun <get-autoFlash>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.autoFlash.<get-autoFlash>|<get-autoFlash>(){}[0]
+        final fun <set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.autoFlash.<set-autoFlash>|<set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig.AutoFlash){}[0]
     final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
         final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
         final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.file/FileProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
@@ -481,6 +508,9 @@ final class com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProvid
 final class com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig|null[0]
     constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.<init>|<init>(){}[0]
 
+    final var autoFlash // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.autoFlash|{}autoFlash[0]
+        final fun <get-autoFlash>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.autoFlash.<get-autoFlash>|<get-autoFlash>(){}[0]
+        final fun <set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.autoFlash.<set-autoFlash>|<set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig.AutoFlash){}[0]
     final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
         final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
         final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.stream/StreamProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]
@@ -690,6 +720,9 @@ final fun com.milkcocoa.info.colotok.core.provider.builtin.file/getFileSystem():
 final class com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderColorConfig, com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig|null[0]
     constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.<init>|<init>(){}[0]
 
+    final var autoFlash // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.autoFlash|{}autoFlash[0]
+        final fun <get-autoFlash>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.autoFlash.<get-autoFlash>|<get-autoFlash>(){}[0]
+        final fun <set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.autoFlash.<set-autoFlash>|<set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig.AutoFlash){}[0]
     final var colorize // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.colorize|{}colorize[0]
         final fun <get-colorize>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.colorize.<get-colorize>|<get-colorize>(){}[0]
         final fun <set-colorize>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.colorize.<set-colorize>|<set-colorize>(kotlin.Boolean){}[0]
@@ -735,6 +768,9 @@ final class <#A: kotlin/Any?> com.milkcocoa.info.colotok.core.logger/AsyncLocalS
 final class com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig : com.milkcocoa.info.colotok.core.provider.details/ProviderConfig { // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig|null[0]
     constructor <init>() // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.<init>|<init>(){}[0]
 
+    final var autoFlash // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.autoFlash|{}autoFlash[0]
+        final fun <get-autoFlash>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.autoFlash.<get-autoFlash>|<get-autoFlash>(){}[0]
+        final fun <set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.autoFlash.<set-autoFlash>|<set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig.AutoFlash){}[0]
     final var enableInternalMetricsLogging // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging|{}enableInternalMetricsLogging[0]
         final fun <get-enableInternalMetricsLogging>(): kotlin/Boolean // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging.<get-enableInternalMetricsLogging>|<get-enableInternalMetricsLogging>(){}[0]
         final fun <set-enableInternalMetricsLogging>(kotlin/Boolean) // com.milkcocoa.info.colotok.core.provider.builtin.console/ConsoleProviderConfig.enableInternalMetricsLogging.<set-enableInternalMetricsLogging>|<set-enableInternalMetricsLogging>(kotlin.Boolean){}[0]

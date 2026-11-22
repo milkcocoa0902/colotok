@@ -86,17 +86,19 @@ class ProviderLifecycleTest {
             val expected = IllegalStateException("flush failed")
             val provider =
                 object : Provider(ConsoleProviderConfig()) {
+                    private var flushCount = 0
+
                     override suspend fun onMessage(record: LogRecord) = Unit
 
                     override suspend fun onFlush() {
-                        throw expected
+                        if (++flushCount == 1) throw expected
                     }
                 }
 
             val actual = assertFailsWith<IllegalStateException> { provider.flush() }
 
             assertTrue(actual === expected)
-            assertTrue(assertFailsWith<IllegalStateException> { provider.join() } === expected)
+            provider.join()
         }
 
     @Test

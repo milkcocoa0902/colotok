@@ -18,6 +18,9 @@ final class com.milkcocoa.info.colotok.core.provider.loki/LokiProvider : com.mil
 final class com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig : com.milkcocoa.info.colotok.core.provider.details/AsyncProviderConfig { // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig|null[0]
     constructor <init>() // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.<init>|<init>(){}[0]
 
+    final var autoFlash // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.autoFlash|{}autoFlash[0]
+        final fun <get-autoFlash>(): com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.autoFlash.<get-autoFlash>|<get-autoFlash>(){}[0]
+        final fun <set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details/ProviderConfig.AutoFlash) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.autoFlash.<set-autoFlash>|<set-autoFlash>(com.milkcocoa.info.colotok.core.provider.details.ProviderConfig.AutoFlash){}[0]
     final var bufferSize // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.bufferSize|{}bufferSize[0]
         final fun <get-bufferSize>(): kotlin/Int // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.bufferSize.<get-bufferSize>|<get-bufferSize>(){}[0]
         final fun <set-bufferSize>(kotlin/Int) // com.milkcocoa.info.colotok.core.provider.loki/LokiProviderConfig.bufferSize.<set-bufferSize>|<set-bufferSize>(kotlin.Int){}[0]

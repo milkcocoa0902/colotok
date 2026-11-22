@@ -171,8 +171,8 @@ class FileProviderSinkLifecycleTest {
         }
 
     @ParameterizedTest
-    @EnumSource(FailurePoint::class)
-    fun io_and_rotation_failures_are_reported_without_retry(point: FailurePoint) =
+    @EnumSource(value = FailurePoint::class, names = ["CLOSE"], mode = EnumSource.Mode.EXCLUDE)
+    fun record_processing_failures_are_reported_by_flush_and_join(point: FailurePoint) =
         runBlocking {
             val failure = IOException("failed at $point")
             fileSystem.failurePoint = point
@@ -198,6 +198,29 @@ class FileProviderSinkLifecycleTest {
             assertEquals(if (point == FailurePoint.OPEN) 0 else 1, fileSystem.events.count { it == "close" })
             assertEquals(if (point == FailurePoint.OPEN) 0 else 1, fileSystem.events.count { it == "write" })
             assertEquals(if (point == FailurePoint.ROTATE) 1 else 0, fileSystem.events.count { it == "rotate" })
+        }
+
+    @ParameterizedTest
+    @EnumSource(value = FailurePoint::class, names = ["FLUSH", "CLOSE"])
+    fun explicit_flush_failure_releases_sink_and_the_next_write_reopens_it(point: FailurePoint) =
+        runBlocking {
+            val provider = provider()
+            val failure = IOException("explicit flush failed")
+            provider.write(record("first"))
+            withTimeout(5.seconds) { fileSystem.flushed.receive() }
+
+            fileSystem.failure = failure
+            fileSystem.failurePoint = point
+            assertSame(failure, assertFailsWith<IOException> { provider.flush(5.seconds) })
+            assertEquals(listOf("open", "write", "flush", "flush", "close"), fileSystem.events)
+
+            fileSystem.failurePoint = null
+            provider.write(record("second"))
+            provider.join()
+
+            assertEquals("first\nsecond\n", logFile.readText())
+            assertEquals(2, fileSystem.events.count { it == "open" })
+            assertEquals(2, fileSystem.events.count { it == "close" })
         }
 
     @Test
