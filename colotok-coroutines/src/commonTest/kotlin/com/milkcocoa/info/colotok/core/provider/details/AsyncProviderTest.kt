@@ -21,6 +21,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class AsyncProviderTest {
     private val providersToClose = mutableListOf<AsyncProvider>()
@@ -89,6 +90,7 @@ class AsyncProviderTest {
         override var bufferSize: Int = 1
         override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
         override var enableInternalMetricsLogging: Boolean = false
+        override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Enabled(30.seconds)
     }
 
     class TestAsyncProvider(config: TestAsyncProviderConfig) : AsyncProvider(config) {
