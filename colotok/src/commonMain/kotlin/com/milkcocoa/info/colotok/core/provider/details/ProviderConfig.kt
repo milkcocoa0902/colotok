@@ -36,7 +36,11 @@ interface ProviderConfig {
         data object Disabled : AutoFlash
         data class Enabled(
             val interval: Duration = 30.seconds
-        ) : AutoFlash
+        ) : AutoFlash {
+            init {
+                require(interval > 15.seconds) { "interval must be between 15.seconds" }
+            }
+        }
     }
     var autoFlash: AutoFlash
 }

@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
 import com.milkcocoa.info.colotok.core.provider.details.ProviderClosedException
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitCancellation
@@ -28,7 +29,7 @@ class ContextShutdownCompletionTest {
             val notified = CompletableDeferred<Result<Unit>>()
             var secondCloseCount = 0
             val first =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(ConsoleProviderConfig().apply { autoFlash = ProviderConfig.AutoFlash.Disabled }) {
                     override suspend fun onMessage(record: LogRecord) = Unit
 
                     override fun onClosed() {
@@ -37,7 +38,7 @@ class ContextShutdownCompletionTest {
                     }
                 }
             val second =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(ConsoleProviderConfig().apply { autoFlash = ProviderConfig.AutoFlash.Disabled }) {
                     override suspend fun onMessage(record: LogRecord) {
                         entered.complete(Unit)
                         try {

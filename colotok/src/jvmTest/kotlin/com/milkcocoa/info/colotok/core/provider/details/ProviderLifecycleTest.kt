@@ -7,12 +7,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class ProviderLifecycleTest {
     private class RecordingProvider : Provider(ConsoleProviderConfig()) {
@@ -78,6 +80,32 @@ class ProviderLifecycleTest {
             provider.forceShutdown()
 
             assertFailsWith<ProviderClosedException> { provider.join() }
+        }
+
+    @Test
+    fun periodic_flush_retries_after_a_failure() =
+        runBlocking {
+            val retried = CompletableDeferred<Unit>()
+            val config = ConsoleProviderConfig().apply {
+                autoFlash = ProviderConfig.AutoFlash.Enabled(16.seconds)
+            }
+            val provider =
+                object : Provider(config) {
+                    private var flushCount = 0
+
+                    override suspend fun onMessage(record: LogRecord) = Unit
+
+                    override suspend fun onFlush() {
+                        if (++flushCount == 1) error("flush failed")
+                        retried.complete(Unit)
+                    }
+                }
+
+            try {
+                withTimeout(45.seconds) { retried.await() }
+            } finally {
+                provider.join()
+            }
         }
 
     @Test

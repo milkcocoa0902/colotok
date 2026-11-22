@@ -236,10 +236,12 @@ On Kotlin/Native, MDC is thread-local. Basic operations and logging-call snapsho
 For an `AsyncProvider`, `bufferSize` is a publish threshold in `1..4096`. Failed batches are retained up to `min(bufferSize * 4, 4096)` records. When that capacity is exhausted, the newest incoming record is dropped, preserving the older records for retry. If a remote destination accepts part of a batch before the provider reports failure, retrying the retained batch can produce duplicates; integrations should tolerate duplicates. Bounded queues, retention limits, and forced shutdown can lose records; at-least-once delivery is not guaranteed.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full.
+The next periodic flush, explicit `flush()`, or graceful shutdown retries that batch. Incoming
+records do not trigger publication while the buffer is full.
 
-There is no time-based automatic flush. A low-volume buffer stays pending until the next publish threshold, an explicit `flush()`, or graceful shutdown.
+Periodic flushing lets a low-volume provider publish a batch before it reaches its threshold.
+The built-in providers default to a 30-second interval. See [Provider configuration](02-01-provider-configuration.md)
+for interval settings and Node.js shutdown behavior.
 
 The `flush(timeout)` timeout includes waiting to enqueue the marker and waiting for its processing; the default is one second. A timeout does not undo an already enqueued marker or confirm remote delivery.
 

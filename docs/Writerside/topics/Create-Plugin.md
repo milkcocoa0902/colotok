@@ -6,12 +6,15 @@ A custom provider connects Colotok to a destination that is not built in. Use `P
 
 ## Dependencies
 
-Add the core and coroutine artifacts to the custom provider module:
+Add the core and coroutine artifacts at the same version. Use a release that provides
+`ProviderConfig.autoFlash` for the example below.
 
 ```kotlin
+val colotokVersion = "<release-version>"
+
 dependencies {
-    implementation("io.github.milkcocoa0902:colotok:1.0.0")
-    implementation("io.github.milkcocoa0902:colotok-coroutines:1.0.0")
+    implementation("io.github.milkcocoa0902:colotok:$colotokVersion")
+    implementation("io.github.milkcocoa0902:colotok-coroutines:$colotokVersion")
 }
 ```
 
@@ -37,12 +40,14 @@ import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 
 class WebhookProviderConfig : AsyncProviderConfig {
     override var level: Level = LogLevel.INFO
     override var formatter: Formatter = SimpleTextFormatter
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
     override var enableInternalMetricsLogging: Boolean = false
+    override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Enabled()
     override var bufferSize: Int = 50
 
     var endpoint: String? = null
@@ -51,6 +56,8 @@ class WebhookProviderConfig : AsyncProviderConfig {
 ```
 
 `bufferSize` is the threshold at which Colotok attempts a batch publish. Its valid range is `1..4096`.
+The example also attempts a flush every 30 seconds. Set `autoFlash` to
+`ProviderConfig.AutoFlash.Disabled` to disable periodic flushing.
 
 ## Implement the provider
 
@@ -151,8 +158,8 @@ Failures in the final flush during graceful shutdown are reported through `join(
 Delivery can lose records under buffer pressure or forced shutdown, and retries can duplicate records. If a transport accepts part of a batch and then throws, the complete retained batch can be retried and accepted messages may appear again. Prefer an idempotency key or destination-side deduplication when duplicates matter.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full.
+The next periodic flush, explicit `flush()`, or graceful shutdown retries that batch. Incoming
+records do not trigger publication while the buffer is full.
 
 ## Implementing IProvider directly
 

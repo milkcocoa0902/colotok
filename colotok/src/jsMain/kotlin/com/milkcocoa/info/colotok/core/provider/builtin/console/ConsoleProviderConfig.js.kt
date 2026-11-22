@@ -14,5 +14,5 @@ actual class ConsoleProviderConfig actual constructor() : ProviderConfig {
     actual override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
     actual override var enableInternalMetricsLogging: Boolean = false
 
-    actual override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Enabled(30.seconds)
+    actual override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Disabled
 }

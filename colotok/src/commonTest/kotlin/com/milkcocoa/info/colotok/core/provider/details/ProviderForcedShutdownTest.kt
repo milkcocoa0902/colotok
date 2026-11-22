@@ -24,6 +24,9 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ProviderForcedShutdownTest {
+    private fun providerConfig() =
+        ConsoleProviderConfig().apply { autoFlash = ProviderConfig.AutoFlash.Disabled }
+
     private fun record() = LogRecord.PlainText("shutdown", "message", LogLevel.INFO, emptyMap())
 
     private suspend fun Provider.dispose() {
@@ -42,7 +45,7 @@ class ProviderForcedShutdownTest {
             val releaseNotification = CompletableDeferred<Unit>()
             val notificationFinished = CompletableDeferred<Unit>()
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(providerConfig()) {
                     override suspend fun onMessage(record: LogRecord) {
                         entered.complete(Unit)
                         try {
@@ -105,7 +108,7 @@ class ProviderForcedShutdownTest {
             val selfWaitFailures = CompletableDeferred<List<Throwable?>>()
             val returned = CompletableDeferred<Unit>()
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(providerConfig()) {
                     override suspend fun onMessage(record: LogRecord) {
                         // NonCancellable changes the current Job, but must not
                         // bypass the prohibition on waiting for this worker.
@@ -143,7 +146,7 @@ class ProviderForcedShutdownTest {
             var flushCount = 0
             var closeCount = 0
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(providerConfig()) {
                     override suspend fun onMessage(record: LogRecord) = Unit
 
                     override suspend fun onFlush() {
@@ -188,7 +191,7 @@ class ProviderForcedShutdownTest {
             val expected = IllegalArgumentException("resource close failed")
             var closeCount = 0
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(providerConfig()) {
                     override suspend fun onMessage(record: LogRecord) = Unit
 
                     override fun onClosed() {
@@ -219,7 +222,7 @@ class ProviderForcedShutdownTest {
             val callbackScope = CoroutineScope(Job().apply { cancel() } + Dispatchers.Default)
             var closeCount = 0
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(providerConfig()) {
                     override suspend fun onMessage(record: LogRecord) = Unit
 
                     override fun onClosed() {
@@ -245,7 +248,7 @@ class ProviderForcedShutdownTest {
             val handler = CoroutineExceptionHandler { _, throwable -> callbackFailure.complete(throwable) }
             val callbackScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined + handler)
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(providerConfig()) {
                     override suspend fun onMessage(record: LogRecord) = Unit
                 }
 

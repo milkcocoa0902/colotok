@@ -7,17 +7,22 @@ import com.milkcocoa.info.colotok.core.metrics.MetricsCollector
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertSame
+import kotlin.time.Duration.Companion.milliseconds
 
 class ProviderCommonLifecycleTest {
     private val providersToClose = mutableListOf<Provider>()
@@ -45,7 +50,7 @@ class ProviderCommonLifecycleTest {
     private class RecordingProvider(
         private val messageFailure: Throwable? = null,
         private val flushAction: suspend (Int) -> Unit = {}
-    ) : Provider(ConsoleProviderConfig()) {
+    ) : Provider(ConsoleProviderConfig().apply { autoFlash = ProviderConfig.AutoFlash.Disabled }) {
         val records = mutableListOf<LogRecord>()
         val lifecycleEvents = mutableListOf<String>()
         var flushCount = 0
@@ -164,6 +169,23 @@ class ProviderCommonLifecycleTest {
             assertSame(expected, flushFailure)
             assertSame(expected, joinFailure)
             assertEquals(1, provider.closeCount)
+        }
+
+    @Test
+    fun disabled_periodic_flush_preserves_explicit_and_final_flushes() =
+        runTest {
+            val flushed = CompletableDeferred<Unit>()
+            val provider = RecordingProvider { flushed.complete(Unit) }.track()
+
+            val periodicFlush = withContext(Dispatchers.Default) {
+                withTimeoutOrNull(100.milliseconds) { flushed.await() }
+            }
+            assertNull(periodicFlush)
+
+            provider.flush()
+            provider.join()
+
+            assertEquals(listOf("flush", "flush", "closed"), provider.lifecycleEvents)
         }
 
     @Test

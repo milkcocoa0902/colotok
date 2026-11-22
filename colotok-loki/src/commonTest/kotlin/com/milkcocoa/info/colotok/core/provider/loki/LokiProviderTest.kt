@@ -2,6 +2,7 @@ package com.milkcocoa.info.colotok.core.provider.loki
 
 import com.milkcocoa.info.colotok.core.formatter.builtin.text.SimpleTextFormatter
 import com.milkcocoa.info.colotok.core.level.LogLevel
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,6 +18,7 @@ class LokiProviderTest {
                 LokiProviderConfig().apply {
                     host = "https://loki.example.com"
                     logStream = mapOf("app" to "test-app")
+                    autoFlash = ProviderConfig.AutoFlash.Disabled
                 }
             val provider = LokiProvider(config)
 
@@ -39,6 +41,7 @@ class LokiProviderTest {
                     level = LogLevel.DEBUG
                     formatter = SimpleTextFormatter
                     bufferSize = 10
+                    autoFlash = ProviderConfig.AutoFlash.Disabled
                     this.credential = credential
                 }
 

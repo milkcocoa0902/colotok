@@ -4,6 +4,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
@@ -19,6 +20,7 @@ class ConsoleProviderFailureJsTest {
             val config =
                 ConsoleProviderConfig().apply {
                     formatter = ThrowingFormatter(failure)
+                    autoFlash = ProviderConfig.AutoFlash.Disabled
                 }
             val provider = ConsoleProvider(config)
             provider.write(LogRecord.PlainText("test", "message", LogLevel.INFO, emptyMap()))
