@@ -189,13 +189,12 @@ and during graceful shutdown. There is no time-based automatic flush. For low-vo
 call `flush()` when output is needed before shutdown.
 
 Automatic publish failures retain the batch for a later attempt. An explicit flush failure
-propagates to the caller and puts the Provider in its failed state. Subsequent `join()` calls
-report the original failure.
+returns the error to its caller and leaves the batch available for retry. The Provider keeps
+processing records. If the final flush during graceful shutdown fails, `join()` reports that failure.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
 Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+while the buffer is full.
 
 Attributes and MDC are captured when the log call creates the record. Later changes to the
 original maps do not affect formatter output.

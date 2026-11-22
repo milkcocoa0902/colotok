@@ -140,14 +140,19 @@ worker and are rejected with `IllegalStateException`. A hook can request `forceS
 return; wait for completion from the application outside that worker. Notification callbacks
 run after the worker has finished and are not part of the worker's completion condition.
 
-On automatic publish failure, `AsyncProvider` retains records up to `min(bufferSize * 4, 4096)` and can retry them on a later publish attempt. At the retention limit it drops the newest incoming record, preserving the older failed batch. A failure during an explicit `flush()` is propagated to the caller and puts the provider in its failed terminal state; `join()` reports the same original failure.
+On automatic publish failure, `AsyncProvider` retains records up to `min(bufferSize * 4, 4096)` and
+can retry them on a later publish attempt. At the retention limit it drops the newest incoming
+record, preserving the older failed batch.
+
+A failure during an explicit `flush()` is propagated to the caller and the worker continues
+processing. Keep your implementation's resources in a usable state if `onFlush()` throws.
+Failures in the final flush during graceful shutdown are reported through `join()`.
 
 Delivery can lose records under buffer pressure or forced shutdown, and retries can duplicate records. If a transport accepts part of a batch and then throws, the complete retained batch can be retried and accepted messages may appear again. Prefer an idempotency key or destination-side deduplication when duplicates matter.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
 Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+while the buffer is full.
 
 ## Implementing IProvider directly
 

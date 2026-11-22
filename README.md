@@ -243,6 +243,8 @@ Providers use the following delivery and shutdown behavior:
   subsequent incoming records are dropped without another automatic publish attempt.
 - `flush()` waits for records accepted before its marker while the provider is open. Its timeout
   includes enqueueing the marker and waiting for its processing; the default is one second.
+  An explicit flush failure is reported to its caller, and the provider continues processing.
+  If the final flush during graceful shutdown fails, `join()` reports that failure.
 - `ColotokLoggerContext.shutdown()` gracefully drains and closes providers. In 1.0.0,
   `forceShutdown()` requests cancellation and may lose queued records. It returns
   without waiting for worker termination or resource release.
