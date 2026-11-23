@@ -7,6 +7,7 @@ import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.core.provider.rotation.Rotation
+import kotlin.time.Duration.Companion.seconds
 
 class FileProviderConfig() : ProviderConfig {
     /**
@@ -28,4 +29,6 @@ class FileProviderConfig() : ProviderConfig {
      * if true, metrics will be logged as [com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics] to this provider.
      */
     override var enableInternalMetricsLogging: Boolean = false
+
+    override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Enabled(30.seconds)
 }

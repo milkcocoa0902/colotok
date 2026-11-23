@@ -178,7 +178,7 @@ logger context.
 
 - `Result.success(Unit)` means cancellation and cleanup finished without a recorded provider
   failure. It does **not** guarantee delivery of queued records.
-- `Result.failure(cause)` reports a recorded processing, flush, or close failure. The context
+- `Result.failure(cause)` reports a recorded processing, final flush, or close failure. The context
   reports the first failure it observes after all targeted providers have finished.
 - The callback is not part of provider termination. Callback exceptions belong to the supplied
   scope's normal exception handling and do not change the provider result.
@@ -214,6 +214,10 @@ while open: after graceful or forced closure starts it throws `ProviderClosedExc
 a recorded provider failure takes precedence. Lifecycle hooks must not wait for their own
 provider's `join()` or `flush()`; these self-waits are rejected with `IllegalStateException`.
 
+An exception from an explicit flush is returned to that caller. The worker continues processing
+queued records and later requests. If the final flush during graceful shutdown fails,
+`join()` reports the failure after resource cleanup.
+
 ## Event snapshots and delivery
 
 Choose the logging call according to the enqueue behavior you need:
@@ -232,16 +236,15 @@ On Kotlin/Native, MDC is thread-local. Basic operations and logging-call snapsho
 For an `AsyncProvider`, `bufferSize` is a publish threshold in `1..4096`. Failed batches are retained up to `min(bufferSize * 4, 4096)` records. When that capacity is exhausted, the newest incoming record is dropped, preserving the older records for retry. If a remote destination accepts part of a batch before the provider reports failure, retrying the retained batch can produce duplicates; integrations should tolerate duplicates. Bounded queues, retention limits, and forced shutdown can lose records; at-least-once delivery is not guaranteed.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+The next periodic flush, explicit `flush()`, or graceful shutdown retries that batch. Incoming
+records do not trigger publication while the buffer is full.
 
-There is no time-based automatic flush. A low-volume buffer stays pending until the next publish threshold, an explicit `flush()`, or graceful shutdown.
+Periodic flushing lets a low-volume provider publish a batch before it reaches its threshold.
+The built-in providers default to a 30-second interval. See [Provider configuration](02-01-provider-configuration.md)
+for interval settings and Node.js shutdown behavior.
 
 The `flush(timeout)` timeout includes waiting to enqueue the marker and waiting for its processing; the default is one second. A timeout does not undo an already enqueued marker or confirm remote delivery.
 
 A structured record holds a reference to its message object. The worker serializes that object
 when it formats the record; event metadata is captured separately at the logging call. Use
 immutable message types to keep message values consistent through output.
-
-An automatic publish failure is recorded and can be retried by a later publish attempt. A failure from an explicit `flush()` is propagated and moves the provider to its failed terminal state; `join()` reports the same original failure.

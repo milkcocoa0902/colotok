@@ -115,11 +115,13 @@ val logger = ColotokLoggerContext()
 logger.info("This log will be sent to CloudWatch")
 ```
 
-**Buffering and Flushing**: The CloudWatch provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. There is no timer-based automatic flush, so low-volume logs can remain buffered until an explicit flush or graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, when the buffer first reaches its retention limit, or on a flush.
+The CloudWatch provider attempts to publish at `bufferSize` multiples, at the retention limit,
+on explicit `flush()`, and during graceful shutdown. Its periodic flush defaults to 30 seconds.
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+The next periodic flush, explicit `flush()`, or graceful shutdown retries that batch. Incoming
+records do not trigger publication while the buffer is full. An explicit `flush()` failure
+returns the error to the caller and leaves the batch available for retry. If the final flush
+during graceful shutdown fails, `join()` reports that failure.
 
 ```kotlin
 // Get a reference to the provider
@@ -256,11 +258,13 @@ logger.info("This log will be sent to Loki")
 Loki and CloudWatch use the timestamp captured by the original logging call, not the later publish time.
 Injected Loki clients are not closed by the provider; the caller must close them after provider shutdown.
 
-**Buffering and Flushing**: The Loki provider buffers logs to improve performance. Publication is attempted when the buffer reaches the configured threshold (`bufferSize`), when you explicitly call `flush()`, and during graceful shutdown. There is no timer-based automatic flush, so low-volume logs can remain buffered until an explicit flush or graceful shutdown. After a failed attempt, the retained buffer is retried at later threshold multiples, when the buffer first reaches its retention limit, or on a flush.
+The Loki provider attempts to publish at `bufferSize` multiples, at the retention limit,
+on explicit `flush()`, and during graceful shutdown. Its periodic flush defaults to 30 seconds.
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+The next periodic flush, explicit `flush()`, or graceful shutdown retries that batch. Incoming
+records do not trigger publication while the buffer is full. An explicit `flush()` failure
+returns the error to the caller and leaves the batch available for retry. If the final flush
+during graceful shutdown fails, `join()` reports that failure.
 
 ```kotlin
 // Get a reference to the provider

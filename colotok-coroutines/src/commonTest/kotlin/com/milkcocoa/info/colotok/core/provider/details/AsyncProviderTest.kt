@@ -89,6 +89,7 @@ class AsyncProviderTest {
         override var bufferSize: Int = 1
         override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
         override var enableInternalMetricsLogging: Boolean = false
+        override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Disabled
     }
 
     class TestAsyncProvider(config: TestAsyncProviderConfig) : AsyncProvider(config) {
@@ -428,20 +429,32 @@ class AsyncProviderTest {
         }
 
     @Test
-    fun manual_flush_failure_retains_batch_and_throws() =
+    fun manual_flush_failure_retains_batch_for_the_next_flush() =
         runTest {
             val config = TestAsyncProviderConfig().apply { bufferSize = 4 }
-            val provider = ControlledAsyncProvider(config).track()
-            provider.write(record(1))
+            val metrics = RecordingMetricsCollector()
+            val provider =
+                ControlledAsyncProvider(config, failuresRemaining = 1).apply {
+                    effectiveMetricsCollector = metrics
+                }.track()
+            val first = record(1)
+            val second = record(2)
+            provider.write(first)
 
             val failure = assertFailsWith<IllegalStateException> { provider.flush() }
 
             assertEquals("publish failed", failure.message)
-            assertEquals(
-                listOf("message 1"),
-                provider.publishAttempts.single().map { (it as LogRecord.PlainText).msg }
-            )
-            runCatching { provider.forceShutdown() }
+            assertEquals(listOf(listOf(first)), provider.publishAttempts)
+            assertEquals(listOf("publish_failed"), metrics.errors)
+
+            provider.write(second)
+            provider.flush()
+            provider.flush()
+            provider.join()
+
+            assertEquals(listOf(listOf(first), listOf(first, second)), provider.publishAttempts)
+            assertEquals(listOf(first, second), provider.processedRecords)
+            assertEquals(listOf(1, 2, 0), metrics.bufferSizes)
         }
 
     @Test

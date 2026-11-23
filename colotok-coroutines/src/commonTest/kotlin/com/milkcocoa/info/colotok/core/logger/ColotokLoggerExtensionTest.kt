@@ -41,6 +41,8 @@ class ColotokLoggerExtensionTest {
         override var formatter: Formatter = SimpleTextFormatter
         override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
         override var enableInternalMetricsLogging: Boolean = false
+
+        override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Disabled
     }
 
     class TestAsyncProvider(config: ProviderConfig = TestProviderConfig()) : Provider(config) {

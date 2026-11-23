@@ -3,6 +3,8 @@ package com.milkcocoa.info.colotok.core.provider.details
 import com.milkcocoa.info.colotok.core.formatter.details.Formatter
 import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * provider's basic config
@@ -29,4 +31,16 @@ interface ProviderConfig {
      * if true, metrics will be logged as [com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics] to this provider.
      */
     var enableInternalMetricsLogging: Boolean
+
+    sealed interface AutoFlash {
+        data object Disabled : AutoFlash
+        data class Enabled(
+            val interval: Duration = 30.seconds
+        ) : AutoFlash {
+            init {
+                require(interval > 15.seconds) { "interval must be between 15.seconds" }
+            }
+        }
+    }
+    var autoFlash: AutoFlash
 }

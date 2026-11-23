@@ -6,8 +6,10 @@ import com.milkcocoa.info.colotok.core.level.Level
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.metrics.MetricsCollectorSpec
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Represents authentication credentials for Loki API access.
@@ -37,6 +39,8 @@ class LokiProviderConfig : AsyncProviderConfig {
 
     override var metricsSpec: MetricsCollectorSpec = MetricsCollectorSpec.Inherit
     override var enableInternalMetricsLogging: Boolean = false
+
+    override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Enabled(30.seconds)
 
     /** The Loki server host URL */
     var host: String? = null

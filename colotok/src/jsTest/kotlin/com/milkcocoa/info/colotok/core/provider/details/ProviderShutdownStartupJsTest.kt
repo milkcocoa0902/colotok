@@ -16,7 +16,7 @@ class ProviderShutdownStartupJsTest {
             var flushCount = 0
             var closeCount = 0
             val provider =
-                object : Provider(ConsoleProviderConfig()) {
+                object : Provider(ConsoleProviderConfig().apply { this.autoFlash = ProviderConfig.AutoFlash.Disabled }) {
                     override suspend fun onMessage(record: LogRecord) = Unit
 
                     override suspend fun onFlush() {

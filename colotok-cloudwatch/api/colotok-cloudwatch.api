@@ -62,6 +62,7 @@ public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/Cloudwatc
 
 public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchProviderConfig : com/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig {
 	public fun <init> ()V
+	public fun getAutoFlash ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;
 	public fun getBufferSize ()I
 	public final fun getCredential ()Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential;
 	public fun getEnableInternalMetricsLogging ()Z
@@ -70,6 +71,7 @@ public final class com/milkcocoa/info/colotok/core/provider/cloudwatch/Cloudwatc
 	public final fun getLogGroup ()Ljava/lang/String;
 	public final fun getLogStream ()Ljava/lang/String;
 	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public fun setAutoFlash (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;)V
 	public fun setBufferSize (I)V
 	public final fun setCredential (Lcom/milkcocoa/info/colotok/core/provider/cloudwatch/CloudwatchCredential;)V
 	public fun setEnableInternalMetricsLogging (Z)V

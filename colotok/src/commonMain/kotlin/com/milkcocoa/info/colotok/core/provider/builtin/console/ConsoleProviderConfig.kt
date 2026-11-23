@@ -23,4 +23,5 @@ expect class ConsoleProviderConfig() : ProviderConfig {
      * if true, metrics will be logged as [com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics] to this provider.
      */
     override var enableInternalMetricsLogging: Boolean // = false
+    override var autoFlash: ProviderConfig.AutoFlash
 }

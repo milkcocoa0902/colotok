@@ -82,7 +82,7 @@ The result has the following meaning:
 | Result | Meaning |
 | --- | --- |
 | `Result.success(Unit)` | Forced cancellation and cleanup completed without a recorded provider failure; queued records may still have been lost |
-| `Result.failure(cause)` | A processing, flush, or close failure was recorded; the Context reports the first failure it observes |
+| `Result.failure(cause)` | A processing, final flush, or close failure was recorded; the Context reports the first failure it observes |
 
 A resource cleanup failure is reported through `Result.failure(cause)`. Handle that failure
 according to the resource's recovery requirements.
@@ -177,20 +177,24 @@ Provider's non-blocking behavior. Enqueue acceptance and log-count metrics do no
 `AsyncProvider.bufferSize` is a publish threshold in `1..4096`. Failed batches are retained for retry,
 with retention limited to `min(bufferSize * 4, 4096)`; new records are dropped at that limit.
 Publish is attempted at threshold multiples, at the retention limit, on explicit flush, and during
-graceful shutdown. There is no time-based automatic flush. For low-volume applications, explicitly
-flush open providers when required and shut down the Context before exiting.
+graceful shutdown. Releases with `ProviderConfig.autoFlash` also support periodic flushing. When
+upgrading a custom `ProviderConfig` or `AsyncProviderConfig` implementation to such a release,
+implement `autoFlash` and rebuild it. Use `ProviderConfig.AutoFlash.Disabled` to keep explicit
+flush and shutdown behavior without a periodic timer. Shut down the Context before exiting.
 
 Retrying a batch that was partly accepted can duplicate records. Queues and buffers are bounded
 and forced shutdown can discard records, so neither at-least-once nor exactly-once delivery is
 guaranteed. Make remote destinations tolerant of duplicates. Automatic publish failures retain
-records for a later attempt; explicit/final flush failures propagate through `flush()` / `join()`.
+records for a later attempt. An explicit `flush()` reports its own failure and the worker
+continues processing. Applications that previously waited for the error through `join()` must
+handle the exception from `flush()` directly. `join()` reports a failure from the final flush
+during graceful shutdown.
 The flush timeout includes enqueueing and processing the marker; timing out does not undo a marker
 already enqueued or cancel all delivery work.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+An explicit `flush()`, a configured periodic flush, or graceful shutdown retries that batch.
+Incoming records do not trigger publication while the buffer is full.
 
 ## Platform behavior and resource ownership
 

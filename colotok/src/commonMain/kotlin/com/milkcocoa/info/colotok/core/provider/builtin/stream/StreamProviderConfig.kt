@@ -9,6 +9,7 @@ import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import okio.Sink
 import okio.blackholeSink
 import okio.buffer
+import kotlin.time.Duration.Companion.seconds
 
 class StreamProviderConfig : ProviderConfig {
     override var level: Level = LogLevel.DEBUG
@@ -24,6 +25,8 @@ class StreamProviderConfig : ProviderConfig {
      * if true, metrics will be logged as [com.milkcocoa.info.colotok.core.logger.LogRecord.Metrics] to this provider.
      */
     override var enableInternalMetricsLogging: Boolean = false
+
+    override var autoFlash: ProviderConfig.AutoFlash = ProviderConfig.AutoFlash.Enabled(30.seconds)
 
     var outputStreamBuilder: (() -> Sink) = { blackholeSink().buffer() }
 }

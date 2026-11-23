@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
@@ -17,14 +18,18 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import okio.Timeout
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class ProviderClosedException(
     message: String = "Provider is closed"
@@ -46,6 +51,12 @@ interface IProvider : AutoCloseable {
      */
     fun write(record: LogRecord)
 
+    /**
+     * Waits for queued records ahead of this request and flushes the destination.
+     *
+     * In [Provider], a flush hook failure is returned to this caller while the
+     * worker remains available to process later records.
+     */
     suspend fun flush(timeout: Duration = 1000.milliseconds)
 
     suspend fun onFlush() {}
@@ -92,6 +103,7 @@ abstract class Provider(
     private val state = MutableStateFlow(State.OPEN)
     private val failure = MutableStateFlow<Throwable?>(null)
     private val closedHookInvoked = MutableStateFlow(false)
+    // Also covers the cleanup coroutine if the worker was cancelled before launch.
     private val termination = CompletableDeferred<Unit>()
 
     private class WorkerContext(val provider: Provider) : AbstractCoroutineContextElement(Key) {
@@ -106,6 +118,29 @@ abstract class Provider(
             capacity = Channel.BUFFERED,
             onBufferOverflow = onBufferOverflow
         )
+
+
+    private val autoFlashCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val autoFlashJob = autoFlashCoroutineScope.launch {
+        when(val flash = config.autoFlash){
+            is ProviderConfig.AutoFlash.Disabled -> return@launch
+            is ProviderConfig.AutoFlash.Enabled -> {
+                while (true) {
+                    delay(flash.interval)
+                    try {
+                        flush(5.seconds)
+                    }catch (e: CancellationException) {
+
+                    }catch (e: Exception){
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    // A single worker serializes writes and flush markers in channel order.
     override val job =
         coroutineScope.launch(workerContext) {
             try {
@@ -116,7 +151,9 @@ abstract class Provider(
                             record.deferred.complete(Unit)
                         } catch (throwable: Throwable) {
                             record.deferred.completeExceptionally(throwable)
-                            throw throwable
+                            // The marker owns this failure. Actual worker cancellation
+                            // still exits the loop and runs the shutdown path.
+                            currentCoroutineContext().ensureActive()
                         }
                         continue
                     }
@@ -127,6 +164,7 @@ abstract class Provider(
                     fail(throwable)
                 }
             } finally {
+                // Graceful closure drains the channel, then performs the final flush.
                 if (state.value == State.CLOSING) {
                     try {
                         onFlush()
@@ -143,6 +181,7 @@ abstract class Provider(
             }
         }.also { worker ->
             worker.invokeOnCompletion { cause ->
+                autoFlashJob.cancel()
                 if (cause != null && (cause !is CancellationException || state.value != State.CANCELLED)) {
                     fail(cause)
                 }
@@ -274,10 +313,7 @@ abstract class Provider(
         }
     }
 
-    /**
-     * 現在キューにあるすべてのログが処理され、
-     * かつ Provider 固有のバッファがフラッシュされるまで待機します。
-     */
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun flush(timeout: Duration) {
         ensureOutsideWorker()
         failure.value?.let { throw it }
@@ -286,26 +322,30 @@ abstract class Provider(
         val flushToken = CompletableDeferred<Unit>()
         val flushPin = LogRecord.Pin(flushToken)
 
-        try {
-            withContext(Dispatchers.Default.limitedParallelism(1)) {
-                withTimeout(timeout) {
-                    val sendResult = channel.trySend(flushPin)
-                    when {
-                        sendResult.isSuccess -> Unit
-                        sendResult.isClosed -> throw failure.value ?: closedException()
-                        else -> channel.send(flushPin)
+        val flushFailure =
+            try {
+                withContext(Dispatchers.Default.limitedParallelism(1)) {
+                    withTimeout(timeout) {
+                        val sendResult = channel.trySend(flushPin)
+                        when {
+                            sendResult.isSuccess -> Unit
+                            sendResult.isClosed -> throw failure.value ?: closedException()
+                            else -> channel.send(flushPin)
+                        }
+                        // The timeout bounds this caller's wait. Once queued, the
+                        // independent marker can still be processed by the worker.
+                        flushToken.join()
+                        // Read the original cause without stack-trace recovery or
+                        // substituting a later, unrelated terminal worker failure.
+                        flushToken.getCompletionExceptionOrNull()
                     }
-                    flushToken.await()
                 }
+            } catch (_: ClosedSendChannelException) {
+                throw failure.value ?: closedException()
+            } catch (throwable: Throwable) {
+                throw failure.value ?: throwable
             }
-        } catch (_: ClosedSendChannelException) {
-            throw failure.value ?: closedException()
-        } catch (throwable: Throwable) {
-            // Await may recover/copy an exception on JVM. Re-throw the provider's
-            // first recorded failure so every lifecycle entry point exposes the
-            // same original cause.
-            throw failure.value ?: throwable
-        }
+        if (flushFailure != null) throw flushFailure
     }
 
     suspend fun join() {

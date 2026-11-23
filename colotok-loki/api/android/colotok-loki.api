@@ -24,6 +24,7 @@ public final class com/milkcocoa/info/colotok/core/provider/loki/LokiProvider : 
 
 public final class com/milkcocoa/info/colotok/core/provider/loki/LokiProviderConfig : com/milkcocoa/info/colotok/core/provider/details/AsyncProviderConfig {
 	public fun <init> ()V
+	public fun getAutoFlash ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;
 	public fun getBufferSize ()I
 	public final fun getCredential ()Lcom/milkcocoa/info/colotok/core/provider/loki/Credential;
 	public fun getEnableInternalMetricsLogging ()Z
@@ -33,6 +34,7 @@ public final class com/milkcocoa/info/colotok/core/provider/loki/LokiProviderCon
 	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
 	public final fun getLogStream ()Ljava/util/Map;
 	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public fun setAutoFlash (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;)V
 	public fun setBufferSize (I)V
 	public final fun setCredential (Lcom/milkcocoa/info/colotok/core/provider/loki/Credential;)V
 	public fun setEnableInternalMetricsLogging (Z)V

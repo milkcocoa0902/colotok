@@ -6,9 +6,11 @@ import com.milkcocoa.info.colotok.core.logger.infoAsync
 import com.milkcocoa.info.colotok.core.provider.builtin.console.ConsoleProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.AsyncProviderConfig
 import com.milkcocoa.info.colotok.core.provider.details.Provider
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import com.milkcocoa.info.colotok.core.provider.loki.LokiProviderConfig
 
-private class RecordingProvider : Provider(ConsoleProviderConfig()) {
+private class RecordingProvider :
+    Provider(ConsoleProviderConfig().apply { autoFlash = ProviderConfig.AutoFlash.Disabled }) {
     val messages = mutableListOf<String>()
 
     override suspend fun onMessage(record: LogRecord) {

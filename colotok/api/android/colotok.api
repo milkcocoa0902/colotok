@@ -447,6 +447,7 @@ public final class com/milkcocoa/info/colotok/core/provider/builtin/console/Cons
 
 public final class com/milkcocoa/info/colotok/core/provider/builtin/console/ConsoleProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
 	public fun <init> ()V
+	public fun getAutoFlash ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;
 	public final fun getDetectDebugModeFn ()Lkotlin/jvm/functions/Function0;
 	public fun getEnableInternalMetricsLogging ()Z
 	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
@@ -454,6 +455,7 @@ public final class com/milkcocoa/info/colotok/core/provider/builtin/console/Cons
 	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
 	public final fun isEnabledForRelease ()Z
 	public final fun isOutputEnabled ()Z
+	public fun setAutoFlash (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;)V
 	public final fun setDetectDebugModeFn (Lkotlin/jvm/functions/Function0;)V
 	public fun setEnableInternalMetricsLogging (Z)V
 	public final fun setEnabledForRelease (Z)V
@@ -474,11 +476,13 @@ public final class com/milkcocoa/info/colotok/core/provider/builtin/file/FilePro
 
 public final class com/milkcocoa/info/colotok/core/provider/builtin/file/FileProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
 	public fun <init> ()V
+	public fun getAutoFlash ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;
 	public fun getEnableInternalMetricsLogging ()Z
 	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
 	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
 	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
 	public final fun getRotation ()Lcom/milkcocoa/info/colotok/core/provider/rotation/Rotation;
+	public fun setAutoFlash (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;)V
 	public fun setEnableInternalMetricsLogging (Z)V
 	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
 	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
@@ -500,11 +504,13 @@ public final class com/milkcocoa/info/colotok/core/provider/builtin/stream/Strea
 
 public final class com/milkcocoa/info/colotok/core/provider/builtin/stream/StreamProviderConfig : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
 	public fun <init> ()V
+	public fun getAutoFlash ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;
 	public fun getEnableInternalMetricsLogging ()Z
 	public fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
 	public fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
 	public fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
 	public final fun getOutputStreamBuilder ()Lkotlin/jvm/functions/Function0;
+	public fun setAutoFlash (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;)V
 	public fun setEnableInternalMetricsLogging (Z)V
 	public fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
 	public fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
@@ -582,14 +588,39 @@ public final class com/milkcocoa/info/colotok/core/provider/details/ProviderColo
 }
 
 public abstract interface class com/milkcocoa/info/colotok/core/provider/details/ProviderConfig {
+	public abstract fun getAutoFlash ()Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;
 	public abstract fun getEnableInternalMetricsLogging ()Z
 	public abstract fun getFormatter ()Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;
 	public abstract fun getLevel ()Lcom/milkcocoa/info/colotok/core/level/Level;
 	public abstract fun getMetricsSpec ()Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;
+	public abstract fun setAutoFlash (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash;)V
 	public abstract fun setEnableInternalMetricsLogging (Z)V
 	public abstract fun setFormatter (Lcom/milkcocoa/info/colotok/core/formatter/details/Formatter;)V
 	public abstract fun setLevel (Lcom/milkcocoa/info/colotok/core/level/Level;)V
 	public abstract fun setMetricsSpec (Lcom/milkcocoa/info/colotok/core/metrics/MetricsCollectorSpec;)V
+}
+
+public abstract interface class com/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash {
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash$Disabled : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash {
+	public static final field INSTANCE Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash$Disabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash$Enabled : com/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash {
+	public fun <init> ()V
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-UwyO8pc ()J
+	public final fun copy-LRDsOJo (J)Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash$Enabled;
+	public static synthetic fun copy-LRDsOJo$default (Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash$Enabled;JILjava/lang/Object;)Lcom/milkcocoa/info/colotok/core/provider/details/ProviderConfig$AutoFlash$Enabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInterval-UwyO8pc ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/milkcocoa/info/colotok/core/provider/rotation/DateBaseRotation : com/milkcocoa/info/colotok/core/provider/rotation/Rotation {

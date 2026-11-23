@@ -236,13 +236,15 @@ Providers use the following delivery and shutdown behavior:
 - Failed remote batches are retained within a bounded buffer. Retrying a retained batch can
   duplicate records if a destination accepted only part of the failed request; delivery is not
   exactly once, and bounded buffers can still reject or drop records under pressure.
-- Batches are sent at threshold multiples, at the retention limit, on explicit `flush()`, and
-  during graceful shutdown. There is no timer-based automatic flush; low-volume records can
-  remain buffered until the application flushes or shuts down.
-- A failed batch at the retention limit requires explicit flush or graceful shutdown to retry;
-  subsequent incoming records are dropped without another automatic publish attempt.
+- Providers attempt to publish batches at threshold multiples, at the retention limit, on
+  explicit `flush()`, and during graceful shutdown. Built-in providers also flush every 30 seconds
+  by default. Set `autoFlash` to `ProviderConfig.AutoFlash.Disabled` to disable periodic flushing.
+- A periodic or explicit flush, or graceful shutdown, retries a failed batch at the retention limit.
+  Incoming records are dropped while the buffer is full.
 - `flush()` waits for records accepted before its marker while the provider is open. Its timeout
   includes enqueueing the marker and waiting for its processing; the default is one second.
+  An explicit flush failure is reported to its caller, and the provider continues processing.
+  If the final flush during graceful shutdown fails, `join()` reports that failure.
 - `ColotokLoggerContext.shutdown()` gracefully drains and closes providers. In 1.0.0,
   `forceShutdown()` requests cancellation and may lose queued records. It returns
   without waiting for worker termination or resource release.

@@ -15,6 +15,28 @@ choose different level and formatter defaults, as listed in the [official plugin
 | `formatter` | Formatter to use | `DetailTextFormatter` |
 | `metricsSpec` | How to collect metrics (`Inherit`, `Explicit`, `NoOp`) | `MetricsCollectorSpec.Inherit` |
 | `enableInternalMetricsLogging` | Whether to log metrics as internal records (`LogRecord.Metrics`) | `false` |
+| `autoFlash` | Periodic `flush()` configuration | `ProviderConfig.AutoFlash.Enabled()` (30 seconds) |
+
+### Periodic flushing
+
+Set `autoFlash` when constructing the provider. Use `ProviderConfig.AutoFlash.Enabled(interval)`
+to set a custom interval greater than 15 seconds, or `ProviderConfig.AutoFlash.Disabled` to
+disable periodic flushing.
+
+On Node.js, the periodic timer can keep the process running while the provider is open. Shut down
+the logging context when the application finishes. For a short-lived command that manages flushing
+explicitly, configure the provider as follows.
+
+```kotlin
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
+
+ConsoleProvider {
+    autoFlash = ProviderConfig.AutoFlash.Disabled
+}
+```
+
+Disabling periodic flushing still allows explicit `flush()` and the final flush during graceful
+shutdown.
 
 ## Log levels and filtering
 
@@ -81,7 +103,7 @@ these color properties.
 
 ## FileProvider
 FileProvider writes the log into a file asynchronously. It lazily opens and reuses the sink,
-flushes each write, and closes it on rotation, explicit flush, shutdown, or failure. After a flush,
+flushes each write, and closes it on rotation, an explicit or periodic flush, shutdown, or failure. After a flush,
 the next record reopens the sink; an unused provider does not open a file merely to shut down.
 
 `FileProvider` accepts an Okio `Path`. Okio is exposed transitively by the `colotok` artifact; add a
@@ -185,17 +207,16 @@ Queue limits, retention limits, and forced shutdown can cause log loss; at-least
 is not guaranteed.
 
 Publication is attempted at threshold multiples, at the retention limit, on explicit `flush()`,
-and during graceful shutdown. There is no time-based automatic flush. For low-volume applications,
-call `flush()` when output is needed before shutdown.
+and during graceful shutdown. With `autoFlash` enabled, the provider also attempts publication
+periodically, even if the batch is below the threshold.
 
 Automatic publish failures retain the batch for a later attempt. An explicit flush failure
-propagates to the caller and puts the Provider in its failed state. Subsequent `join()` calls
-report the original failure.
+returns the error to its caller and leaves the batch available for retry. The Provider keeps
+processing records. If the final flush during graceful shutdown fails, `join()` reports that failure.
 
 At full retention capacity, the Provider keeps the buffered batch and drops new records.
-Retry that batch with `flush()` or graceful shutdown; incoming records do not trigger publication
-while the buffer is full. A flush failure is reported to the caller and puts the Provider in its
-failed state. Subsequent lifecycle calls report the original failure.
+The next periodic flush, explicit `flush()`, or graceful shutdown retries that batch. Incoming
+records do not trigger publication while the buffer is full.
 
 Attributes and MDC are captured when the log call creates the record. Later changes to the
 original maps do not affect formatter output.

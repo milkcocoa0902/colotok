@@ -3,10 +3,11 @@ package com.milkcocoa.info.colotok.core.provider.builtin.console
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.Provider
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 
 @OptIn(ExperimentalJsExport::class)
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider(config) {
+public actual class ConsoleProvider actual constructor(config: ConsoleProviderConfig) : Provider(config.apply { this.autoFlash = ProviderConfig.AutoFlash.Disabled }) {
     constructor(config: ConsoleProviderConfig.() -> Unit) : this(ConsoleProviderConfig().apply(config))
 
     /**

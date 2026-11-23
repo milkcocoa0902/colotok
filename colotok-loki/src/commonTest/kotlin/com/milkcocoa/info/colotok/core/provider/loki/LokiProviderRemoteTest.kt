@@ -5,6 +5,7 @@ import com.milkcocoa.info.colotok.core.formatter.details.LogStructure
 import com.milkcocoa.info.colotok.core.level.LogLevel
 import com.milkcocoa.info.colotok.core.logger.LogRecord
 import com.milkcocoa.info.colotok.core.provider.details.ProviderClosedException
+import com.milkcocoa.info.colotok.core.provider.details.ProviderConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -340,6 +341,7 @@ class LokiProviderRemoteTest {
             host = "https://loki.example.com"
             logStream = mapOf("app" to "test")
             bufferSize = 2
+            autoFlash = ProviderConfig.AutoFlash.Disabled
         }
 
     private fun plain(eventTimestamp: Instant = Instant.fromEpochMilliseconds(1_000)) =
